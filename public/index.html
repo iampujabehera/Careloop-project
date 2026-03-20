@@ -624,6 +624,13 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .voice-script { background:var(--blue-light); border-radius:10px; padding:14px; }
 .voice-script-label { font-size:10px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
 .voice-script-text { font-size:12px; color:var(--ink); line-height:1.7; font-style:italic; }
+.row-highlight {
+  animation: rowFadeIn 3s ease forwards;
+}
+@keyframes rowFadeIn {
+  0% { background: #f0fdf4; }
+  100% { background: white; }
+}
 </style>
 </head>
 <body>
@@ -691,6 +698,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
     <span class="topbar-title" id="topbar-title">Priority Queue</span>
     <span class="topbar-sub" id="topbar-sub">OPD Workbench · Al-Hilal Hospital · 9 March 2026</span>
     <div class="topbar-right">
+      <button id="demo-btn" onclick="runPrescriptionDemo()" style="padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;display:flex;align-items:center;gap:6px;transition:all .15s;">▶ Demo: New Prescription</button>
       <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);font-weight:500;" id="live-clock">08:42</span>
       <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:10px;font-weight:700;color:#15803d;">🔒 HAAD / DHA Compliant</div>
       <div style="padding:4px 10px;background:var(--red-light);border:1px solid rgba(229,62,62,.2);border-radius:6px;font-size:11px;font-weight:700;color:var(--red);">AED 173,400 revenue at risk today</div>
@@ -1605,6 +1613,14 @@ Care Orchestrator: Fatima Hassan · Al-Hilal Hospital · March 9, 2026 · 08:44 
 </div>
 
 <script>
+// ── HELPERS ──
+function getFormattedTime() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  return h + ':' + m;
+}
+
 // ── PATIENT DATA ──
 var currentPatient = null;
 const PATIENTS = {
@@ -1622,9 +1638,9 @@ const PATIENTS = {
     escalateDept: 'Pulmonology · Al-Hilal Hospital',
     episodes: [
       { type: 'acute', label: 'OPD Acute · Day 9 of 14', name: 'Chest Infection', meta: 'Dr. Al-Hamdan · Started Feb 28 · Follow-up Mar 14', actions: [
-        { icon: 'done', iconChar: '✓', text: 'Azithromycin 500mg — Days 1–8 confirmed' },
-        { icon: 'overdue', iconChar: '!', text: 'CBC (Al Noor Lab, Khalidiyah) — 5 days overdue', overdue: true },
-        { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 14 · 10:30 AM — pending lab results' }
+        { icon: 'done', iconChar: '✓', text: 'Azithromycin 500mg — Days 1–8 confirmed', iconId: 'care-medication' },
+        { icon: 'overdue', iconChar: '!', text: 'CBC (Al Noor Lab, Khalidiyah) — 5 days overdue', overdue: true, iconId: 'care-lab', textId: 'care-lab-text' },
+        { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 14 · 10:30 AM — pending lab results', iconId: 'care-followup' }
       ]},
       { type: 'chronic', label: 'OPD Chronic · Month 6', name: 'Diabetes Management', meta: 'Dr. Al-Hamdan · Since Oct 2025 · Ongoing', actions: [
         { icon: 'done', iconChar: '✓', text: 'Insulin — 87% adherence this month' },
@@ -1778,6 +1794,41 @@ const PATIENTS = {
     timelineTrackLabel: '🔵 Chronic · Diabetes Type 2 Management',
     timelineTrackSub: 'Month 14 · Since Jan 2025 · Ongoing',
     timelineTrackBadge: { text: '4 insulin reminders unacknowledged', bg: 'var(--amber-light)', color: 'var(--amber)' }
+  },
+  nora: {
+    initials: 'NA', name: 'Nora Al-Ansari', mrn: '44201', age: '38 years',
+    phone: '+971 52 XXX XXXX', insurance: 'Daman · Enhanced Network',
+    consultant: 'Dr. Layla Al-Rashid', nok: 'Saeed Al-Ansari (husband)',
+    dept: 'Endocrinology · Dr. Al-Rashid', lang: 'Arabic',
+    channel: 'WhatsApp', insTag: 'Daman Enhanced',
+    insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
+    riskScore: '12', riskColor: 'var(--green)',
+    riskLabel: 'New episode · Monitoring started', status: 'auto',
+    suggestion: 'Episode just onboarded. First WhatsApp summary sent automatically. Monitor for 24 hours before any action is needed.',
+    escalateTo: 'Dr. Layla Al-Rashid',
+    escalateDept: 'Endocrinology · Al-Hilal Hospital',
+    episodes: [
+      { type: 'acute', label: 'OPD Acute · Day 1 of 14', name: 'Diabetes Onset — New Diagnosis', meta: 'Dr. Al-Rashid · Started today · Follow-up Mar 28', actions: [
+        { icon: 'pending', iconChar: '⏳', text: 'Metformin 500mg — twice daily · starts today' },
+        { icon: 'pending', iconChar: '⏳', text: 'HbA1c blood test — due within 7 days' },
+        { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 28 · 10:00 AM' }
+      ]}
+    ],
+    episodeBadge: { text: '1 new episode', bg: 'var(--green-light)', color: 'var(--green)' },
+    complexityFlag: null,
+    riskFactors: [
+      { label: 'New episode', pct: 20, color: 'var(--teal)' },
+      { label: 'All items pending', pct: 30, color: 'var(--amber)' },
+      { label: 'First contact sent', pct: 10, color: 'var(--green)' }
+    ],
+    barriers: [],
+    barrierNote: 'No barriers detected — episode just started. Monitor engagement over the next 48 hours.',
+    timeline: [
+      { time: 'Now · 10:04am', dot: 'ack', connector: false, action: 'WhatsApp sent — Episode care plan summary', detail: 'Hi Nora, Dr. Al-Rashid has shared your care plan. 💊 Metformin 500mg · twice daily · with food 🧪 HbA1c blood test · due within 7 days 📅 Follow-up · March 28 · 10:00 AM', statusClass: 'ok', statusText: 'Delivered · Read 10:06am' }
+    ],
+    timelineTrackLabel: '🟠 Acute · Diabetes Onset',
+    timelineTrackSub: 'Day 1 of 14 · Started today · OPD',
+    timelineTrackBadge: { text: 'New · Monitoring', bg: 'var(--green-light)', color: 'var(--green)' }
   }
 };
 
@@ -1867,8 +1918,8 @@ function showDetail(data) {
     epHtml += '<div class="ep-card-actions">';
     (ep.actions || []).forEach(function(a) {
       epHtml += '<div class="ep-action-row">';
-      epHtml += '<div class="ep-action-icon ' + a.icon + '">' + a.iconChar + '</div>';
-      epHtml += '<span class="ep-action-text' + (a.overdue ? ' overdue' : '') + '">' + a.text + '</span>';
+      epHtml += '<div class="ep-action-icon ' + a.icon + '"' + (a.iconId ? ' id="' + a.iconId + '"' : '') + '>' + a.iconChar + '</div>';
+      epHtml += '<span class="ep-action-text' + (a.overdue ? ' overdue' : '') + '"' + (a.textId ? ' id="' + a.textId + '"' : '') + '>' + a.text + '</span>';
       epHtml += '</div>';
     });
     epHtml += '</div></div>';
@@ -1964,7 +2015,23 @@ const modals = {
     <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Sending as: CareLoop · Al-Hilal Hospital · Arabic version available</div>`,
     confirm: 'confirm',
     confirmText: '💬 Send WhatsApp',
-    confirmAction: () => showToast('💬 WhatsApp sent to Ahmed Al-Rashidi')
+    confirmAction: () => {
+      var name = currentPatient ? currentPatient.name : 'patient';
+      var textarea = document.querySelector('#modal-content textarea');
+      var msgText = textarea ? textarea.value : '';
+      var truncated = msgText.length > 80 ? msgText.substring(0, 80) + '...' : msgText;
+      showToast('💬 WhatsApp sent to ' + name);
+      var timeline = document.getElementById('track-acute');
+      if (timeline) {
+        var tl = timeline.querySelector('.timeline');
+        if (tl) {
+          var item = document.createElement('div');
+          item.className = 'timeline-item';
+          item.innerHTML = '<div class="tl-time">Now · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot sent"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">WhatsApp sent — manual outreach by orchestrator</div><div class="tl-detail">' + truncated.replace(/</g,'&lt;') + '</div><span class="tl-status ok">Sent · Awaiting reply</span></div>';
+          tl.insertBefore(item, tl.firstChild);
+        }
+      }
+    }
   },
   sms: {
     title: '📱 Send SMS',
@@ -1985,12 +2052,27 @@ const modals = {
     <div style="font-size:12px;color:var(--slate);margin-bottom:12px;">Suggested opening: <em>"Hi Ahmed, I'm calling from the care team at Al-Hilal Hospital about your blood test..."</em></div>`,
     confirm: 'confirm',
     confirmText: '📞 Start Call',
-    confirmAction: () => showToast('📞 Calling Ahmed Al-Rashidi...')
+    confirmAction: () => {
+      var name = currentPatient ? currentPatient.name : 'patient';
+      var phone = currentPatient ? currentPatient.phone : '';
+      showToast('📞 Calling ' + name + '...');
+      setTimeout(() => showToast('📞 Call ended — log the outcome in Log Outcome'), 2000);
+      var timeline = document.getElementById('track-acute');
+      if (timeline) {
+        var tl = timeline.querySelector('.timeline');
+        if (tl) {
+          var item = document.createElement('div');
+          item.className = 'timeline-item';
+          item.innerHTML = '<div class="tl-time">Now · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot call"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">Voice call initiated by orchestrator</div><div class="tl-detail">' + phone + ' · Manual call</div><span class="tl-status esc">Call made · Awaiting log</span></div>';
+          tl.insertBefore(item, tl.firstChild);
+        }
+      }
+    }
   },
   mark: {
     title: '✅ Mark Action Complete',
     sub: 'Confirm what the patient has completed. This will be logged to the episode.',
-    content: `<select class="modal-input">
+    content: `<select class="modal-input" id="mark-select">
       <option>CBC Blood Test — completed</option>
       <option>Azithromycin — Day 9 taken</option>
       <option>Follow-up appointment — attended</option>
@@ -1998,7 +2080,27 @@ const modals = {
     <input class="modal-input" placeholder="Note (optional): e.g. Patient called in to confirm...">`,
     confirm: 'confirm-green',
     confirmText: '✅ Mark Complete',
-    confirmAction: () => showToast('✅ Marked complete — episode updated')
+    confirmAction: () => {
+      var sel = document.getElementById('mark-select');
+      var val = sel ? sel.value : '';
+      if (val.indexOf('CBC Blood Test') === 0) {
+        var labIcon = document.getElementById('care-lab');
+        if (labIcon) { labIcon.className = 'ep-action-icon done'; labIcon.textContent = '✓'; }
+        var labText = document.getElementById('care-lab-text');
+        if (labText) { labText.className = 'ep-action-text'; labText.textContent = 'CBC blood test — completed ✓'; }
+        var timeline = document.getElementById('track-acute');
+        if (timeline) {
+          var tl = timeline.querySelector('.timeline');
+          if (tl) {
+            var item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.innerHTML = '<div class="tl-time">Mar 9 · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot ack"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">Lab outcome logged — CBC marked complete</div><div class="tl-detail">Orchestrator confirmed patient completed CBC at Al Noor Lab · Episode updated</div><span class="tl-status ok">Care item closed</span></div>';
+            tl.insertBefore(item, tl.firstChild);
+          }
+        }
+      }
+      showToast('✅ CBC Blood Test marked complete — episode updated');
+    }
   },
   barrier: {
     title: '🚧 Log Barrier',
@@ -2218,6 +2320,70 @@ function updateClock() {
 }
 setInterval(updateClock, 10000);
 updateClock();
+
+// ── PRESCRIPTION DEMO ──
+function runPrescriptionDemo() {
+  // Guard against duplicate runs
+  if (document.querySelector('.queue-row[onclick*="nora"]')) {
+    showToast('ℹ️ Demo already running — reload page to reset');
+    return;
+  }
+
+  var btn = document.getElementById('demo-btn');
+
+  // Step A — disable button
+  btn.disabled = true;
+  btn.textContent = '⏳ Onboarding...';
+  btn.style.background = '#94a3b8';
+
+  // Step B — HMIS signal
+  setTimeout(function() {
+    showToast('📋 HMIS signal received — prescription saved by Dr. Al-Rashid');
+  }, 800);
+
+  // Step C — Episode created + inject row
+  setTimeout(function() {
+    showToast('⚡ Episode created — Nora Al-Ansari onboarded to CareLoop');
+
+    // Inject queue row
+    var footer = document.querySelector('.queue-table > div:last-child');
+    var row = document.createElement('div');
+    row.className = 'queue-row row-highlight';
+    row.setAttribute('data-status', 'auto');
+    row.setAttribute('onclick', "showDetail('nora')");
+    row.style.cssText = 'grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;border-left:3px solid var(--green);cursor:pointer;';
+    row.innerHTML = '<div class="risk-dot green"></div>' +
+      '<div><div class="patient-name">Nora Al-Ansari</div><div class="patient-meta">MRN 44201 · Daman · 38y · Arabic</div></div>' +
+      '<div><span class="episode-tag acute">OPD Acute</span></div>' +
+      '<div class="action-pending"><strong>Care plan sending...</strong>Episode just started</div>' +
+      '<div class="days-badge ok" style="color:var(--green);">Just now</div>' +
+      '<span class="action-tag auto">Auto-Monitored</span>';
+    footer.parentNode.insertBefore(row, footer);
+
+    // Update Active OPD Episodes stat from 38 to 39
+    var statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(function(card) {
+      var label = card.querySelector('.stat-card-label');
+      if (label && label.textContent.indexOf('Active OPD Episodes') !== -1) {
+        var num = card.querySelector('.stat-card-num');
+        if (num) num.textContent = parseInt(num.textContent) + 1;
+      }
+    });
+  }, 2000);
+
+  // Step D — WhatsApp sent
+  setTimeout(function() {
+    showToast('💬 WhatsApp care plan summary sent to Nora — +971 52 XXX XXXX');
+  }, 3800);
+
+  // Step E — Demo complete
+  setTimeout(function() {
+    showToast('✅ Demo complete — episode is live and monitoring has started');
+    btn.disabled = false;
+    btn.textContent = '▶ Demo: New Prescription';
+    btn.style.background = 'linear-gradient(135deg,#7c3aed,#4f46e5)';
+  }, 5500);
+}
 
 // Init
 showScreen('queue');
