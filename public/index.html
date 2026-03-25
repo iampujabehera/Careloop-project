@@ -107,22 +107,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .screen { display:none; }
 .screen.active { display:block; }
 
-/* ── STATS ROW ── */
-.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-.stat-card {
-  background:var(--white); border-radius:12px; padding:18px 20px;
-  border:1px solid var(--border); box-shadow:var(--shadow);
-  cursor:pointer; transition:all .2s;
-}
-.stat-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
-.stat-card-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
-.stat-card-num { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; margin-bottom:4px; }
-.stat-card-sub { font-size:11px; color:var(--muted); }
-.stat-card.red .stat-card-num { color:var(--red); }
-.stat-card.amber .stat-card-num { color:var(--amber); }
-.stat-card.green .stat-card-num { color:var(--green); }
-.stat-card.teal .stat-card-num { color:var(--teal); }
-
 /* ── QUEUE TABLE ── */
 .section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .section-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--ink); }
@@ -260,6 +244,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .tl-status.ok { background:var(--green-light); color:var(--green); }
 .tl-status.fail { background:var(--red-light); color:var(--red); }
 .tl-status.esc { background:var(--amber-light); color:var(--amber); }
+.tl-status.csat { background:#fdf4ff; color:#7c3aed; border:1px solid #e9d5ff; }
 
 /* Action panel */
 .action-panel { display:flex; flex-direction:column; gap:12px; }
@@ -305,17 +290,16 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .risk-score-num { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--red); line-height:1; }
 .risk-score-label { font-size:8px; font-weight:700; color:var(--muted); text-transform:uppercase; }
 
-.risk-factors { display:flex; flex-direction:column; gap:6px; }
-.risk-factor { display:flex; align-items:center; gap:8px; }
-.risk-factor-label { font-size:11px; color:var(--slate); flex:1; }
-.risk-factor-bar { width:80px; height:5px; background:var(--bg); border-radius:3px; }
-.risk-factor-fill { height:100%; border-radius:3px; }
-
-/* Barrier card */
-.barrier-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; background:var(--amber-light); border-radius:8px; border-left:3px solid var(--amber); margin-bottom:8px; }
-.barrier-icon { font-size:16px; margin-top:1px; }
-.barrier-type { font-size:11px; font-weight:700; color:var(--amber); margin-bottom:2px; text-transform:uppercase; letter-spacing:1px; }
-.barrier-desc { font-size:12px; color:var(--slate); line-height:1.4; }
+.risk-factors { display:flex; flex-direction:column; gap:4px; }
+.risk-reason-row { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:7px; margin-bottom:0; background:var(--bg); }
+.risk-reason-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.risk-reason-dot.red { background:var(--red); }
+.risk-reason-dot.amber { background:var(--amber); }
+.risk-reason-dot.grey { background:#cbd5e1; }
+.risk-reason-label { font-size:12px; font-weight:600; color:var(--ink); flex:1; }
+.risk-reason-tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; white-space:nowrap; }
+.risk-reason-tag.red { background:var(--red-light); color:var(--red); }
+.risk-reason-tag.amber { background:var(--amber-light); color:var(--amber); }
 
 /* ── ESCALATION SCREEN ── */
 .escalation-form { max-width:680px; }
@@ -648,18 +632,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
       <span class="nav-icon">⚡</span> Priority Queue
       <span class="nav-badge">4</span>
     </div>
-    <div class="nav-item" onclick="showScreen('notifications')">
-      <span class="nav-icon">💬</span> Notifications
-      <span class="nav-badge teal">3</span>
-    </div>
-    <div class="nav-item" onclick="showScreen('inbox')">
-      <span class="nav-icon">📩</span> Patient Replies
-      <span class="nav-badge teal">5</span>
-    </div>
-    <div class="nav-item" onclick="showScreen('escalation')">
-      <span class="nav-icon">🔺</span> Escalations
-      <span class="nav-badge">2</span>
-    </div>
   </div>
 
   <div class="sidebar-section">
@@ -671,11 +643,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
   <div class="sidebar-section">
     <div class="sidebar-section-label">Settings</div>
-    <div class="nav-item">
-      <span class="nav-icon">🔗</span> HMIS Connection
+    <div class="nav-item" onclick="showScreen('notifications')">
+      <span class="nav-icon">💬</span> Notification Templates
     </div>
-    <div class="nav-item">
-      <span class="nav-icon">⚙️</span> Rule Engine
+    <div class="nav-item" onclick="showScreen('inbox')">
+      <span class="nav-icon">📋</span> Audit Log
     </div>
   </div>
 
@@ -695,15 +667,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <span class="topbar-title" id="topbar-title">Priority Queue</span>
-    <span class="topbar-sub" id="topbar-sub">OPD Workbench · Al-Hilal Hospital · 9 March 2026</span>
+    <span class="topbar-title" id="topbar-title">CareLoop</span>
+    <span class="topbar-sub" id="topbar-sub">Al-Hilal Hospital · OPD Care</span>
     <div class="topbar-right">
-      <button id="demo-btn" onclick="runPrescriptionDemo()" style="padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;display:flex;align-items:center;gap:6px;transition:all .15s;">▶ Demo: New Prescription</button>
-      <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);font-weight:500;" id="live-clock">08:42</span>
-      <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:10px;font-weight:700;color:#15803d;">🔒 HAAD / DHA Compliant</div>
-      <div style="padding:4px 10px;background:var(--red-light);border:1px solid rgba(229,62,62,.2);border-radius:6px;font-size:11px;font-weight:700;color:var(--red);">AED 173,400 revenue at risk today</div>
-      <button class="topbar-btn btn-outline" onclick="showModal('add-patient')">+ Add Patient</button>
-      <button class="topbar-btn btn-teal" onclick="showScreen('notifications')">Send Notification</button>
+      <div id="hmis-status" style="display:flex;align-items:center;gap:6px;padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;" onclick="window.open('/hmis.html','hmis-tab')"><span style="width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block;"></span> HMIS · Open Prescription</div>
+      <button id="demo-btn" onclick="runPrescriptionDemo()" style="padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)';" onmouseout="this.style.borderColor='#d1d5db';this.style.color='var(--muted)';">Demo: New Prescription</button>
     </div>
   </div>
 
@@ -717,37 +685,13 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
     <!-- ══════ SCREEN: PRIORITY QUEUE ══════ -->
     <div class="screen active" id="screen-queue">
 
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card red" onclick="filterQueue('escalate')">
-          <div class="stat-card-label">Needs Action Now</div>
-          <div class="stat-card-num">4</div>
-          <div class="stat-card-sub">↑ 2 from yesterday</div>
-        </div>
-        <div class="stat-card amber" onclick="filterQueue('lab')">
-          <div class="stat-card-label">Care Gaps Open</div>
-          <div class="stat-card-num">7</div>
-          <div class="stat-card-sub">Labs, meds, follow-ups</div>
-        </div>
-        <div class="stat-card teal" onclick="filterQueue('all')">
-          <div class="stat-card-label">Active OPD Episodes</div>
-          <div class="stat-card-num">38</div>
-          <div class="stat-card-sub">All OPD consultations · 24 on track · 14 at risk</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-card-label">Closed Today</div>
-          <div class="stat-card-num" id="closed-today-count">3</div>
-          <div class="stat-card-sub">Episodes completed ✓</div>
-        </div>
-      </div>
-
       <!-- Queue -->
       <div class="section-header">
         <span class="section-title">OPD Patient Queue</span>
         <span class="section-count">18 patients</span>
         <div class="filter-row">
-          <button class="filter-btn active" onclick="setFilter(this,'all')">All</button>
-          <button class="filter-btn" onclick="setFilter(this,'red')">🔴 Critical</button>
+          <button class="filter-btn" onclick="setFilter(this,'all')">All</button>
+          <button class="filter-btn active" onclick="setFilter(this,'red')">🔴 Critical</button>
           <button class="filter-btn" onclick="setFilter(this,'amber')">🟡 At Risk</button>
           <button class="filter-btn" onclick="setFilter(this,'green')">🟢 On Track</button>
         </div>
@@ -830,22 +774,22 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         </div>
 
         <!-- Row 5 — Ready to Close -->
-        <div class="queue-row" data-status="auto" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;background:#f0fdf4;" onclick="showScreen('close-episode')">
+        <div class="queue-row" id="sara-row" data-status="auto" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;background:#f0fdf4;" onclick="showScreen('close-episode')">
           <div class="risk-dot green"></div>
           <div>
             <div class="patient-name" style="display:flex;align-items:center;gap:8px;">
               Sara Al-Zaabi
-              <span class="lifecycle-badge ready">● Ready to Close</span>
+              <span class="lifecycle-badge" id="sara-lifecycle-badge" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">● Day 10 · In Progress</span>
             </div>
             <div class="patient-meta">MRN 37820 · MSH · 28y · Arabic</div>
           </div>
           <div><span class="episode-tag acute">OPD Acute</span></div>
-          <div class="action-pending">
-            <strong style="color:var(--green);">All care items complete ✓</strong>
-            Lab done · Meds confirmed · Appt attended
+          <div class="action-pending" id="sara-row-status">
+            <strong>3 care items pending</strong>
+            Medication · Lab · Follow-up
           </div>
           <div class="days-badge ok">Day 10 of 10</div>
-          <span class="action-tag" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;">Close Episode</span>
+          <span class="action-tag auto" id="sara-row-tag">Monitoring</span>
         </div>
 
         <div style="padding:14px 20px;text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--border);">
@@ -870,22 +814,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             <div class="patient-header">
               <div class="patient-big-avatar" id="d-initials">AA</div>
               <div style="flex:1;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-                  <div>
-                    <h2 id="d-name">Ahmed Al-Rashidi</h2>
-                    <div class="patient-tags">
-                      <span class="patient-tag dept" id="d-dept">Pulmonology · Dr. Al-Hamdan</span>
-                      <span class="patient-tag lang" id="d-lang">Arabic</span>
-                      <span class="patient-tag channel" id="d-channel">WhatsApp · SMS</span>
-                      <span id="d-ins-tag" style="font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">Daman Network</span>
-                    </div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Care Gap Risk</div>
-                    <div id="d-risk-score" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--red);line-height:1;">78</div>
-                    <div id="d-risk-label" style="font-size:10px;color:var(--red);">High · Review required</div>
-                  </div>
-                </div>
+                <h2 id="d-name">Ahmed Al-Rashidi</h2>
                 <div class="info-grid">
                   <div class="info-item"><label>MRN</label><span id="d-mrn">40821</span></div>
                   <div class="info-item"><label>Age</label><span id="d-age">52 years</span></div>
@@ -921,15 +850,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
           </div>
 
-          <!-- Barrier -->
-          <div class="detail-card">
-            <div class="detail-card-title">🚧 Detected Barriers</div>
-            <div style="padding:6px 10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;margin-bottom:10px;font-size:10px;color:#0369a1;">
-              ◈ Barriers below are inferred from engagement patterns. They are unconfirmed until spoken with the patient. Do not treat these as facts.
-            </div>
-            <div id="d-barriers"></div>
-            <div id="d-barrier-note" style="padding:10px 12px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted);"></div>
-          </div>
 
         </div>
 
@@ -947,35 +867,19 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             </div>
             <div class="risk-factors" id="d-risk-factors"></div>
             <div style="margin-top:10px;padding:8px 10px;background:#f0f9ff;border-radius:6px;border:1px solid #bae6fd;font-size:10px;color:#0369a1;line-height:1.5;">
-              ◈ Based on engagement patterns only — not a clinical assessment.
+              ◈ Engagement patterns + patient-reported symptoms. Not a clinical assessment.
             </div>
           </div>
 
           <!-- AI Suggestion + Numbered Validation Steps -->
           <div class="ai-suggestion-strip">
-            <div class="ai-suggestion-label">Suggested action — review before acting</div>
-            <div class="ai-suggestion-body" id="d-ai-suggestion">Call Ahmed to understand the lab barrier. If cost is a concern, guide him to Al Noor Lab in Khalidiyah — covered under his Daman policy. If he reports worsening symptoms, escalate to Dr. Al-Hamdan immediately via WhatsApp.</div>
-            <div class="ai-suggestion-disclaimer">Decision-support only. Not a clinical recommendation. Your judgement governs.</div>
+            <div class="ai-suggestion-label">Suggested action</div>
+            <div class="ai-suggestion-body" id="d-ai-suggestion">Call Ahmed — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.</div>
           </div>
 
           <!-- 3-Step Validation Flow -->
           <div class="action-card">
-            <div class="action-card-title">Take Action — 3 Steps</div>
-
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);">
-                <div style="width:22px;height:22px;border-radius:50%;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</div>
-                <div style="font-size:12px;color:var(--slate);">Review the suggested action above</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);">
-                <div style="width:22px;height:22px;border-radius:50%;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</div>
-                <div style="font-size:12px;color:var(--slate);">Choose your channel below</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);">
-                <div style="width:22px;height:22px;border-radius:50%;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</div>
-                <div style="font-size:12px;color:var(--slate);">Confirm in the modal — then it sends</div>
-              </div>
-            </div>
+            <div class="action-card-title">Take Action</div>
 
             <button class="action-btn whatsapp" onclick="showModal('whatsapp')" style="margin-bottom:6px;">
               <span class="action-btn-icon">💬</span>
@@ -1018,8 +922,8 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             <button class="abandoned-btn" onclick="showModal('abandon')">
               <span style="font-size:14px;">🚩</span>
               <div>
-                <div style="font-size:12px;font-weight:600;">Mark as Abandoned</div>
-                <div style="font-size:10px;margin-top:1px;">Patient unreachable · Log reason for HAAD audit</div>
+                <div style="font-size:12px;font-weight:600;">Close Episode — Unresolved</div>
+                <div style="font-size:10px;margin-top:1px;">Patient unreachable · Log reason and close</div>
               </div>
             </button>
           </div>
@@ -1065,29 +969,29 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             ◈ Review each item before closing. You are confirming that the documented care was completed as prescribed.
           </div>
           <div class="close-checklist">
-            <div class="close-check-row done">
-              <span class="close-check-icon">✅</span>
+            <div class="close-check-row" id="sara-med-check">
+              <span class="close-check-icon" id="sara-med-icon">⏳</span>
               <div style="flex:1;">
                 <strong>Azithromycin 500mg — 10-day course</strong>
-                <div style="font-size:10px;margin-top:2px;">Patient replied TAKEN ✓ on all 10 days · Last: Mar 9</div>
+                <div style="font-size:10px;margin-top:2px;" id="sara-med-sub">Awaiting final dose confirmation from patient</div>
               </div>
-              <span class="lifecycle-badge ready">Verified</span>
+              <span class="lifecycle-badge" id="sara-med-badge" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">Pending</span>
             </div>
-            <div class="close-check-row done">
-              <span class="close-check-icon">✅</span>
+            <div class="close-check-row" id="sara-lab-check">
+              <span class="close-check-icon" id="sara-lab-icon">⏳</span>
               <div style="flex:1;">
                 <strong>Throat swab — Al Noor Lab</strong>
-                <div style="font-size:10px;margin-top:2px;">Patient confirmed Day 3 · Receipt photo received</div>
+                <div style="font-size:10px;margin-top:2px;" id="sara-lab-sub">Awaiting patient confirmation</div>
               </div>
-              <span class="lifecycle-badge ready">Verified</span>
+              <span class="lifecycle-badge" id="sara-lab-badge" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">Pending</span>
             </div>
-            <div class="close-check-row done">
-              <span class="close-check-icon">✅</span>
+            <div class="close-check-row" id="sara-followup-check">
+              <span class="close-check-icon" id="sara-followup-icon">⏳</span>
               <div style="flex:1;">
                 <strong>Follow-up appointment — Dr. Al-Hamdan</strong>
-                <div style="font-size:10px;margin-top:2px;">Attended Mar 12 · 10:00 AM · Patient confirmed</div>
+                <div style="font-size:10px;margin-top:2px;" id="sara-followup-sub">Scheduled Mar 12 · 10:00 AM · Awaiting attendance</div>
               </div>
-              <span class="lifecycle-badge ready">Verified</span>
+              <span class="lifecycle-badge" id="sara-followup-badge" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">Pending</span>
             </div>
           </div>
         </div>
@@ -1251,13 +1155,15 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           </div>
 
           <div class="esc-summary-card">
+            <div style="padding:12px 14px;background:var(--red-light);border-left:3px solid var(--red);border-radius:6px;margin-bottom:16px;">
+              <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⚠ Reason for Escalation</div>
+              <div style="font-size:12px;color:var(--ink);line-height:1.7;">Patient reported <strong>nausea and dizziness after each dose of Azithromycin</strong> — received via WhatsApp wellbeing check on Mar 2 · 8:07pm (Day 3 of medication course).<br>CBC blood test is <strong>5 days overdue</strong> with follow-up on March 14 · 10:30 AM in 5 days. 5 contact attempts made — no response.<br>Doctor input needed: (1) review medication reaction, (2) advise whether to proceed with appointment without lab result.</div>
+            </div>
             <div class="esc-summary-row"><label>Patient</label><span>Ahmed Al-Rashidi · MRN 40821</span></div>
             <div class="esc-summary-row"><label>Episode</label><span>Acute: Chest Infection · Day 9 of 14</span></div>
             <div class="esc-summary-row"><label>Care Gap</label><span>CBC (Al Noor Lab, Khalidiyah) — 5 days overdue</span></div>
             <div class="esc-summary-row"><label>Next Appointment</label><span>March 14, 2026 · 10:30 AM · Pulmonology OPD</span></div>
             <div class="esc-summary-row"><label>Attempts Made</label><span>3× WhatsApp, 1× SMS, 1× Voice call — no response</span></div>
-            <div class="esc-summary-row"><label>Suspected Barrier</label><span>Possible cost concern — unconfirmed</span></div>
-            <div class="esc-summary-row"><label>Insurance</label><span>Daman · Basic Network · Lab covered</span></div>
           </div>
 
           <div class="esc-urgent-toggle" onclick="toggleUrgent(this)">
@@ -1271,13 +1177,14 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <div style="margin-bottom:12px;">
             <textarea class="esc-note-field" id="esc-note-field">Dr. Al-Hamdan,
 
-Ahmed Al-Rashidi (MRN 40821) has been unable to complete his CBC blood test at Al Noor Lab (Khalidiyah), now 5 days overdue. We have attempted contact 5 times across WhatsApp, SMS, and voice call with no response. His follow-up appointment is March 14 · 10:30 AM · Pulmonology OPD.
+Ahmed Al-Rashidi (MRN 40821) reported nausea and dizziness after each dose of Azithromycin 500mg during his wellbeing check on March 2 (Day 3 of his 10-day course). His CBC blood test at Al Noor Lab is now 5 days overdue and his follow-up appointment is March 14 · 10:30 AM. We have attempted contact 5 times with no response.
 
-Possible cost barrier detected — patient engaged with all medication reminders but went silent when lab reminders began. Daman Basic Network covers this test; patient may not be aware.
+Requesting your guidance on:
+(1) Whether to continue or pause Azithromycin given the reported side effects.
+(2) Whether to proceed with the March 14 appointment if CBC remains incomplete.
 
-Requesting clinical guidance: (1) proceed with appointment if lab is incomplete, or (2) defer until lab is completed.
-
-Care Orchestrator: Fatima Hassan · Al-Hilal Hospital · March 9, 2026 · 08:44 AM</textarea>
+Care Orchestrator: Fatima Hassan · Al-Hilal Hospital
+March 9, 2026 · 08:44 AM</textarea>
           </div>
 
           <label class="review-check-row" for="esc-review-check">
@@ -1500,36 +1407,13 @@ Care Orchestrator: Fatima Hassan · Al-Hilal Hospital · March 9, 2026 · 08:44 
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
           <div style="background:var(--gold-light);border:1px solid rgba(201,146,42,.2);color:var(--gold);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">Executive View Only</div>
         </div>
-        <div class="section-title" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Revenue Dashboard · March 2026</div>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-card teal">
-          <div class="stat-card-label">Care Completion Rate</div>
-          <div class="stat-card-num">78%</div>
-          <div class="stat-card-sub">↑ 12% since CareLoop launch</div>
-        </div>
-        <div class="stat-card red">
-          <div class="stat-card-label">Revenue at Risk · This Month</div>
-          <div class="stat-card-num">AED 309K</div>
-          <div class="stat-card-sub">Incomplete orders in window</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-card-label">Revenue Realized · MTD</div>
-          <div class="stat-card-num">AED 521K</div>
-          <div class="stat-card-sub">↑ Care re-engagement · March</div>
-        </div>
-        <div class="stat-card amber">
-          <div class="stat-card-label">Top Care Gap This Month</div>
-          <div class="stat-card-num" style="font-size:18px;padding-top:4px;">Labs</div>
-          <div class="stat-card-sub">41% of open gaps · Al Noor + NMC</div>
-        </div>
+        <div class="section-title" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Revenue Dashboard · March 2026 · USD</div>
       </div>
 
       <div class="exec-grid">
         <div class="exec-big-stat">
           <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">Monthly Revenue Realized Trend</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal);">AED 521,400</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal);">$140,778</div>
           <div style="font-size:12px;color:var(--green);font-weight:600;">↑ 23% vs last month</div>
           <div class="exec-chart-bar">
             <div><div class="chart-bar-col" style="height:35%;background:var(--teal-light);border-radius:4px;"></div><div class="chart-bar-label">Oct</div></div>
@@ -1542,56 +1426,59 @@ Care Orchestrator: Fatima Hassan · Al-Hilal Hospital · March 9, 2026 · 08:44 
         </div>
 
         <div class="exec-big-stat">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;">Where Patients Drop Off</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">Appointment Show-Up Rate</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);">91%</div>
+          <div style="font-size:12px;color:var(--green);font-weight:600;">↑ 18% since CareLoop launch</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
             <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Day 3 — Lab test reminder</span><span style="font-weight:700;color:var(--red);">28%</span></div>
-              <div class="completion-bar-wrap"><div class="completion-bar" style="width:28%;background:var(--red);"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Booked appointments · March</span><span style="font-weight:700;color:var(--ink);">142</span></div>
+              <div class="completion-bar-wrap"><div class="completion-bar" style="width:100%;"></div></div>
             </div>
             <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Day 7 — Follow-up scheduling</span><span style="font-weight:700;color:var(--amber);">21%</span></div>
-              <div class="completion-bar-wrap"><div class="completion-bar" style="width:21%;background:var(--amber);"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Attended (CareLoop confirmed)</span><span style="font-weight:700;color:var(--green);">129</span></div>
+              <div class="completion-bar-wrap"><div class="completion-bar" style="width:91%;"></div></div>
             </div>
             <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Day 1 — Care plan not opened</span><span style="font-weight:700;color:var(--amber);">14%</span></div>
-              <div class="completion-bar-wrap"><div class="completion-bar" style="width:14%;background:var(--amber);"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">Day 14 — Chronic check-in ignored</span><span style="font-weight:700;color:var(--teal);">9%</span></div>
-              <div class="completion-bar-wrap"><div class="completion-bar" style="width:9%;"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--slate);">No-show (despite reminders)</span><span style="font-weight:700;color:var(--red);">13</span></div>
+              <div class="completion-bar-wrap"><div class="completion-bar" style="width:9%;background:var(--red);"></div></div>
             </div>
           </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:10px;font-style:italic;">CareLoop sends appointment reminders + confirmation requests 24hrs before each visit</div>
         </div>
+      </div>
+
+      <div style="padding:10px 14px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;margin-bottom:16px;font-size:11px;color:#0369a1;line-height:1.6;">
+        <strong>How revenue is calculated:</strong> Prescription date → end-of-day billing report → items not billed on Day 1 = revenue to recover. CareLoop works to bring the patient back for those remaining items. When billed → counted as realized.
       </div>
 
       <div class="section-header"><span class="section-title">By Department</span></div>
       <div class="dept-table">
         <div class="dept-row head">
-          <div>Specialty</div><div>Completion</div><div>Revenue Risk</div><div>Realized</div>
+          <div>Specialty</div><div>Completion</div><div>To Recover</div><div>Realized</div>
         </div>
         <div class="dept-row">
           <div><div style="font-weight:600;font-size:13px;">Pulmonology</div><div class="completion-bar-wrap" style="width:80%;"><div class="completion-bar" style="width:82%;"></div></div></div>
           <div style="font-weight:700;color:var(--green);">82%</div>
-          <div><span class="revenue-tag at-risk">AED 66K</span></div>
-          <div><span class="revenue-tag recovered">AED 162K ↑</span></div>
+          <div><span class="revenue-tag at-risk">$18K</span></div>
+          <div><span class="revenue-tag recovered">$44K ↑</span></div>
         </div>
         <div class="dept-row">
           <div><div style="font-weight:600;font-size:13px;">Cardiology</div><div class="completion-bar-wrap" style="width:80%;"><div class="completion-bar" style="width:71%;"></div></div></div>
           <div style="font-weight:700;color:var(--amber);">71%</div>
-          <div><span class="revenue-tag at-risk">AED 114K</span></div>
-          <div><span class="revenue-tag recovered">AED 191K ↑</span></div>
+          <div><span class="revenue-tag at-risk">$31K</span></div>
+          <div><span class="revenue-tag recovered">$52K ↑</span></div>
         </div>
         <div class="dept-row">
           <div><div style="font-weight:600;font-size:13px;">Endocrinology</div><div class="completion-bar-wrap" style="width:80%;"><div class="completion-bar" style="width:88%;"></div></div></div>
           <div style="font-weight:700;color:var(--green);">88%</div>
-          <div><span class="revenue-tag at-risk">AED 44K</span></div>
-          <div><span class="revenue-tag recovered">AED 103K ↑</span></div>
+          <div><span class="revenue-tag at-risk">$12K</span></div>
+          <div><span class="revenue-tag recovered">$28K ↑</span></div>
         </div>
         <div class="dept-row">
           <div><div style="font-weight:600;font-size:13px;">Gastroenterology</div><div class="completion-bar-wrap" style="width:80%;"><div class="completion-bar" style="width:64%;background:var(--amber);"></div></div></div>
           <div style="font-weight:700;color:var(--red);">64%</div>
-          <div><span class="revenue-tag at-risk">AED 84K</span></div>
-          <div><span class="revenue-tag recovered">AED 66K ↑</span></div>
+          <div><span class="revenue-tag at-risk">$23K</span></div>
+          <div><span class="revenue-tag recovered">$18K ↑</span></div>
         </div>
       </div>
     </div>
@@ -1633,16 +1520,17 @@ const PATIENTS = {
     insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
     riskScore: 78, riskColor: 'var(--red)',
     riskLabel: 'High · Review required', status: 'critical',
-    suggestion: 'Call Ahmed to understand the lab barrier. If cost is a concern, guide him to Al Noor Lab in Khalidiyah — covered under his Daman policy. If he reports worsening symptoms, escalate to Dr. Al-Hamdan immediately via WhatsApp.',
+    suggestion: 'Call Ahmed — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.',
     escalateTo: 'Dr. Khalid Al-Hamdan',
     escalateDept: 'Pulmonology · Al-Hilal Hospital',
     episodes: [
-      { type: 'acute', label: 'OPD Acute · Day 9 of 14', name: 'Chest Infection', meta: 'Dr. Al-Hamdan · Started Feb 28 · Follow-up Mar 14', actions: [
+      { type: 'acute', label: 'OPD Acute · Day 9 of 14', name: 'Chest Infection', icd: 'ICD-10: J06.9 · Acute upper respiratory infection', meta: 'Dr. Al-Hamdan · Started Feb 28 · Follow-up Mar 14', actions: [
         { icon: 'done', iconChar: '✓', text: 'Azithromycin 500mg — Days 1–8 confirmed', iconId: 'care-medication' },
+        { type: 'adherence', pct: 80, confirmed: 8, total: 10, unack: 2 },
         { icon: 'overdue', iconChar: '!', text: 'CBC (Al Noor Lab, Khalidiyah) — 5 days overdue', overdue: true, iconId: 'care-lab', textId: 'care-lab-text' },
         { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 14 · 10:30 AM — pending lab results', iconId: 'care-followup' }
       ]},
-      { type: 'chronic', label: 'OPD Chronic · Month 6', name: 'Diabetes Management', meta: 'Dr. Al-Hamdan · Since Oct 2025 · Ongoing', actions: [
+      { type: 'chronic', label: 'OPD Chronic · Month 6', name: 'Diabetes Management', icd: 'ICD-10: E11 · Type 2 diabetes mellitus', meta: 'Dr. Al-Hamdan · Since Oct 2025 · Ongoing', actions: [
         { icon: 'done', iconChar: '✓', text: 'Insulin — 87% adherence this month' },
         { icon: 'pending', iconChar: '⏳', text: 'HbA1c (NMC Healthcare) — due next week' }
       ]}
@@ -1650,10 +1538,10 @@ const PATIENTS = {
     episodeBadge: { text: '2 simultaneous · Monitor closely', bg: 'var(--red-light)', color: 'var(--red)' },
     complexityFlag: { text: 'Patient managing 2 simultaneous episodes. Dropout risk is elevated. Orchestrator check-in recommended before Day 10.' },
     riskFactors: [
-      { label: 'Silent 5 days', pct: 90, color: 'var(--red)' },
-      { label: 'Lab overdue', pct: 80, color: 'var(--amber)' },
-      { label: '2 open episodes', pct: 65, color: 'var(--amber)' },
-      { label: 'Appt in 5 days', pct: 50, color: 'var(--teal)' }
+      { dot: 'red', label: 'Patient condition', tag: 'Nausea reported Mar 2', tagClass: 'red' },
+      { dot: 'red', label: 'Silent 5 days', tag: 'No response since Mar 4', tagClass: 'red' },
+      { dot: 'amber', label: 'Lab overdue', tag: 'CBC · 5 days past due', tagClass: 'amber' },
+      { dot: 'amber', label: '2 ongoing episodes', tag: 'Acute + Chronic active', tagClass: 'amber' }
     ],
     barriers: [
       { icon: '💰', type: 'Possible Cost Barrier', desc: 'Patient engaged with all medication reminders but went silent specifically when lab test reminders began. Pattern suggests cost concern. Confirm on call.' }
@@ -1662,15 +1550,60 @@ const PATIENTS = {
     timeline: [
       { time: 'Feb 28 · 9:04am', dot: 'sent', connector: true, action: 'WhatsApp — Care plan delivered', detail: '"Hi Ahmed, Dr. Al-Hamdan has shared your recovery plan..."', statusClass: 'ok', statusText: 'Opened · Read 9:11am' },
       { time: 'Mar 1 · 8:00am', dot: 'ack', connector: true, action: 'WhatsApp — Medication reminder', detail: '"Ahmed, time for your Azithromycin 500mg..."', statusClass: 'ok', statusText: 'Replied: "Taken ✓"' },
+      { time: 'Mar 2 · 8:00pm', dot: 'sent', connector: true, action: 'WhatsApp — Wellbeing & side effects check', detail: '"Ahmed, you have been on Azithromycin 500mg for 3 days now. How are you feeling?\n\nReply with a number:\n1 — Feeling better ✓\n2 — No change yet\n3 — Feeling worse or side effects"', subDetail: 'Sent automatically on Days 3, 6, 9 of every medication course · CareLoop monitors reply for clinical signals', statusClass: 'ok', statusText: 'Delivered · Read 8:04pm' },
+      { time: 'Mar 2 · 8:07pm', dot: 'ack', connector: true, action: 'Patient replied — wellbeing check', detail: 'Ahmed replied: "3 — Feeling worse. Having nausea and dizziness after each dose."', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'esc', statusText: '⚠ Side effect signal detected' },
+      { time: 'Mar 2 · 8:07pm', dot: 'esc', connector: true, action: '🔺 Clinical alert triggered — side effect reported', detail: 'Patient reported nausea and dizziness on Azithromycin 500mg Day 3. CareLoop flagged for orchestrator review. Dr. Al-Hamdan notified via WhatsApp automatically.', bodyStyle: 'background:#fff7ed;border-radius:6px;padding:6px 8px;border-left:2px solid var(--amber);', statusClass: 'esc', statusText: 'Flagged · Doctor notified' },
       { time: 'Mar 3 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Lab test reminder', detail: '"Ahmed, your blood test is due by Mar 7..."', statusClass: 'fail', statusText: 'Delivered · Not read' },
       { time: 'Mar 5 · 10:00am', dot: 'fail', connector: true, action: 'SMS — Lab reminder retry', detail: '"Ahmed, your CBC test is now overdue. Reply YES if you need help."', statusClass: 'fail', statusText: 'No response' },
       { time: 'Mar 6 · 2:00pm', dot: 'call', connector: true, action: 'Voice call initiated', detail: 'Auto-call · +971 50 XXX XXXX · 45 seconds', statusClass: 'fail', statusText: 'No answer' },
       { time: 'Mar 7 · 8:30am', dot: 'esc', connector: true, action: '🔺 Escalated to orchestrator queue', detail: '3 failed lab reminders + 1 unanswered call. Human action required.', statusClass: 'esc', statusText: 'Awaiting action' },
-      { time: 'Mar 9 · 2:15pm', dot: 'ack', connector: false, action: '📋 Lab result received — CBC complete', detail: 'Result available at Al Noor Lab · CareLoop notified Ahmed via WhatsApp · Dr. Al-Hamdan flagged for review before Mar 14 appointment', statusClass: 'ok', statusText: 'Patient notified · Loop closed' }
+      { time: 'Mar 9 · 2:15pm', dot: 'ack', connector: true, action: '📋 Lab result received — CBC complete', detail: 'Result available at Al Noor Lab · CareLoop notified Ahmed via WhatsApp · Dr. Al-Hamdan flagged for review before Mar 14 appointment', statusClass: 'ok', statusText: 'Patient notified · Loop closed' },
+      { time: 'Mar 13 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Appointment reminder + doctor recommendation check', detail: '"Ahmed, your follow-up with Dr. Al-Hamdan is tomorrow — March 14 · 10:30 AM · Al-Hilal Hospital OPD.\n\nPlease confirm you will attend.\n\nAlso, based on your experience so far — would you recommend Dr. Al-Hamdan to a friend or family member?\n\nReply:\nYES — I will attend + I recommend Dr. Al-Hamdan ⭐\nNO — I cannot attend (we will help reschedule)\nMAYBE — I will attend but not sure about recommendation"', subDetail: 'Sent automatically 24 hours before every follow-up appointment · Captures appointment confirmation + doctor CSAT in one message', statusClass: 'ok', statusText: 'Delivered · Read 9:03am' },
+      { time: 'Mar 13 · 9:15am', dot: 'ack', connector: true, action: 'Patient replied — appointment + recommendation', detail: 'Ahmed replied: "YES — I will be there. Dr. Al-Hamdan is very good, I recommend him ⭐"', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'csat', statusText: 'Confirmed attendance · CSAT captured ⭐' },
+      { time: 'Mar 16 · 10:00am', dot: 'sent', connector: true, action: 'WhatsApp — Health outcome check', detail: '"Ahmed, it has been 2 days since your follow-up with Dr. Al-Hamdan.\n\nHow are you feeling now?\n\nReply with a number:\n1 — Fully recovered ✓\n2 — Getting better, still some symptoms\n3 — No improvement\n4 — Feeling worse — I need help"', subDetail: 'Sent automatically 48 hours after follow-up appointment · Health outcome data collected for hospital reporting', statusClass: 'ok', statusText: 'Delivered · Read 10:06am' },
+      { time: 'Mar 16 · 10:22am', dot: 'ack', connector: false, action: 'Patient replied — health outcome', detail: 'Ahmed replied: "1 — Fully recovered. Feeling much better. Shukran Al-Hilal Hospital 🙏"', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'ok', statusText: '✅ Outcome: Recovered · Episode complete' }
     ],
     timelineTrackLabel: '🟠 Acute · Chest Infection',
     timelineTrackSub: 'Day 9 of 14 · Feb 28 – Mar 14 · OPD',
-    timelineTrackBadge: { text: 'Lab overdue · 3 failed attempts', bg: 'var(--red-light)', color: 'var(--red)' }
+    timelineTrackBadge: { text: 'Lab overdue · 3 failed attempts', bg: 'var(--red-light)', color: 'var(--red)' },
+    chronicTrack: {
+      label: '🔵 Chronic · Diabetes Management',
+      sub: 'Month 6 · Since Oct 2025 · Ongoing',
+      badge: { text: '87% adherent · Stable', bg: 'var(--green-light)', color: 'var(--green)' },
+      summary: {
+        months: [
+          { label: 'Oct', dot: 'full', char: '✓' },
+          { label: 'Nov', dot: 'full', char: '✓' },
+          { label: 'Dec', dot: 'full', char: '✓' },
+          { label: 'Jan', dot: 'full', char: '✓' },
+          { label: 'Feb', dot: 'full', char: '✓' },
+          { label: 'Mar', dot: 'partial', char: '~' }
+        ],
+        stat: '87% adherent'
+      },
+      rhythm: {
+        rows: [
+          { label: '💊 Medication', cells: [
+            { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' },
+            { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' }, { cls: 'partial', text: '87%' }
+          ]},
+          { label: '🧪 Lab (HbA1c)', cells: [
+            { cls: 'done', text: '✓' }, { cls: 'pending', text: '—' }, { cls: 'done', text: '✓' },
+            { cls: 'pending', text: '—' }, { cls: 'done', text: '✓' }, { cls: 'pending', text: 'Due' }
+          ]},
+          { label: '📅 Check-in', cells: [
+            { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' },
+            { cls: 'done', text: '✓' }, { cls: 'done', text: '✓' }, { cls: 'partial', text: '~' }
+          ]}
+        ]
+      },
+      timeline: [
+        { time: 'Feb 1 · 9am', dot: 'ack', connector: true, action: 'Monthly check-in — February', detail: 'Patient replied: "Feeling fine, medication on track"', statusClass: 'ok', statusText: 'Responded' },
+        { time: 'Mar 1 · 9am', dot: 'sent', connector: true, action: 'Monthly check-in — March', detail: 'Delivered — no response yet', statusClass: 'fail', statusText: 'No response' },
+        { time: 'Mar 5 · 9am', dot: 'sent', connector: true, action: 'Insulin reminder — daily', detail: 'Patient replied: "Taken ✓"', statusClass: 'ok', statusText: 'Replied' },
+        { time: 'Mar 9 · 8am', dot: 'esc', connector: false, action: 'HbA1c reminder sent', detail: 'Due next week · NMC Healthcare · Covered under Daman', statusClass: 'esc', statusText: 'Pending' }
+      ]
+    }
   },
   fatima: {
     initials: 'FA', name: 'Fatima Al-Zahrawi', mrn: '38204', age: '34 years',
@@ -1694,9 +1627,9 @@ const PATIENTS = {
     episodeBadge: { text: '1 active episode', bg: 'var(--red-light)', color: 'var(--red)' },
     complexityFlag: null,
     riskFactors: [
-      { label: 'Doctor not notified', pct: 95, color: 'var(--red)' },
-      { label: 'Appt tomorrow', pct: 85, color: 'var(--red)' },
-      { label: 'Result ready', pct: 60, color: 'var(--amber)' }
+      { dot: 'red', label: 'Doctor not notified', tag: 'X-ray result pending', tagClass: 'red' },
+      { dot: 'red', label: 'Appt tomorrow', tag: 'Mar 10 · 10:00 AM', tagClass: 'red' },
+      { dot: 'amber', label: 'Result ready', tag: 'Awaiting doctor review', tagClass: 'amber' }
     ],
     barriers: [
       { icon: '⏱️', type: 'Time-Sensitive Gap', desc: 'X-ray result is available but Dr. Nasser has not been notified. Appointment is tomorrow morning. Delay risks unprepared consultation.' }
@@ -1733,10 +1666,10 @@ const PATIENTS = {
     episodeBadge: { text: '1 active episode', bg: 'var(--amber-light)', color: 'var(--amber)' },
     complexityFlag: null,
     riskFactors: [
-      { label: 'Silent 3 days', pct: 70, color: 'var(--amber)' },
-      { label: 'Lab due in 2 days', pct: 65, color: 'var(--amber)' },
-      { label: 'Cost barrier possible', pct: 50, color: 'var(--amber)' },
-      { label: 'Medication on track', pct: 20, color: 'var(--teal)' }
+      { dot: 'amber', label: 'Silent 3 days', tag: 'No response since Mar 6', tagClass: 'amber' },
+      { dot: 'amber', label: 'Lab due in 2 days', tag: 'Stool test · Mar 11', tagClass: 'amber' },
+      { dot: 'amber', label: 'Cost barrier possible', tag: 'Unconfirmed', tagClass: 'amber' },
+      { dot: 'grey', label: 'Medication on track', tag: 'Pantoprazole ✓', tagClass: 'amber' }
     ],
     barriers: [
       { icon: '📍', type: 'Possible Distance / Access Barrier', desc: 'Patient has not responded to 3 consecutive reminders about stool test. May indicate difficulty reaching an approved lab centre.' }
@@ -1775,10 +1708,10 @@ const PATIENTS = {
     episodeBadge: { text: '1 chronic episode', bg: 'var(--amber-light)', color: 'var(--amber)' },
     complexityFlag: null,
     riskFactors: [
-      { label: 'Insulin unacknowledged', pct: 65, color: 'var(--amber)' },
-      { label: 'HbA1c due soon', pct: 50, color: 'var(--amber)' },
-      { label: 'Wellbeing replies ok', pct: 25, color: 'var(--teal)' },
-      { label: 'Metformin on track', pct: 15, color: 'var(--teal)' }
+      { dot: 'amber', label: 'Insulin unacknowledged', tag: '4 reminders ignored', tagClass: 'amber' },
+      { dot: 'amber', label: 'HbA1c due soon', tag: 'Due in 10 days', tagClass: 'amber' },
+      { dot: 'grey', label: 'Wellbeing replies ok', tag: 'Responding ✓', tagClass: 'amber' },
+      { dot: 'grey', label: 'Metformin on track', tag: 'Daily confirmed ✓', tagClass: 'amber' }
     ],
     barriers: [
       { icon: '💊', type: 'Possible Medication Avoidance', desc: 'Patient responds to general check-ins but consistently ignores insulin-specific reminders. May indicate discomfort with injections or misunderstanding of dosing.' }
@@ -1817,9 +1750,9 @@ const PATIENTS = {
     episodeBadge: { text: '1 new episode', bg: 'var(--green-light)', color: 'var(--green)' },
     complexityFlag: null,
     riskFactors: [
-      { label: 'New episode', pct: 20, color: 'var(--teal)' },
-      { label: 'All items pending', pct: 30, color: 'var(--amber)' },
-      { label: 'First contact sent', pct: 10, color: 'var(--green)' }
+      { dot: 'grey', label: 'Patient condition', tag: 'None reported yet', tagClass: 'amber' },
+      { dot: 'grey', label: 'New episode', tag: 'Just onboarded', tagClass: 'amber' },
+      { dot: 'grey', label: 'First contact sent', tag: 'WhatsApp delivered', tagClass: 'amber' }
     ],
     barriers: [],
     barrierNote: 'No barriers detected — episode just started. Monitor engagement over the next 48 hours.',
@@ -1840,14 +1773,14 @@ function showScreen(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
   const titles = {
-    queue: ['Priority Queue', 'OPD Workbench · Al-Hilal Hospital · 9 March 2026'],
+    queue: ['CareLoop', 'Al-Hilal Hospital · OPD Care'],
     detail: ['Ahmed Al-Rashidi', 'Episode Detail · MRN 40821'],
     'escalation-form': ['Escalate to Doctor', 'Dr. Khalid Al-Hamdan · Pulmonology'],
-    notifications: ['Notification Templates', 'How CareLoop communicates with patients'],
+    notifications: ['Notification Templates', 'Settings · Configure outreach messages'],
     escalation: ['Active Escalations', '2 cases requiring immediate action'],
-    exec: ['Revenue Dashboard', 'Executive View · March 2026'],
+    exec: ['Revenue Dashboard', 'Executive View · March 2026 · USD'],
     'close-episode': ['Close Episode', 'Sara Al-Zaabi · Acute · Day 10 of 10'],
-    inbox: ['Patient Replies', '5 unread messages · 12 total today']
+    inbox: ['Audit Log', 'Patient message history · Read only']
   };
   if (id === 'detail' && currentPatient) {
     document.getElementById('topbar-title').textContent = currentPatient.name;
@@ -1857,7 +1790,7 @@ function showScreen(id) {
     document.getElementById('topbar-sub').textContent = titles[id][1];
   }
 
-  const navMap = { queue: 0, detail: 0, 'escalation-form': 3, notifications: 1, inbox: 2, escalation: 3, exec: 4, 'close-episode': 0 };
+  const navMap = { queue: 0, detail: 0, 'close-episode': 0, exec: 1, notifications: 2, inbox: 3, escalation: 0, 'escalation-form': 0 };
   const navItems = document.querySelectorAll('.nav-item');
   if (navMap[id] !== undefined) navItems[navMap[id]]?.classList.add('active');
 }
@@ -1870,23 +1803,6 @@ function showDetail(data) {
   // Identity
   document.getElementById('d-initials').textContent = p.initials;
   document.getElementById('d-name').textContent = p.name;
-  document.getElementById('d-dept').textContent = p.dept;
-  document.getElementById('d-lang').textContent = p.lang;
-  document.getElementById('d-channel').textContent = p.channel;
-
-  var insEl = document.getElementById('d-ins-tag');
-  insEl.textContent = p.insTag;
-  insEl.style.color = p.insColor;
-  insEl.style.background = p.insBg;
-  insEl.style.borderColor = p.insBorder;
-
-  var scoreEl = document.getElementById('d-risk-score');
-  scoreEl.textContent = p.riskScore;
-  scoreEl.style.color = p.riskColor;
-
-  var labelEl = document.getElementById('d-risk-label');
-  labelEl.textContent = p.riskLabel;
-  labelEl.style.color = p.riskColor;
 
   document.getElementById('d-mrn').textContent = p.mrn;
   document.getElementById('d-age').textContent = p.age;
@@ -1913,14 +1829,25 @@ function showDetail(data) {
     epHtml += '<div class="ep-card ' + ep.type + '">';
     epHtml += '<div class="ep-card-type">' + ep.label + '</div>';
     epHtml += '<div class="ep-card-name">' + ep.name + '</div>';
+    if (ep.icd) epHtml += '<div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;margin-bottom:6px;letter-spacing:0.5px;">' + ep.icd + '</div>';
     epHtml += '<div class="ep-card-progress"><div class="ep-card-fill"></div></div>';
     epHtml += '<div class="ep-card-meta">' + ep.meta + '</div>';
     epHtml += '<div class="ep-card-actions">';
     (ep.actions || []).forEach(function(a) {
-      epHtml += '<div class="ep-action-row">';
-      epHtml += '<div class="ep-action-icon ' + a.icon + '"' + (a.iconId ? ' id="' + a.iconId + '"' : '') + '>' + a.iconChar + '</div>';
-      epHtml += '<span class="ep-action-text' + (a.overdue ? ' overdue' : '') + '"' + (a.textId ? ' id="' + a.textId + '"' : '') + '>' + a.text + '</span>';
-      epHtml += '</div>';
+      if (a.type === 'adherence') {
+        epHtml += '<div style="margin:6px 0 8px 0;padding:6px 10px;background:#f0fdf4;border-radius:6px;border-left:3px solid var(--green);">';
+        epHtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
+        epHtml += '<span style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px;">💊 Medication Adherence</span>';
+        epHtml += '<span style="font-size:12px;font-weight:800;color:var(--green);">' + a.pct + '%</span></div>';
+        epHtml += '<div style="width:100%;height:4px;background:#dcfce7;border-radius:2px;"><div style="width:' + a.pct + '%;height:100%;background:var(--green);border-radius:2px;"></div></div>';
+        epHtml += '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + a.confirmed + ' of ' + a.total + ' days confirmed · ' + a.unack + ' days unacknowledged</div>';
+        epHtml += '</div>';
+      } else {
+        epHtml += '<div class="ep-action-row">';
+        epHtml += '<div class="ep-action-icon ' + a.icon + '"' + (a.iconId ? ' id="' + a.iconId + '"' : '') + '>' + a.iconChar + '</div>';
+        epHtml += '<span class="ep-action-text' + (a.overdue ? ' overdue' : '') + '"' + (a.textId ? ' id="' + a.textId + '"' : '') + '>' + a.text + '</span>';
+        epHtml += '</div>';
+      }
     });
     epHtml += '</div></div>';
   });
@@ -1951,13 +1878,80 @@ function showDetail(data) {
     tlHtml += '<div class="timeline-item">';
     tlHtml += '<div class="tl-time">' + ev.time + '</div>';
     tlHtml += '<div class="tl-line"><div class="tl-dot ' + ev.dot + '"></div>' + (ev.connector ? '<div class="tl-connector"></div>' : '') + '</div>';
-    tlHtml += '<div class="tl-body">';
+    tlHtml += '<div class="tl-body"' + (ev.bodyStyle ? ' style="' + ev.bodyStyle + '"' : '') + '>';
     tlHtml += '<div class="tl-action">' + ev.action + '</div>';
     tlHtml += '<div class="tl-detail">' + ev.detail + '</div>';
+    if (ev.subDetail) tlHtml += '<div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic;">' + ev.subDetail + '</div>';
     tlHtml += '<span class="tl-status ' + ev.statusClass + '">' + ev.statusText + '</span>';
     tlHtml += '</div></div>';
   });
   tlHtml += '</div></div></div>';
+
+  // Chronic track (Track 2) — only for patients who have one
+  var ct = p.chronicTrack;
+  if (ct) {
+    var ctb = ct.badge || {};
+    tlHtml += '<div class="tl-track">';
+    tlHtml += '<div class="tl-track-header chronic-header" onclick="toggleTrack(\'track-chronic\', this)">';
+    tlHtml += '<div><div class="tl-track-label">' + ct.label + '</div>';
+    tlHtml += '<div class="tl-track-sub">' + ct.sub + '</div></div>';
+    tlHtml += '<span style="font-size:10px;background:' + (ctb.bg || 'var(--green-light)') + ';color:' + (ctb.color || 'var(--green)') + ';padding:2px 8px;border-radius:4px;font-weight:700;">' + (ctb.text || '') + '</span>';
+    tlHtml += '<div class="tl-track-toggle" id="toggle-track-chronic">▼</div></div>';
+
+    // Chronic summary bar
+    if (ct.summary) {
+      tlHtml += '<div class="chronic-summary">';
+      tlHtml += '<div style="font-size:10px;color:var(--muted);width:80px;flex-shrink:0;">6-month view</div>';
+      tlHtml += '<div class="chronic-month-dots">';
+      ct.summary.months.forEach(function(m) {
+        tlHtml += '<div class="chronic-month-col"><div class="cm-dot ' + m.dot + '">' + m.char + '</div><div class="chronic-month-label">' + m.label + '</div></div>';
+      });
+      tlHtml += '</div>';
+      tlHtml += '<div class="chronic-stat">' + ct.summary.stat + '</div>';
+      tlHtml += '</div>';
+    }
+
+    // Chronic body — collapsed by default
+    tlHtml += '<div class="tl-track-body" id="track-chronic">';
+
+    // Rhythm grid
+    if (ct.rhythm) {
+      var monthLabels = ct.summary ? ct.summary.months : [];
+      tlHtml += '<div class="rhythm-grid">';
+      tlHtml += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Monthly Compliance — 6 Months</div>';
+      tlHtml += '<div class="rhythm-months">';
+      monthLabels.forEach(function(m) { tlHtml += '<div class="rhythm-month-label">' + m.label + '</div>'; });
+      tlHtml += '</div>';
+      ct.rhythm.rows.forEach(function(r) {
+        tlHtml += '<div class="rhythm-row"><div class="rhythm-row-label">' + r.label + '</div><div class="rhythm-cells">';
+        r.cells.forEach(function(c) { tlHtml += '<div class="rhythm-cell ' + c.cls + '">' + c.text + '</div>'; });
+        tlHtml += '</div></div>';
+      });
+      tlHtml += '<div class="rhythm-divider"></div>';
+      tlHtml += '<div style="font-size:11px;color:var(--slate);line-height:1.6;">✓ = Fully completed &nbsp;·&nbsp; ~ = Partial / in progress &nbsp;·&nbsp; — = Not due this month &nbsp;·&nbsp; Due = Upcoming</div>';
+      tlHtml += '</div>';
+    }
+
+    // Chronic timeline events
+    if (ct.timeline && ct.timeline.length) {
+      tlHtml += '<div class="recent-events-label">Recent Events — Last 30 Days</div>';
+      tlHtml += '<div style="padding:0 14px 14px;background:white;"><div class="timeline">';
+      ct.timeline.forEach(function(ev) {
+        tlHtml += '<div class="timeline-item">';
+        tlHtml += '<div class="tl-time">' + ev.time + '</div>';
+        tlHtml += '<div class="tl-line"><div class="tl-dot ' + ev.dot + '"></div>' + (ev.connector ? '<div class="tl-connector"></div>' : '') + '</div>';
+        tlHtml += '<div class="tl-body">';
+        tlHtml += '<div class="tl-action">' + ev.action + '</div>';
+        tlHtml += '<div class="tl-detail">' + ev.detail + '</div>';
+        tlHtml += '<span class="tl-status ' + ev.statusClass + '">' + ev.statusText + '</span>';
+        tlHtml += '</div></div>';
+      });
+      tlHtml += '</div></div>';
+    }
+
+    tlHtml += '</div></div>';
+  }
+
   tlContainer.innerHTML = tlHtml;
 
   // Risk factors (sidebar)
@@ -1967,25 +1961,29 @@ function showDetail(data) {
   var rfs = p.riskFactors || [];
   var rfHtml = '';
   rfs.forEach(function(rf) {
-    rfHtml += '<div class="risk-factor">';
-    rfHtml += '<div class="risk-factor-label">' + rf.label + '</div>';
-    rfHtml += '<div class="risk-factor-bar"><div class="risk-factor-fill" style="width:' + rf.pct + '%;background:' + rf.color + ';"></div></div>';
+    rfHtml += '<div class="risk-reason-row">';
+    rfHtml += '<div class="risk-reason-dot ' + (rf.dot || 'grey') + '"></div>';
+    rfHtml += '<div class="risk-reason-label">' + rf.label + '</div>';
+    rfHtml += '<span class="risk-reason-tag ' + (rf.tagClass || 'amber') + '">' + (rf.tag || '') + '</span>';
     rfHtml += '</div>';
   });
   rfContainer.innerHTML = rfHtml;
 
   // Barriers
   var bContainer = document.getElementById('d-barriers');
-  var barriers = p.barriers || [];
-  var bHtml = '';
-  barriers.forEach(function(b) {
-    bHtml += '<div class="barrier-item"><div class="barrier-icon">' + b.icon + '</div><div>';
-    bHtml += '<div class="barrier-type">' + b.type + '</div>';
-    bHtml += '<div class="barrier-desc">' + b.desc + '</div>';
-    bHtml += '</div></div>';
-  });
-  bContainer.innerHTML = bHtml;
-  document.getElementById('d-barrier-note').innerHTML = p.barrierNote || '';
+  if (bContainer) {
+    var barriers = p.barriers || [];
+    var bHtml = '';
+    barriers.forEach(function(b) {
+      bHtml += '<div class="barrier-item"><div class="barrier-icon">' + b.icon + '</div><div>';
+      bHtml += '<div class="barrier-type">' + b.type + '</div>';
+      bHtml += '<div class="barrier-desc">' + b.desc + '</div>';
+      bHtml += '</div></div>';
+    });
+    bContainer.innerHTML = bHtml;
+  }
+  var bNoteEl = document.getElementById('d-barrier-note');
+  if (bNoteEl) bNoteEl.innerHTML = p.barrierNote || '';
 
   showScreen('detail');
 }
@@ -1995,7 +1993,7 @@ function filterQueue(type) {
   rows.forEach(row => {
     const status = row.getAttribute('data-status');
     if (type === 'all') row.style.display = '';
-    else if (type === 'red') row.style.display = status === 'critical' ? '' : 'none';
+    else if (type === 'red' || type === 'critical') row.style.display = status === 'critical' ? '' : 'none';
     else if (type === 'amber') row.style.display = status === 'watch' ? '' : 'none';
     else if (type === 'green') row.style.display = status === 'auto' ? '' : 'none';
   });
@@ -2042,29 +2040,59 @@ const modals = {
     confirmAction: () => showToast('📱 SMS sent to +971 50 XXX XXXX')
   },
   call: {
-    title: '📞 Initiate Call',
-    sub: 'Episode context will be visible on screen during the call.',
-    content: `<div style="padding:16px;background:var(--bg);border-radius:8px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px;">Ahmed Al-Rashidi</div>
-      <div style="font-size:13px;color:var(--slate);">+971 50 XXX XXXX</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px;">Episode: Acute Chest Infection · Day 9 · Lab overdue 5 days</div>
+    title: '📞 Call Patient',
+    sub: 'Choose how you want to contact the patient.',
+    content: `<div style="padding:12px 14px;background:var(--bg);border-radius:8px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">Ahmed Al-Rashidi</div>
+      <div style="font-size:12px;color:var(--slate);">+971 50 XXX XXXX</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Acute Chest Infection · Day 9 · Lab overdue 5 days</div>
     </div>
-    <div style="font-size:12px;color:var(--slate);margin-bottom:12px;">Suggested opening: <em>"Hi Ahmed, I'm calling from the care team at Al-Hilal Hospital about your blood test..."</em></div>`,
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Choose call type</div>
+    <label id="call-option-manual" onclick="selectCallOption('manual')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:9px;cursor:pointer;border:2px solid var(--teal);background:var(--teal-light);margin-bottom:8px;transition:all .15s;">
+      <input type="radio" name="call-type" value="manual" checked style="margin-top:2px;accent-color:var(--teal);flex-shrink:0;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">📞 Call manually</div>
+        <div style="font-size:11px;color:var(--slate);line-height:1.5;">You make the call. Episode context stays visible on your screen throughout.<br><span style="color:var(--muted);">Suggested opening: <em>"Hi Ahmed, I'm calling from the care team at Al-Hilal Hospital about your blood test..."</em></span></div>
+      </div>
+    </label>
+    <label id="call-option-agent" onclick="selectCallOption('agent')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:9px;cursor:pointer;border:2px solid var(--border);background:white;margin-bottom:4px;transition:all .15s;">
+      <input type="radio" name="call-type" value="agent" style="margin-top:2px;accent-color:var(--teal);flex-shrink:0;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">🤖 Trigger voice agent</div>
+        <div style="font-size:11px;color:var(--slate);line-height:1.5;">CareLoop's voice agent calls the patient automatically in Arabic. If they press 3, the call transfers to you immediately.<br><span style="color:var(--muted);">No action needed from you after triggering.</span></div>
+      </div>
+    </label>`,
     confirm: 'confirm',
     confirmText: '📞 Start Call',
     confirmAction: () => {
       var name = currentPatient ? currentPatient.name : 'patient';
       var phone = currentPatient ? currentPatient.phone : '';
-      showToast('📞 Calling ' + name + '...');
-      setTimeout(() => showToast('📞 Call ended — log the outcome in Log Outcome'), 2000);
-      var timeline = document.getElementById('track-acute');
-      if (timeline) {
-        var tl = timeline.querySelector('.timeline');
-        if (tl) {
-          var item = document.createElement('div');
-          item.className = 'timeline-item';
-          item.innerHTML = '<div class="tl-time">Now · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot call"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">Voice call initiated by orchestrator</div><div class="tl-detail">' + phone + ' · Manual call</div><span class="tl-status esc">Call made · Awaiting log</span></div>';
-          tl.insertBefore(item, tl.firstChild);
+      var selected = document.querySelector('input[name="call-type"]:checked');
+      var callType = selected ? selected.value : 'manual';
+      if (callType === 'agent') {
+        showToast('🤖 Voice agent triggered · Calling ' + name + ' in Arabic · You will be alerted if they press 3');
+        var timeline = document.getElementById('track-acute');
+        if (timeline) {
+          var tl = timeline.querySelector('.timeline');
+          if (tl) {
+            var item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.innerHTML = '<div class="tl-time">Now · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot call"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">🤖 Voice agent call triggered</div><div class="tl-detail">' + phone + ' · Automated · Arabic</div><span class="tl-status esc">Agent calling · Awaiting response</span></div>';
+            tl.insertBefore(item, tl.firstChild);
+          }
+        }
+      } else {
+        showToast('📞 Calling ' + name + ' · ' + phone + ' · Episode context visible');
+        setTimeout(function() { showToast('📞 Call ended — log the outcome in Log Outcome'); }, 2000);
+        var timeline = document.getElementById('track-acute');
+        if (timeline) {
+          var tl = timeline.querySelector('.timeline');
+          if (tl) {
+            var item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.innerHTML = '<div class="tl-time">Now · ' + getFormattedTime() + '</div><div class="tl-line"><div class="tl-dot call"></div><div class="tl-connector"></div></div><div class="tl-body"><div class="tl-action">Voice call initiated by orchestrator</div><div class="tl-detail">' + phone + ' · Manual call</div><span class="tl-status esc">Call made · Awaiting log</span></div>';
+            tl.insertBefore(item, tl.firstChild);
+          }
         }
       }
     }
@@ -2139,12 +2167,12 @@ const modals = {
     }
   },
   abandon: {
-    title: '🚩 Mark Episode as Abandoned',
+    title: '🚩 Close Episode — Unresolved',
     sub: 'This action closes the episode as unresolved. It will be logged and flagged in the revenue dashboard.',
     content: `<div style="background:var(--amber-light);border:1px solid var(--amber-border);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--amber);">
-      ⚠ Abandoned episodes are reported to hospital management and flagged for HAAD/DHA audit review.
+      ⚠ Unresolved closures are reported to hospital management and flagged for HAAD/DHA audit review.
     </div>
-    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Reason for abandonment</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Reason for closing unresolved</div>
     <select class="modal-input">
       <option>Patient left UAE — returned to home country</option>
       <option>Patient transferred to another provider</option>
@@ -2157,7 +2185,7 @@ const modals = {
     <div style="font-size:11px;color:var(--muted);margin-top:4px;">5 contact attempts · 14 days · Last contact: Mar 3, 2026</div>`,
     confirm: 'confirm-red',
     confirmText: '🚩 Confirm Abandonment',
-    confirmAction: () => showToast('🚩 Episode marked abandoned · Revenue flagged · Audit record created')
+    confirmAction: () => showToast('🚩 Episode closed · Revenue flagged · Audit record created')
   },
   'add-patient': {
     title: '+ Add OPD Patient to CareLoop',
@@ -2242,6 +2270,25 @@ function toggleTrack(trackId, headerEl) {
   if (toggleEl) toggleEl.textContent = isOpen ? '▼' : '▲';
 }
 
+function selectCallOption(type) {
+  var manualLabel = document.getElementById('call-option-manual');
+  var agentLabel = document.getElementById('call-option-agent');
+  if (!manualLabel || !agentLabel) return;
+  if (type === 'manual') {
+    manualLabel.style.border = '2px solid var(--teal)';
+    manualLabel.style.background = 'var(--teal-light)';
+    agentLabel.style.border = '2px solid var(--border)';
+    agentLabel.style.background = 'white';
+    document.querySelector('input[value="manual"]').checked = true;
+  } else {
+    agentLabel.style.border = '2px solid var(--teal)';
+    agentLabel.style.background = 'var(--teal-light)';
+    manualLabel.style.border = '2px solid var(--border)';
+    manualLabel.style.background = 'white';
+    document.querySelector('input[value="agent"]').checked = true;
+  }
+}
+
 // ── EPISODE CLOSE ──
 function toggleCloseBtn() {
   const checked = document.getElementById('close-confirm-check').checked;
@@ -2307,19 +2354,8 @@ function sendEscalation() {
 }
 
 function incrementClosed() {
-  const el = document.getElementById('closed-today-count');
-  if (el) el.textContent = parseInt(el.textContent) + 1;
+  // stat card removed per product feedback
 }
-
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const el = document.getElementById('live-clock');
-  if (el) el.textContent = h + ':' + m;
-}
-setInterval(updateClock, 10000);
-updateClock();
 
 // ── PRESCRIPTION DEMO ──
 function runPrescriptionDemo() {
@@ -2385,8 +2421,159 @@ function runPrescriptionDemo() {
   }, 5500);
 }
 
+// ── HMIS PRESCRIPTION LISTENER ──
+function handleNewPrescription(prescriptionData) {
+  // Generate a unique key from MRN
+  var patientKey = 'hmis_' + prescriptionData.mrn;
+
+  // Check if this patient row already exists
+  var existing = document.querySelector('[data-patient-key="' + patientKey + '"]');
+  if (existing) {
+    showToast('ℹ️ ' + prescriptionData.name + ' is already in the queue');
+    return;
+  }
+
+  // Build initials from name
+  var nameParts = prescriptionData.name.trim().split(' ');
+  var initials = nameParts.length >= 2
+    ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+    : nameParts[0].substring(0, 2).toUpperCase();
+
+  // Derive insurance tag
+  var insRaw = prescriptionData.insurance || '';
+  var insTag = insRaw.split('·')[0].trim();
+
+  // Build a dynamic PATIENTS entry so showDetail works
+  var medsText = (prescriptionData.medications || []).map(function(m) {
+    return { icon: 'pending', iconChar: '⏳', text: m.name + ' ' + m.dose + ' — ' + m.frequency + ' · ' + m.duration };
+  });
+  var labsText = (prescriptionData.labs || []).map(function(l) {
+    return { icon: 'pending', iconChar: '⏳', text: l.test + ' — ' + l.lab + ' · Due within ' + l.dueWithin };
+  });
+  var followupAction = [];
+  if (prescriptionData.followupDate) {
+    followupAction.push({ icon: 'pending', iconChar: '⏳', text: 'Follow-up ' + prescriptionData.followupDate + ' · ' + (prescriptionData.followupTime || '') + ' — ' + prescriptionData.dept });
+  }
+  var allActions = medsText.concat(labsText).concat(followupAction);
+
+  PATIENTS[patientKey] = {
+    initials: initials,
+    name: prescriptionData.name,
+    mrn: prescriptionData.mrn,
+    age: prescriptionData.age,
+    phone: prescriptionData.phone,
+    insurance: prescriptionData.insurance,
+    consultant: prescriptionData.consultant,
+    nok: '—',
+    dept: prescriptionData.dept + ' · ' + prescriptionData.consultant,
+    lang: prescriptionData.lang,
+    channel: 'WhatsApp',
+    insTag: insTag,
+    insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
+    riskScore: '12',
+    riskColor: 'var(--green)',
+    riskLabel: 'New episode · Monitoring started',
+    status: 'auto',
+    suggestion: 'Episode just onboarded from HMIS. First WhatsApp care plan sent automatically. Monitor for 24 hours before any action is needed.',
+    escalateTo: prescriptionData.consultant,
+    escalateDept: prescriptionData.dept + ' · Al-Hilal Hospital',
+    episodes: [{
+      type: prescriptionData.episodeType === 'OPD Chronic' ? 'chronic' : 'acute',
+      label: prescriptionData.episodeType + ' · Day 1',
+      name: prescriptionData.diagnosis,
+      meta: prescriptionData.consultant + ' · Started today · Follow-up ' + (prescriptionData.followupDate || 'TBD'),
+      actions: allActions
+    }],
+    episodeBadge: { text: '1 new episode', bg: 'var(--green-light)', color: 'var(--green)' },
+    complexityFlag: null,
+    riskFactors: [
+      { dot: 'grey', label: 'Patient condition', tag: 'None reported yet', tagClass: 'amber' },
+      { dot: 'grey', label: 'New episode', tag: 'Just onboarded', tagClass: 'amber' },
+      { dot: 'grey', label: 'First contact sent', tag: 'WhatsApp delivered', tagClass: 'amber' }
+    ],
+    barriers: [],
+    barrierNote: 'No barriers detected — episode just started. Monitor engagement over the next 48 hours.',
+    timeline: [{
+      time: 'Now · ' + getFormattedTime(),
+      dot: 'ack', connector: false,
+      action: 'WhatsApp sent — Episode care plan summary',
+      detail: 'Hi ' + prescriptionData.name.split(' ')[0] + ', ' + prescriptionData.consultant + ' has shared your care plan.',
+      statusClass: 'ok', statusText: 'Delivered'
+    }],
+    timelineTrackLabel: (prescriptionData.episodeType === 'OPD Chronic' ? '🔵' : '🟠') + ' ' + prescriptionData.episodeType.replace('OPD ','') + ' · ' + prescriptionData.diagnosis,
+    timelineTrackSub: 'Day 1 · Started today · OPD',
+    timelineTrackBadge: { text: 'New · Monitoring', bg: 'var(--green-light)', color: 'var(--green)' }
+  };
+
+  showToast('📋 HMIS signal received — prescription saved by ' + prescriptionData.consultant);
+
+  setTimeout(function() {
+    showToast('⚡ Episode created — ' + prescriptionData.name + ' onboarded to CareLoop');
+
+    var newRow = document.createElement('div');
+    newRow.className = 'queue-row row-highlight';
+    newRow.style.cssText = 'grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;border-left:3px solid var(--green);cursor:pointer;';
+    newRow.setAttribute('data-status', 'auto');
+    newRow.setAttribute('data-patient-key', patientKey);
+    newRow.setAttribute('onclick', "showDetail('" + patientKey + "')");
+    newRow.innerHTML = '<div class="risk-dot green"></div>' +
+      '<div><div class="patient-name">' + prescriptionData.name +
+      ' <span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:700;">NEW</span></div>' +
+      '<div class="patient-meta">MRN ' + prescriptionData.mrn +
+      ' · ' + insTag +
+      ' · ' + prescriptionData.age + ' · ' + prescriptionData.lang + '</div></div>' +
+      '<div><span class="episode-tag ' + (prescriptionData.episodeType === 'OPD Chronic' ? 'chronic' : 'acute') + '">' + prescriptionData.episodeType + '</span></div>' +
+      '<div class="action-pending"><strong>Episode just started</strong>' + prescriptionData.diagnosis + '</div>' +
+      '<div class="days-badge ok">Just now</div>' +
+      '<span class="action-tag auto">Auto-Monitored</span>';
+
+    var queueTable = document.querySelector('#screen-queue .queue-table');
+    var lastChild = queueTable.lastElementChild;
+    queueTable.insertBefore(newRow, lastChild);
+
+    var activeEl = document.querySelector('.stat-card.teal .stat-card-num');
+    if (activeEl) activeEl.textContent = parseInt(activeEl.textContent) + 1;
+  }, 1200);
+
+  setTimeout(function() {
+    showToast('💬 WhatsApp care plan sent to ' + prescriptionData.name + ' — ' + prescriptionData.phone);
+  }, 2800);
+
+  setTimeout(function() {
+    showToast('✅ Episode live · CareLoop is now monitoring ' + prescriptionData.name);
+  }, 4200);
+}
+
+window.addEventListener('storage', function(e) {
+  if (e.key === 'careloop_new_prescription' && e.newValue) {
+    try {
+      var data = JSON.parse(e.newValue);
+      handleNewPrescription(data);
+    } catch(err) {
+      console.error('CareLoop: failed to parse prescription', err);
+    }
+  }
+});
+
+// Check for any pending prescription on load (in case HMIS saved before this tab was listening)
+(function() {
+  var pending = localStorage.getItem('careloop_new_prescription');
+  if (pending) {
+    try {
+      var data = JSON.parse(pending);
+      // Only process if it was saved within the last 30 seconds
+      var age = Date.now() - new Date(data.timestamp).getTime();
+      if (age < 30000) {
+        setTimeout(function() { handleNewPrescription(data); }, 500);
+      }
+    } catch(err) {}
+    localStorage.removeItem('careloop_new_prescription');
+  }
+})();
+
 // Init
 showScreen('queue');
+filterQueue('critical');
 </script>
 </body>
 </html>

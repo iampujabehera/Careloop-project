@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medinous HMIS · OPD Prescription</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font-size:13px; }
+
+/* Header */
+.hmis-header {
+  background:white; border-bottom:2px solid #e2e8f0;
+  padding:0 24px; height:52px; display:flex; align-items:center; gap:20px;
+}
+.hmis-logo { font-size:17px; font-weight:700; color:#00b89c; letter-spacing:-.5px; }
+.hmis-logo span { color:#64748b; font-weight:400; font-size:13px; margin-left:4px; }
+.hmis-header-sep { width:1px; height:28px; background:#e2e8f0; }
+.hmis-header-info { font-size:12px; color:#64748b; }
+.hmis-header-info strong { color:#1a1a2e; font-weight:600; }
+.hmis-header-right { margin-left:auto; display:flex; align-items:center; gap:16px; }
+.hmis-header-right .doctor-badge {
+  display:flex; align-items:center; gap:8px;
+  padding:4px 12px; background:#f0fdf4; border:1px solid #bbf7d0;
+  border-radius:6px; font-size:11px; font-weight:600; color:#15803d;
+}
+.hmis-header-right .date-badge {
+  font-size:12px; color:#64748b; font-weight:500;
+}
+
+/* Main */
+.hmis-main { max-width:880px; margin:20px auto; padding:0 20px; }
+
+/* Success banner */
+.success-banner {
+  background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px;
+  padding:14px 18px; margin-bottom:16px; font-size:13px; color:#15803d;
+  font-weight:600; display:none;
+}
+.success-banner.show { display:block; }
+
+/* Validation error */
+.validation-error {
+  background:#fff5f5; border:1.5px solid #fca5a5; border-radius:8px;
+  padding:10px 14px; margin-bottom:12px; font-size:12px; color:#dc2626;
+  font-weight:600; display:none;
+}
+.validation-error.show { display:block; }
+
+/* Section */
+.form-section {
+  background:white; border:1px solid #e2e8f0; border-radius:8px;
+  margin-bottom:14px; overflow:hidden;
+}
+.form-section-header {
+  background:#f8fafc; border-bottom:1px solid #e2e8f0;
+  padding:10px 16px; font-size:11px; font-weight:700;
+  color:#64748b; text-transform:uppercase; letter-spacing:1.5px;
+  display:flex; align-items:center; gap:8px;
+}
+.form-section-body { padding:14px 16px; }
+
+/* Form grid */
+.form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 14px; }
+.form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+.form-group { display:flex; flex-direction:column; gap:3px; }
+.form-group label {
+  font-size:10px; font-weight:700; color:#94a3b8;
+  text-transform:uppercase; letter-spacing:.8px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  font-family:'DM Sans',sans-serif; font-size:13px; color:#1a1a2e;
+  border:1.5px solid #e2e8f0; border-radius:6px; padding:7px 10px;
+  background:white; transition:border-color .15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { outline:none; border-color:#00b89c; }
+.form-group textarea { resize:vertical; min-height:60px; }
+.form-group input.invalid,
+.form-group select.invalid { border-color:#dc2626; background:#fff5f5; }
+
+/* Medication / Lab rows */
+.med-rows, .lab-rows { display:flex; flex-direction:column; gap:8px; }
+.med-row, .lab-row {
+  display:grid; align-items:end; gap:8px;
+  padding:8px 10px; background:#fafbfc; border:1px solid #f1f5f9;
+  border-radius:6px;
+}
+.med-row { grid-template-columns:1.5fr .6fr 1fr .6fr 28px; }
+.lab-row { grid-template-columns:1.5fr 1.2fr .8fr 28px; }
+.remove-btn {
+  width:24px; height:24px; border-radius:4px; border:1px solid #e2e8f0;
+  background:white; color:#94a3b8; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .12s;
+}
+.remove-btn:hover { border-color:#dc2626; color:#dc2626; background:#fff5f5; }
+
+.add-link {
+  font-size:12px; font-weight:600; color:#00b89c; cursor:pointer;
+  margin-top:6px; display:inline-flex; align-items:center; gap:4px;
+}
+.add-link:hover { color:#008f79; }
+
+/* Save button */
+.save-area { margin-top:16px; margin-bottom:40px; }
+.save-btn {
+  width:100%; padding:14px; border:none; border-radius:8px;
+  background:#00b89c; color:white; font-family:'DM Sans',sans-serif;
+  font-size:14px; font-weight:700; cursor:pointer; transition:all .15s;
+}
+.save-btn:hover { background:#008f79; }
+.save-btn:disabled { cursor:not-allowed; }
+.save-hint {
+  text-align:center; font-size:11px; color:#94a3b8; margin-top:8px;
+}
+
+/* Status bar */
+.status-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background:white; border-top:1px solid #e2e8f0;
+  padding:6px 24px; font-size:11px; color:#64748b;
+  display:flex; align-items:center; gap:8px;
+}
+.status-dot {
+  width:7px; height:7px; border-radius:50%; background:#16a34a;
+  display:inline-block;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hmis-header">
+  <div class="hmis-logo">Medinous <span>HMIS</span></div>
+  <div class="hmis-header-sep"></div>
+  <div class="hmis-header-info"><strong>Al-Hilal Hospital</strong> · Abu Dhabi</div>
+  <div class="hmis-header-sep"></div>
+  <div class="hmis-header-info">General Practice · OPD</div>
+  <div class="hmis-header-right">
+    <div class="doctor-badge">Dr. Layla Al-Rashid · Endocrinology</div>
+    <div class="date-badge">20 Mar 2026</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="hmis-main">
+
+  <div class="success-banner" id="success-banner"></div>
+  <div class="validation-error" id="validation-error"></div>
+
+  <!-- Patient Details -->
+  <div class="form-section">
+    <div class="form-section-header">Patient Details</div>
+    <div class="form-section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Patient Name *</label>
+          <input type="text" id="f-name" value="Nora Al-Ansari" required>
+        </div>
+        <div class="form-group">
+          <label>MRN *</label>
+          <input type="text" id="f-mrn" value="44201" required>
+        </div>
+        <div class="form-group">
+          <label>Age *</label>
+          <input type="text" id="f-age" value="38 years" required>
+        </div>
+        <div class="form-group">
+          <label>Mobile *</label>
+          <input type="text" id="f-phone" value="+971 52 XXX XXXX" required>
+        </div>
+        <div class="form-group">
+          <label>Language</label>
+          <select id="f-lang">
+            <option>Arabic</option>
+            <option>English</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Insurance *</label>
+          <select id="f-insurance">
+            <option>Daman · Enhanced Network</option>
+            <option>Daman · Basic Network</option>
+            <option>Thiqa · Gold</option>
+            <option>AXA Gulf · Comprehensive</option>
+            <option>ADNIC · Enhanced Network</option>
+            <option>MSH International</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consultation Details -->
+  <div class="form-section">
+    <div class="form-section-header">Consultation Details</div>
+    <div class="form-section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Consulting Doctor *</label>
+          <input type="text" id="f-doctor" value="Dr. Layla Al-Rashid" required>
+        </div>
+        <div class="form-group">
+          <label>Department *</label>
+          <select id="f-dept">
+            <option>Endocrinology</option>
+            <option>Pulmonology</option>
+            <option>Cardiology</option>
+            <option>Gastroenterology</option>
+            <option>Radiology</option>
+            <option>General Practice</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Diagnosis *</label>
+          <input type="text" id="f-diagnosis" value="Type 2 Diabetes — newly diagnosed" required>
+        </div>
+        <div class="form-group">
+          <label>Episode Type</label>
+          <select id="f-episode-type">
+            <option>OPD Acute</option>
+            <option>OPD Chronic</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medications -->
+  <div class="form-section">
+    <div class="form-section-header">Prescribed Medications</div>
+    <div class="form-section-body">
+      <div class="med-rows" id="med-rows">
+        <div class="med-row">
+          <div class="form-group"><label>Medication</label><input type="text" value="Metformin 500mg"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="500mg"></div>
+          <div class="form-group"><label>Frequency</label>
+            <select>
+              <option>Once daily</option>
+              <option selected>Twice daily</option>
+              <option>Three times daily</option>
+              <option>As needed</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Duration</label><input type="text" value="Ongoing"></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+        <div class="med-row">
+          <div class="form-group"><label>Medication</label><input type="text" value="Vitamin D3"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="1000 IU"></div>
+          <div class="form-group"><label>Frequency</label>
+            <select>
+              <option selected>Once daily</option>
+              <option>Twice daily</option>
+              <option>Three times daily</option>
+              <option>As needed</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Duration</label><input type="text" value="3 months"></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+      </div>
+      <div class="add-link" onclick="addMedRow()">+ Add Medication</div>
+    </div>
+  </div>
+
+  <!-- Lab Orders -->
+  <div class="form-section">
+    <div class="form-section-header">Lab & Investigation Orders</div>
+    <div class="form-section-body">
+      <div class="lab-rows" id="lab-rows">
+        <div class="lab-row">
+          <div class="form-group"><label>Test Name</label><input type="text" value="HbA1c Blood Test"></div>
+          <div class="form-group"><label>Lab / Centre</label><input type="text" value="Al Noor Lab · Khalidiyah"></div>
+          <div class="form-group"><label>Due Within</label>
+            <select>
+              <option>3 days</option>
+              <option selected>7 days</option>
+              <option>14 days</option>
+              <option>1 month</option>
+            </select>
+          </div>
+          <button class="remove-btn" onclick="this.closest('.lab-row').remove()">&times;</button>
+        </div>
+      </div>
+      <div class="add-link" onclick="addLabRow()">+ Add Lab Order</div>
+    </div>
+  </div>
+
+  <!-- Follow-up -->
+  <div class="form-section">
+    <div class="form-section-header">Follow-up Appointment</div>
+    <div class="form-section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Follow-up Date *</label>
+          <input type="date" id="f-followup-date">
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" id="f-followup-time" value="10:00">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <select id="f-followup-dept">
+            <option>Endocrinology</option>
+            <option>Pulmonology</option>
+            <option>Cardiology</option>
+            <option>Gastroenterology</option>
+            <option>Radiology</option>
+            <option>General Practice</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:span 3;">
+          <label>Notes</label>
+          <textarea id="f-followup-notes" placeholder="Any notes for the follow-up visit..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save -->
+  <div class="save-area">
+    <button class="save-btn" id="save-btn" onclick="savePrescription()">Save Prescription & Onboard to CareLoop</button>
+    <div class="save-hint">This prescription will be automatically sent to the CareLoop Workbench as an active episode</div>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <span class="status-dot"></span>
+  Connected to CareLoop Workbench · localStorage bridge active
+  <span style="margin-left:auto;color:#94a3b8;">Medinous HMIS v4.2 · Al-Hilal Hospital</span>
+</div>
+
+<script>
+// Set default follow-up date to 14 days from now
+(function() {
+  var d = new Date();
+  d.setDate(d.getDate() + 14);
+  var yyyy = d.getFullYear();
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  document.getElementById('f-followup-date').value = yyyy + '-' + mm + '-' + dd;
+})();
+
+function addMedRow() {
+  var container = document.getElementById('med-rows');
+  var row = document.createElement('div');
+  row.className = 'med-row';
+  row.innerHTML = '<div class="form-group"><label>Medication</label><input type="text" placeholder="Medication name"></div>' +
+    '<div class="form-group"><label>Dose</label><input type="text" placeholder="e.g. 500mg"></div>' +
+    '<div class="form-group"><label>Frequency</label><select><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>As needed</option></select></div>' +
+    '<div class="form-group"><label>Duration</label><input type="text" placeholder="e.g. 10 days"></div>' +
+    '<button class="remove-btn" onclick="this.closest(\'.med-row\').remove()">&times;</button>';
+  container.appendChild(row);
+}
+
+function addLabRow() {
+  var container = document.getElementById('lab-rows');
+  var row = document.createElement('div');
+  row.className = 'lab-row';
+  row.innerHTML = '<div class="form-group"><label>Test Name</label><input type="text" placeholder="Test name"></div>' +
+    '<div class="form-group"><label>Lab / Centre</label><input type="text" placeholder="Lab name"></div>' +
+    '<div class="form-group"><label>Due Within</label><select><option>3 days</option><option>7 days</option><option>14 days</option><option>1 month</option></select></div>' +
+    '<button class="remove-btn" onclick="this.closest(\'.lab-row\').remove()">&times;</button>';
+  container.appendChild(row);
+}
+
+function savePrescription() {
+  // Clear previous states
+  document.getElementById('validation-error').classList.remove('show');
+  document.getElementById('success-banner').classList.remove('show');
+  document.querySelectorAll('.invalid').forEach(function(el) { el.classList.remove('invalid'); });
+
+  // Validate required fields
+  var fields = [
+    { id: 'f-name', label: 'Patient Name' },
+    { id: 'f-mrn', label: 'MRN' },
+    { id: 'f-age', label: 'Age' },
+    { id: 'f-phone', label: 'Mobile' },
+    { id: 'f-doctor', label: 'Consulting Doctor' },
+    { id: 'f-diagnosis', label: 'Diagnosis' },
+    { id: 'f-followup-date', label: 'Follow-up Date' }
+  ];
+
+  var missing = [];
+  fields.forEach(function(f) {
+    var el = document.getElementById(f.id);
+    if (!el.value.trim()) {
+      missing.push(f.label);
+      el.classList.add('invalid');
+    }
+  });
+
+  if (missing.length > 0) {
+    var errEl = document.getElementById('validation-error');
+    errEl.textContent = 'Required fields missing: ' + missing.join(', ');
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Build medications array
+  var meds = [];
+  document.querySelectorAll('.med-row').forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var sel = row.querySelector('select');
+    if (inputs[0] && inputs[0].value.trim()) {
+      meds.push({
+        name: inputs[0].value.trim(),
+        dose: inputs[1] ? inputs[1].value.trim() : '',
+        frequency: sel ? sel.value : '',
+        duration: inputs[2] ? inputs[2].value.trim() : ''
+      });
+    }
+  });
+
+  // Build labs array
+  var labs = [];
+  document.querySelectorAll('.lab-row').forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var sel = row.querySelector('select');
+    if (inputs[0] && inputs[0].value.trim()) {
+      labs.push({
+        test: inputs[0].value.trim(),
+        lab: inputs[1] ? inputs[1].value.trim() : '',
+        dueWithin: sel ? sel.value : ''
+      });
+    }
+  });
+
+  // Build prescription object
+  var prescription = {
+    id: Date.now(),
+    name: document.getElementById('f-name').value.trim(),
+    mrn: document.getElementById('f-mrn').value.trim(),
+    age: document.getElementById('f-age').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    lang: document.getElementById('f-lang').value,
+    insurance: document.getElementById('f-insurance').value,
+    consultant: document.getElementById('f-doctor').value.trim(),
+    dept: document.getElementById('f-dept').value,
+    diagnosis: document.getElementById('f-diagnosis').value.trim(),
+    episodeType: document.getElementById('f-episode-type').value,
+    medications: meds,
+    labs: labs,
+    followupDate: document.getElementById('f-followup-date').value,
+    followupTime: document.getElementById('f-followup-time').value,
+    timestamp: new Date().toISOString()
+  };
+
+  // Clear first so the storage event fires even if key existed before
+  localStorage.removeItem('careloop_new_prescription');
+  // Small delay to ensure the remove is processed before the set
+  setTimeout(function() {
+    localStorage.setItem('careloop_new_prescription', JSON.stringify(prescription));
+  }, 50);
+
+  // Update button
+  var btn = document.getElementById('save-btn');
+  btn.textContent = '✅ Prescription Saved — Sending to CareLoop...';
+  btn.style.background = '#16a34a';
+  btn.disabled = true;
+
+  // Show success banner after 1500ms
+  setTimeout(function() {
+    var banner = document.getElementById('success-banner');
+    banner.textContent = '✅ Prescription saved. Episode onboarded to CareLoop workbench. First WhatsApp care plan will be sent to ' + prescription.name + ' within 30 minutes.';
+    banner.classList.add('show');
+  }, 1500);
+
+  // Reset after 6000ms (longer delay so CareLoop tab has time to process)
+  setTimeout(function() {
+    btn.textContent = 'Save Prescription & Onboard to CareLoop';
+    btn.style.background = '#00b89c';
+    btn.disabled = false;
+    document.getElementById('success-banner').classList.remove('show');
+  }, 6000);
+}
+</script>
+</body>
+</html>
