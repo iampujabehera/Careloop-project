@@ -350,7 +350,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .modal {
   background:var(--white); border-radius:16px; padding:28px;
   max-width:440px; width:90%; box-shadow:var(--shadow-lg);
-  animation:modalIn .2s ease;
+  animation:modalIn .2s ease; position:relative; overflow:visible;
 }
 @keyframes modalIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 .modal-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:6px; }
@@ -615,6 +615,181 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
   0% { background: #f0fdf4; }
   100% { background: white; }
 }
+
+/* ── PROGRESS STRIP (inside timeline header) ── */
+.tl-progress-strip { display:flex; align-items:center; gap:0; padding:10px 0 4px; }
+.tl-pi-step { display:flex; align-items:center; gap:5px; flex:1; }
+.tl-pi-connector { flex:1; height:1.5px; background:var(--border); margin:0 3px; margin-bottom:14px; }
+.tl-pi-connector.done { background:var(--teal); }
+.tl-pi-dot { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex-shrink:0; border:1.5px solid var(--border); background:var(--white); color:var(--muted); }
+.tl-pi-step.done .tl-pi-dot { background:var(--teal); border-color:var(--teal); color:white; }
+.tl-pi-step.crit .tl-pi-dot { background:var(--red); border-color:var(--red); color:white; animation:tl-pulse 1.5s infinite; }
+.tl-pi-step.pend .tl-pi-dot { background:var(--white); border-color:var(--border); color:var(--muted); }
+@keyframes tl-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(229,62,62,.4)} 50%{box-shadow:0 0 0 5px rgba(229,62,62,0)} }
+.tl-pi-label { font-size:9px; color:var(--muted); line-height:1.3; font-weight:500; }
+.tl-pi-step.done .tl-pi-label { color:var(--teal-d); }
+.tl-pi-step.crit .tl-pi-label { color:var(--red); font-weight:700; }
+.tl-pi-step.warn .tl-pi-dot { background:var(--amber-light); border-color:var(--amber); color:var(--amber); }
+.tl-pi-step.warn .tl-pi-label { color:var(--amber); font-weight:700; }
+
+/* ── EXPANDABLE WA BUBBLE PANEL ── */
+.tl-wa-panel { display:none; background:#f0f4f0; border-radius:8px; margin-top:8px; padding:10px; }
+.tl-wa-panel.open { display:block; }
+.tl-wa-screen { background:#e8e0d8; border-radius:8px; padding:10px; }
+.tl-wa-hdr { background:#075e54; color:white; border-radius:6px 6px 0 0; padding:7px 10px; display:flex; align-items:center; gap:7px; font-size:10px; font-weight:600; margin:-10px -10px 8px; }
+.tl-wa-av { width:22px; height:22px; border-radius:50%; background:#25d366; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; }
+.tl-wa-bub { background:#e7ffd9; border-radius:0 8px 8px 8px; padding:8px 10px; font-size:11px; line-height:1.6; color:#111; position:relative; }
+.tl-wa-bub::before { content:''; position:absolute; top:0; left:-6px; border-right:6px solid #e7ffd9; border-top:6px solid transparent; }
+.tl-wa-bub.out { background:#dcf8c6; border-radius:8px 0 8px 8px; margin-left:auto; max-width:80%; }
+.tl-wa-bub.out::before { display:none; }
+.tl-wa-btns { display:flex; gap:5px; margin-top:5px; }
+.tl-wa-btn { background:white; border:1px solid #d0e8d0; border-radius:5px; padding:5px 10px; font-size:11px; font-weight:600; color:#128c7e; flex:1; text-align:center; }
+.tl-wa-time { font-size:9px; color:#999; text-align:right; margin-top:3px; }
+.tl-wa-note { font-size:10px; color:var(--muted); margin-top:6px; font-style:italic; }
+.tl-xbtn { font-size:10px; color:var(--teal); font-weight:600; cursor:pointer; background:none; border:1px solid rgba(0,184,156,.2); padding:2px 8px; border-radius:4px; margin-left:auto; white-space:nowrap; font-family:'DM Sans',sans-serif; }
+.tl-xbtn:hover { background:var(--teal-light); }
+
+/* ── CRITICAL EVENT (always open) ── */
+.tl-crit-row { background:#fffaf9; }
+.tl-crit-detail { padding:8px 0 4px; }
+.tl-auto-rows { display:flex; flex-direction:column; gap:5px; margin-bottom:8px; }
+.tl-auto-row { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink); }
+.tl-auto-row .tl-ck { color:var(--green); font-weight:700; font-size:12px; }
+.tl-auto-row .tl-ts { margin-left:auto; font-size:9px; color:var(--muted); font-weight:600; white-space:nowrap; }
+.tl-resp-bar { padding:5px 10px; background:var(--white); border:1px solid var(--border); border-radius:6px; font-size:10px; color:var(--muted); text-align:center; }
+.tl-resp-bar strong { color:var(--green); }
+.tl-see-msgs { display:inline-flex; align-items:center; gap:4px; font-size:10px; color:var(--red); font-weight:600; cursor:pointer; background:none; border:1px solid rgba(229,62,62,.2); padding:3px 10px; border-radius:4px; margin-top:8px; font-family:'DM Sans',sans-serif; }
+.tl-see-msgs:hover { background:var(--red-light); }
+.tl-crit-pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.tl-crit-card { background:white; border-radius:7px; padding:8px 10px; border:1px solid var(--border); }
+.tl-crit-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
+.tl-crit-lbl.p { color:var(--teal-d); }
+.tl-crit-lbl.d { color:#1d4ed8; }
+.tl-crit-bub { border-radius:0 7px 7px 7px; padding:7px 9px; font-size:11px; line-height:1.5; border-left:2px solid var(--red); background:#fff0ee; color:#7f1d1d; }
+.tl-crit-bub.doc { background:#eff6ff; color:#1e3a8a; border-left-color:#3b82f6; }
+.tl-crit-ts { font-size:9px; color:var(--muted); text-align:right; margin-top:3px; }
+.tl-audit-strip { margin-top:8px; padding:5px 10px; background:white; border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; gap:6px; font-size:10px; color:var(--muted); }
+.tl-resp-badge { margin-left:auto; background:#dcfce7; color:var(--green); font-size:9px; font-weight:700; padding:2px 7px; border-radius:8px; white-space:nowrap; }
+
+/* Critical banner in right panel */
+.crit-auto-banner { background:var(--red-light); border:1.5px solid var(--red); border-radius:10px; padding:12px 14px; margin-bottom:14px; }
+.crit-auto-banner-title { font-size:10px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.crit-auto-dot { width:7px; height:7px; border-radius:50%; background:var(--red); animation:tl-pulse 1.5s infinite; flex-shrink:0; }
+.crit-auto-row { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink); margin-bottom:4px; }
+.crit-auto-ck { color:var(--green); font-weight:700; }
+.crit-auto-ts { margin-left:auto; font-size:9px; color:var(--muted); font-weight:600; }
+.crit-auto-footer { margin-top:8px; font-size:10px; color:var(--muted); padding:4px 8px; background:white; border-radius:5px; text-align:center; }
+.crit-auto-footer strong { color:var(--green); }
+
+/* ── DOCTOR VIEW ── */
+.doctor-compliance-badge { display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--green-light);border:1px solid rgba(22,163,74,.2);border-radius:10px;margin-bottom:20px;font-size:12px;color:var(--green);font-weight:500; }
+.doctor-compliance-badge .badge-icon { font-size:16px;flex-shrink:0; }
+.doctor-section-card { background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow); }
+.doctor-section-header { padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+.doctor-section-title { font-size:12px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:1px; }
+.doctor-section-sub { font-size:11px;color:var(--muted);margin-top:1px; }
+.doctor-section-count { font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--green-light);color:var(--green); }
+.doctor-section-count.has-alerts { background:var(--red-light);color:var(--red); }
+.doc-patient-row { display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border-light);font-size:12px; }
+.doc-patient-row:last-child { border-bottom:none; }
+.doc-status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.doc-status-dot.green { background:var(--green); }
+.doc-status-dot.amber { background:var(--amber); }
+.doc-status-dot.red { background:var(--red);animation:tl-pulse 1.5s infinite; }
+.doc-patient-name { font-weight:600;color:var(--ink);min-width:160px; }
+.doc-patient-episode { color:var(--muted);flex:1; }
+.doc-patient-status { font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px; }
+.doc-patient-status.ok { background:var(--green-light);color:var(--green); }
+.doc-patient-status.warn { background:var(--amber-light);color:var(--amber); }
+.doc-patient-status.crit { background:var(--red-light);color:var(--red); }
+.doc-alert-card { padding:16px 20px;border-bottom:1px solid var(--border-light); }
+.doc-alert-card:last-child { border-bottom:none; }
+.doc-alert-card.escalation { background:#fffdf5;border-left:3px solid var(--amber); }
+.doc-alert-card.critical-done { opacity:.55; }
+.doc-alert-header { display:flex;align-items:flex-start;gap:10px;margin-bottom:8px; }
+.doc-alert-type { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px; }
+.doc-alert-type.amber { color:var(--amber); }
+.doc-alert-type.red { color:var(--red); }
+.doc-alert-patient { font-size:14px;font-weight:700;color:var(--ink);font-family:'Syne',sans-serif; }
+.doc-alert-meta { font-size:11px;color:var(--slate);margin-top:2px;line-height:1.5; }
+.doc-alert-time { margin-left:auto;font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap; }
+.doc-nudge-status { display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--amber-light);border:1px solid rgba(217,119,6,.2);border-radius:6px;font-size:10px;color:var(--amber);font-weight:600;margin-bottom:10px; }
+.doc-alert-actions { display:flex;gap:8px;margin-top:10px; }
+.doc-action-btn { padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s; }
+.doc-action-btn.primary { background:var(--teal);color:white; }
+.doc-action-btn.primary:hover { background:var(--teal-d); }
+.doc-action-btn.secondary { background:var(--white);border:1px solid var(--border);color:var(--slate); }
+.doc-action-btn.ghost { background:none;border:1px solid rgba(229,62,62,.2);color:var(--red);font-size:11px; }
+.doc-nudge-log { margin-top:8px;font-size:10px;color:var(--muted);line-height:1.8;padding:8px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px; }
+.doc-setup-row { display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border-light);gap:14px; }
+.doc-setup-row:last-child { border-bottom:none; }
+.doc-setup-label { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;width:130px;flex-shrink:0; }
+.doc-setup-value { font-size:13px;color:var(--ink);font-weight:500;flex:1; }
+.doc-setup-edit { font-size:11px;color:var(--teal);font-weight:600;cursor:pointer;background:none;border:1px solid rgba(0,184,156,.2);border-radius:5px;padding:3px 10px;font-family:'DM Sans',sans-serif; }
+.doc-routing-strip { margin:12px 20px 16px;padding:10px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border); }
+.doc-routing-label { font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px; }
+.doc-routing-chain { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
+.doc-routing-node { font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;white-space:nowrap; }
+.doc-routing-node.careloop { background:var(--teal-light);color:var(--teal-d); }
+.doc-routing-node.orchestrator { background:var(--amber-light);color:var(--amber); }
+.doc-routing-node.duty { background:var(--blue-light);color:var(--blue); }
+.doc-routing-node.doctor { background:var(--green-light);color:var(--green); }
+.doc-routing-arrow { font-size:10px;color:var(--muted); }
+.doc-routing-note { font-size:10px;color:var(--muted);margin-top:6px;font-style:italic; }
+.doc-more-row { padding:10px 20px;font-size:12px;color:var(--muted);border-top:1px solid var(--border-light); }
+.doc-status-option { display:flex;align-items:center;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;transition:background .1s; }
+.doc-status-option:hover { background:var(--bg); }
+.doc-section-divider { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin:20px 0 10px; display:flex; align-items:center; gap:10px; }
+.doc-section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.doc-resolved-row { padding:12px 0; display:flex; align-items:center; justify-content:space-between; opacity:.55; }
+.msg-thread-card { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:16px; box-shadow:var(--shadow); }
+.msg-thread-header { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.msg-thread-label { font-size:11px; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:1px; }
+.msg-thread-time { font-size:10px; color:var(--muted); font-weight:600; }
+.msg-thread-body { padding:16px 20px; }
+.msg-bubble-orchestrator { background:#f0f2f5; border-radius:4px 12px 12px 12px; padding:12px 14px; font-size:13px; line-height:1.7; color:var(--ink); margin-bottom:4px; position:relative; }
+.msg-bubble-orchestrator::before { content:''; position:absolute; top:0; left:-7px; border-right:7px solid #f0f2f5; border-top:7px solid transparent; }
+.msg-bubble-sender { font-size:10px; color:var(--muted); margin-bottom:14px; padding-left:2px; }
+.msg-reply-wrap { border-top:1px solid var(--border-light); padding-top:14px; }
+.msg-reply-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.msg-reply-box { width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--ink); resize:none; min-height:80px; outline:none; transition:border .15s; line-height:1.6; }
+.msg-reply-box:focus { border-color:var(--teal); }
+.msg-reply-actions { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.msg-reply-send { padding:8px 20px; background:var(--teal); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background .15s; }
+.msg-reply-send:hover { background:var(--teal-d); }
+.msg-wa-note { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.msg-reply-sent { display:none; padding:8px 12px; background:var(--green-light); border:1px solid rgba(22,163,74,.2); border-radius:8px; font-size:11px; color:var(--green); font-weight:600; margin-top:10px; }
+.role-switcher { display:flex; align-items:center; gap:0; background:var(--bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; font-size:11px; font-weight:600; }
+.role-btn { padding:5px 12px; cursor:pointer; background:transparent; border:none; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; color:var(--muted); transition:all .15s; white-space:nowrap; }
+.role-btn.active { background:var(--white); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.08); border-radius:6px; margin:2px; }
+.role-btn:hover:not(.active) { color:var(--slate); }
+.doc-role-banner { display:none; background:linear-gradient(90deg,rgba(37,99,235,.06) 0%,rgba(37,99,235,.02) 100%); border-bottom:1px solid rgba(37,99,235,.12); padding:8px 28px; font-size:11px; color:var(--blue); align-items:center; gap:8px; flex-shrink:0; }
+.doc-role-banner.visible { display:flex; }
+.wa-phone-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(13,27,42,.6); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.wa-phone-overlay.open { display:flex; }
+.wa-phone-wrap { position:relative; animation:phoneIn .35s cubic-bezier(.34,1.56,.64,1); }
+@keyframes phoneIn { from{opacity:0;transform:translateY(30px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+.wa-phone-close { position:absolute; top:-14px; right:-14px; width:30px; height:30px; border-radius:50%; background:white; border:none; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.2); z-index:10; }
+.wa-phone { width:310px; background:#111; border-radius:42px; padding:14px; box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.1); }
+.wa-phone-screen { background:#e8e0d8; border-radius:32px; overflow:hidden; }
+.wa-phone-statusbar { background:#075e54; padding:10px 16px 6px; display:flex; align-items:center; gap:8px; }
+.wa-phone-back { color:rgba(255,255,255,.7); font-size:16px; }
+.wa-phone-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#1d4ed8,#3b82f6); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; font-family:'Syne',sans-serif; }
+.wa-phone-contact { flex:1; }
+.wa-phone-contact-name { font-size:13px; font-weight:600; color:white; font-family:'DM Sans',sans-serif; }
+.wa-phone-contact-sub { font-size:10px; color:rgba(255,255,255,.6); font-family:'DM Sans',sans-serif; }
+.wa-phone-messages { padding:12px 10px; min-height:280px; display:flex; flex-direction:column; gap:8px; }
+.wa-incoming { background:#fff; border-radius:0 10px 10px 10px; padding:9px 11px; max-width:88%; font-size:12px; line-height:1.6; color:#111; font-family:'DM Sans',sans-serif; position:relative; box-shadow:0 1px 2px rgba(0,0,0,.1); }
+.wa-incoming::before { content:''; position:absolute; top:0; left:-7px; border-right:7px solid #fff; border-top:7px solid transparent; }
+.wa-time { font-size:10px; color:#999; text-align:right; margin-top:3px; }
+.wa-link-btn { display:block; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:7px; padding:8px 12px; margin-top:8px; font-size:11px; font-weight:600; color:#15803d; text-align:center; font-family:'DM Sans',sans-serif; }
+.wa-notification-banner { background:rgba(7,94,84,.95); margin:8px; border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:10px; font-family:'DM Sans',sans-serif; }
+.wa-notif-icon { width:36px; height:36px; border-radius:8px; background:#25d366; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.wa-notif-text { flex:1; }
+.wa-notif-app { font-size:10px; color:rgba(255,255,255,.6); margin-bottom:1px; }
+.wa-notif-title { font-size:12px; font-weight:600; color:white; }
+.wa-notif-body { font-size:11px; color:rgba(255,255,255,.7); }
+.wa-demo-label { text-align:center; margin-top:16px; font-size:11px; color:rgba(255,255,255,.5); font-family:'DM Sans',sans-serif; }
 </style>
 </head>
 <body>
@@ -623,10 +798,10 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-text">Care<span>Loop</span></div>
-    <div class="logo-sub">Al-Hilal Hospital · OPD Care</div>
+    <div class="logo-sub">American Hospital Dubai · OPD Care</div>
   </div>
 
-  <div class="sidebar-section">
+  <div class="sidebar-section" id="sidebar-orchestrator">
     <div class="sidebar-section-label">Care Orchestrator</div>
     <div class="nav-item active" onclick="showScreen('queue')">
       <span class="nav-icon">⚡</span> Priority Queue
@@ -634,14 +809,22 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
     </div>
   </div>
 
-  <div class="sidebar-section">
+  <div class="sidebar-section" id="sidebar-clinical" style="display:none;">
+    <div class="sidebar-section-label">Clinical</div>
+    <div class="nav-item" onclick="showScreen('doctor')">
+      <span class="nav-icon">👨‍⚕️</span> Doctor View
+      <span class="nav-badge teal" id="doctor-alert-badge" style="display:none;">1</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="sidebar-executive">
     <div class="sidebar-section-label">Executive</div>
     <div class="nav-item" onclick="showScreen('exec')">
       <span class="nav-icon">📊</span> Revenue Dashboard
     </div>
   </div>
 
-  <div class="sidebar-section">
+  <div class="sidebar-section" id="sidebar-settings">
     <div class="sidebar-section-label">Settings</div>
     <div class="nav-item" onclick="showScreen('notifications')">
       <span class="nav-icon">💬</span> Notification Templates
@@ -668,17 +851,24 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
   <!-- TOPBAR -->
   <div class="topbar">
     <span class="topbar-title" id="topbar-title">CareLoop</span>
-    <span class="topbar-sub" id="topbar-sub">Al-Hilal Hospital · OPD Care</span>
+    <span class="topbar-sub" id="topbar-sub">American Hospital Dubai · OPD Care</span>
     <div class="topbar-right">
       <div id="hmis-status" style="display:flex;align-items:center;gap:6px;padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;" onclick="window.open('/hmis.html','hmis-tab')"><span style="width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block;"></span> HMIS · Open Prescription</div>
       <button id="demo-btn" onclick="runPrescriptionDemo()" style="padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)';" onmouseout="this.style.borderColor='#d1d5db';this.style.color='var(--muted)';">Demo: New Prescription</button>
+      <div style="width:1px;height:20px;background:var(--border);"></div>
+      <button id="role-toggle-btn" onclick="switchRole(document.getElementById('role-toggle-btn').dataset.role === 'orchestrator' ? 'doctor' : 'orchestrator')" data-role="orchestrator" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--slate);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;">
+        <span id="role-toggle-dot" style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;"></span>
+        <span id="role-toggle-label">Orchestrator</span>
+      </button>
     </div>
   </div>
 
   <!-- SAFEGUARD BANNER -->
-  <div class="safeguard-bar">
+  <div class="safeguard-bar" id="safeguard-bar">
     CareLoop surfaces information to support your decisions. All suggestions must be reviewed before any action is taken. CareLoop does not make clinical decisions. All actions are logged with timestamp and user ID for HAAD/DHA audit purposes.
   </div>
+
+
 
   <div class="content">
 
@@ -713,7 +903,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         <div class="queue-row" data-status="critical" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;" onclick="showDetail('marcus')">
           <div class="risk-dot red"></div>
           <div>
-            <div class="patient-name">Ahmed Al-Rashidi</div>
+            <div class="patient-name">Zayn Al-Rashidi</div>
             <div class="patient-meta">MRN 40821 · Daman · 52y · Arabic</div>
           </div>
           <div><span class="episode-tag both">OPD · Acute + Chronic</span></div>
@@ -725,23 +915,23 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <span class="action-tag escalate">Escalate</span>
         </div>
 
-        <!-- Row 2 -->
-        <div class="queue-row" data-status="critical" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;" onclick="showDetail('fatima')">
+        <!-- Row 2 — Nora -->
+        <div class="queue-row" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;" data-status="critical" onclick="showDetail('nora')">
           <div class="risk-dot red"></div>
           <div>
-            <div class="patient-name">Fatima Al-Zahrawi</div>
-            <div class="patient-meta">MRN 38204 · ADNIC · 34y · Arabic</div>
+            <div class="patient-name">Nora Al-Ansari</div>
+            <div class="patient-meta">MRN 44201 · Daman · 38y · Arabic</div>
           </div>
           <div><span class="episode-tag acute">OPD Acute</span></div>
           <div class="action-pending">
-            <strong>Doctor not notified</strong>
-            X-ray result ready · Appt tomorrow
+            <strong>Critical result flag received</strong>
+            Auto-notified patient + doctor · Mar 28
           </div>
-          <div class="days-badge soon">Appt in 18hrs</div>
-          <span class="action-tag call">Call Now</span>
+          <div class="days-badge" style="background:var(--red-light);color:var(--red);border:1px solid rgba(229,62,62,.2);">Auto-acted</div>
+          <span class="action-tag" style="background:var(--red-light);color:var(--red);border:1px solid rgba(229,62,62,.15);font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Review Audit</span>
         </div>
 
-        <!-- Row 3 -->
+        <!-- Row 4 -->
         <div class="queue-row" data-status="watch" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px;" onclick="showDetail('khalid')">
           <div class="risk-dot amber"></div>
           <div>
@@ -814,13 +1004,13 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             <div class="patient-header">
               <div class="patient-big-avatar" id="d-initials">AA</div>
               <div style="flex:1;">
-                <h2 id="d-name">Ahmed Al-Rashidi</h2>
+                <h2 id="d-name">Zayn Al-Rashidi</h2>
                 <div class="info-grid">
                   <div class="info-item"><label>MRN</label><span id="d-mrn">40821</span></div>
                   <div class="info-item"><label>Age</label><span id="d-age">52 years</span></div>
                   <div class="info-item"><label>Phone</label><span id="d-phone">+971 50 XXX XXXX</span></div>
                   <div class="info-item"><label>Insurance</label><span id="d-insurance">Daman · Basic Network</span></div>
-                  <div class="info-item"><label>Consultant</label><span id="d-consultant">Dr. Khalid Al-Hamdan</span></div>
+                  <div class="info-item"><label>Consultant</label><span id="d-consultant">Dr. Sam Willis</span></div>
                   <div class="info-item"><label>Next of Kin</label><span id="d-nok">Omar Al-Rashidi (son)</span></div>
                 </div>
               </div>
@@ -833,10 +1023,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
               <span id="d-episode-badge" style="background:var(--red-light);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;">2 simultaneous · Monitor closely</span>
             </div>
             <div class="episode-cards" id="d-episodes"></div>
-            <div id="d-complexity-flag" style="margin-top:12px;padding:10px 14px;background:#fdf4ff;border-radius:8px;border-left:3px solid #7c3aed;">
-              <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">⚠ Care Complexity Flag</div>
-              <div style="font-size:12px;color:var(--slate);">Patient managing 2 simultaneous episodes. Dropout risk is elevated. Orchestrator check-in recommended before Day 10.</div>
-            </div>
           </div>
 
           <!-- Engagement Timeline — Dual Track -->
@@ -874,7 +1060,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <!-- AI Suggestion + Numbered Validation Steps -->
           <div class="ai-suggestion-strip">
             <div class="ai-suggestion-label">Suggested action</div>
-            <div class="ai-suggestion-body" id="d-ai-suggestion">Call Ahmed — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.</div>
+            <div class="ai-suggestion-body" id="d-ai-suggestion">Call Zayn — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.</div>
           </div>
 
           <!-- 3-Step Validation Flow -->
@@ -906,7 +1092,14 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
               <span class="action-btn-icon">🔺</span>
               <div class="action-btn-text">
                 <div class="action-btn-label">Escalate to Doctor</div>
-                <div class="action-btn-sub" id="d-escalate-sub">Send to Dr. Al-Hamdan — clinical review needed</div>
+                <div class="action-btn-sub" id="d-escalate-sub">Send to Dr. Sam Willis — clinical review needed</div>
+              </div>
+            </button>
+            <button class="action-btn" id="nudge-doctor-btn" style="background:var(--amber-light);border:1px solid rgba(217,119,6,.2);color:var(--amber);margin-top:6px;display:none;" onclick="sendNudge()">
+              <span class="action-btn-icon">📳</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Nudge Doctor</div>
+                <div class="action-btn-sub" id="nudge-doctor-sub">Send reminder · No response yet</div>
               </div>
             </button>
             <button class="action-btn barrier" onclick="showModal('barrier')" style="margin-top:6px;">
@@ -919,6 +1112,14 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
             <div style="height:1px;background:var(--border);margin:12px 0;"></div>
 
+            <button class="action-btn" style="background:var(--green-light);border:1px solid rgba(22,163,74,.2);color:var(--green);margin-bottom:6px;" onclick="showScreen('close-episode')">
+              <span class="action-btn-icon">✅</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Close Episode</div>
+                <div class="action-btn-sub">All care items complete · Record outcome</div>
+              </div>
+            </button>
+
             <button class="abandoned-btn" onclick="showModal('abandon')">
               <span style="font-size:14px;">🚩</span>
               <div>
@@ -930,6 +1131,480 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
         </div>
       </div>
+    </div>
+
+    <!-- ══════ SCREEN: NORA DETAIL ══════ -->
+    <div class="screen" id="screen-detail-nora">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <button onclick="showScreen('queue')" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--slate);">← Back to Queue</button>
+        <span style="font-size:13px;color:var(--muted);">Patient Detail</span>
+      </div>
+
+      <div class="detail-layout">
+        <div class="detail-main">
+
+          <!-- PATIENT IDENTITY -->
+          <div class="detail-card">
+            <div class="patient-header">
+              <div class="patient-big-avatar" style="background:linear-gradient(135deg,#16a34a,#22c55e);">NA</div>
+              <div style="flex:1;">
+                <h2>Nora Al-Ansari</h2>
+                <div class="info-grid">
+                  <div class="info-item"><label>MRN</label><span>44201</span></div>
+                  <div class="info-item"><label>Age</label><span>38 years</span></div>
+                  <div class="info-item"><label>Phone</label><span>+971 55 XXX XXXX</span></div>
+                  <div class="info-item"><label>Insurance</label><span>Daman · Enhanced</span></div>
+                  <div class="info-item"><label>Consultant</label><span>Dr. Layla Al-Rashid</span></div>
+                  <div class="info-item"><label>Next of Kin</label><span>Khalid Al-Ansari (husband)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIVE EPISODE -->
+          <div class="detail-card">
+            <div class="detail-card-title">⚡ Active OPD Episode</div>
+            <div class="ep-card acute">
+              <div class="ep-card-type">OPD Acute · Day 3 of 14</div>
+              <div class="ep-card-name">Chest Infection</div>
+              <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;margin-bottom:6px;">ICD-10: J06.9 · Acute upper respiratory infection</div>
+              <div class="ep-card-progress"><div class="ep-card-fill" style="width:21%;"></div></div>
+              <div class="ep-card-meta">Dr. Al-Rashid · Started Mar 26 · Follow-up Apr 4</div>
+              <div class="ep-action-row">
+                <div class="ep-action-icon done">✓</div>
+                <span class="ep-action-text">Metformin 500mg — Day 2 confirmed · 100% adherence</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:5px 10px;background:var(--green-light);border-radius:6px;">
+                <span style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;">Medication adherence</span>
+                <div style="flex:1;height:5px;background:#dcfce7;border-radius:3px;"><div style="height:100%;width:100%;background:var(--green);border-radius:3px;"></div></div>
+                <span style="font-size:11px;font-weight:700;color:var(--green);">100%</span>
+              </div>
+              <div class="ep-action-row">
+                <div class="ep-action-icon done">✓</div>
+                <span class="ep-action-text">Chest X-ray — completed Mar 28 · American Hospital Dubai Radiology</span>
+              </div>
+              <div class="ep-action-row">
+                <div class="ep-action-icon pending">⏳</div>
+                <span class="ep-action-text">Follow-up Apr 4 · 10:00 AM — pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ENGAGEMENT TIMELINE -->
+          <div class="detail-card" style="padding:0;overflow:hidden;">
+            <div style="padding:16px 20px 12px;">
+              <div class="detail-card-title" style="margin-bottom:14px;">
+                📋 Engagement Timeline
+                <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:4px;">— click any event to see the message sent</span>
+              </div>
+
+              <!-- 5-step progress strip -->
+              <div class="tl-progress-strip">
+                <div class="tl-pi-step done">
+                  <div class="tl-pi-dot">✓</div>
+                  <div><div class="tl-pi-label">Care plan<br>sent</div></div>
+                </div>
+                <div class="tl-pi-connector done"></div>
+                <div class="tl-pi-step done">
+                  <div class="tl-pi-dot">✓</div>
+                  <div><div class="tl-pi-label">Meds<br>confirmed</div></div>
+                </div>
+                <div class="tl-pi-connector done"></div>
+                <div class="tl-pi-step done">
+                  <div class="tl-pi-dot">✓</div>
+                  <div><div class="tl-pi-label">Appt<br>confirmed</div></div>
+                </div>
+                <div class="tl-pi-connector"></div>
+                <div class="tl-pi-step crit">
+                  <div class="tl-pi-dot">!</div>
+                  <div><div class="tl-pi-label">Critical<br>alert fired</div></div>
+                </div>
+                <div class="tl-pi-connector"></div>
+                <div class="tl-pi-step pend">
+                  <div class="tl-pi-dot">○</div>
+                  <div><div class="tl-pi-label">Follow-up<br>Apr 4</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TRACK HEADER -->
+            <div class="tl-track-header acute-header" style="border-radius:0;cursor:default;">
+              <div>
+                <div class="tl-track-label">🟠 Acute · Chest Infection</div>
+                <div class="tl-track-sub">Day 3 · Mar 26 – Apr 9 · Dr. Al-Rashid</div>
+              </div>
+              <span style="font-size:10px;background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:4px;font-weight:700;">🔴 Critical alert · Mar 28 · 11:00am</span>
+            </div>
+
+            <!-- Timeline events -->
+            <div style="background:white;">
+
+              <!-- EVENT 1: Care plan -->
+              <div style="display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border-light);">
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--muted);font-weight:600;line-height:1.4;">Mar 26<br>3:30pm</div>
+                <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--teal);flex-shrink:0;"></div>
+                  <div style="width:1px;background:var(--border);flex:1;margin-top:3px;"></div>
+                </div>
+                <div style="flex:1;padding:11px 0 11px 8px;">
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    WhatsApp — Care plan delivered · Episode started
+                    <button class="tl-xbtn" onclick="toggleTlPanel('nora-ev1')">▼ Message</button>
+                  </div>
+                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--green-light);color:var(--green);">Opened · Read 3:34pm</span>
+                  <div class="tl-wa-panel" id="nora-ev1">
+                    <div class="tl-wa-screen">
+                      <div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div>
+                      <div class="tl-wa-bub">
+                        Hi Nora 👋 Dr. Al-Rashid has shared your care plan.<br><br>
+                        💊 <strong>Metformin 500mg</strong> · twice daily with food<br>
+                        🧪 <strong>HbA1c blood test</strong> · due within 7 days<br>
+                        🏥 <strong>Chest X-ray</strong> · Radiology · due Mar 28<br>
+                        📅 <strong>Follow-up</strong> · Apr 4 · 10:00 AM<br><br>
+                        I'll be with you every step 💚
+                        <div class="tl-wa-time">3:30 PM ✓✓</div>
+                      </div>
+                      <div class="tl-wa-btn" style="display:block;background:white;border:1px solid #d0e8d0;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:600;color:#128c7e;text-align:center;margin-top:6px;">See Consultation Summary →</div>
+                    </div>
+                    <div class="tl-wa-note">Sent automatically 30 mins after consultation · Opened and read within 4 mins</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EVENT 2: Medication reminder -->
+              <div style="display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border-light);">
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--muted);font-weight:600;line-height:1.4;">Mar 27<br>8:00am</div>
+                <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--teal);flex-shrink:0;"></div>
+                  <div style="width:1px;background:var(--border);flex:1;margin-top:3px;"></div>
+                </div>
+                <div style="flex:1;padding:11px 0 11px 8px;">
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    WhatsApp — Medication reminder · Metformin 500mg
+                    <button class="tl-xbtn" onclick="toggleTlPanel('nora-ev2')">▼ Message</button>
+                  </div>
+                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--green-light);color:var(--green);">Replied: "I took the medicine" · 8:12am</span>
+                  <div class="tl-wa-panel" id="nora-ev2">
+                    <div class="tl-wa-screen">
+                      <div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div>
+                      <div class="tl-wa-bub">
+                        Nora, time for your recovery boost 💊<br>
+                        <strong>Metformin 500mg</strong> (1 tab) · Best taken with food 🍽
+                        <div class="tl-wa-time">8:00 AM ✓✓</div>
+                      </div>
+                      <div class="tl-wa-btns">
+                        <div class="tl-wa-btn" style="color:#16a34a;">Mark as taken ✓</div>
+                        <div class="tl-wa-btn">Remind me 15 mins</div>
+                      </div>
+                      <div class="tl-wa-bub out" style="margin-top:8px;">
+                        I took the medicine
+                        <div class="tl-wa-time">8:12 AM ✓✓</div>
+                      </div>
+                    </div>
+                    <div class="tl-wa-note">Daily reminder · Reply logged · Adherence updated to Day 2 confirmed</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EVENT 3: Appointment confirmation -->
+              <div style="display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border-light);">
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--muted);font-weight:600;line-height:1.4;">Mar 27<br>9:00am</div>
+                <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--teal);flex-shrink:0;"></div>
+                  <div style="width:1px;background:var(--border);flex:1;margin-top:3px;"></div>
+                </div>
+                <div style="flex:1;padding:11px 0 11px 8px;">
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    WhatsApp — X-ray appointment reminder
+                    <button class="tl-xbtn" onclick="toggleTlPanel('nora-ev3')">▼ Message</button>
+                  </div>
+                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--green-light);color:var(--green);">Replied: "Confirmed" · 9:05am · Appointment locked</span>
+                  <div class="tl-wa-panel" id="nora-ev3">
+                    <div class="tl-wa-screen">
+                      <div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div>
+                      <div class="tl-wa-bub">
+                        Nora, your <strong>Chest X-ray</strong> is due by tomorrow Mar 28 🏥<br><br>
+                        📍 Radiology Dept · 2nd Floor · American Hospital Dubai<br>
+                        🕐 Any time 8am – 4pm<br><br>
+                        Can you confirm your appointment?
+                        <div class="tl-wa-time">9:00 AM ✓✓</div>
+                      </div>
+                      <div class="tl-wa-btns">
+                        <div class="tl-wa-btn" style="color:#16a34a;">Confirm ✓</div>
+                        <div class="tl-wa-btn">Reschedule</div>
+                      </div>
+                      <div class="tl-wa-bub out" style="margin-top:8px;">
+                        Confirmed
+                        <div class="tl-wa-time">9:05 AM ✓✓</div>
+                      </div>
+                    </div>
+                    <div class="tl-wa-note">Appointment arrangement triggered from prescription · Patient confirmed · Care item updated</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EVENT 4: Lab done, HMIS flags CRITICAL -->
+              <div style="display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border-light);">
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--muted);font-weight:600;line-height:1.4;">Mar 28<br>10:52am</div>
+                <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+                  <div style="width:1px;background:#fca5a5;flex:1;margin-top:3px;"></div>
+                </div>
+                <div style="flex:1;padding:11px 0 11px 8px;">
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);">X-ray completed · Result uploaded · HMIS flagged CRITICAL</div>
+                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--green-light);color:var(--green);">Result received · Critical flag sent to CareLoop</span>
+                </div>
+              </div>
+
+              <!-- EVENT 5: CRITICAL — always open -->
+              <div class="tl-crit-row" style="display:flex;gap:0;padding:0 14px;">
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--red);font-weight:700;line-height:1.4;">Mar 28<br>11:00am</div>
+                <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;animation:tl-pulse 1.5s infinite;"></div>
+                </div>
+                <div style="flex:1;padding:11px 0 11px 8px;">
+                  <div style="font-size:12px;font-weight:600;color:var(--red);">🔴 Critical result flag received — CareLoop auto-acted</div>
+                  <div class="tl-crit-detail">
+                    <div class="tl-auto-rows">
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Patient notified via WhatsApp — urgent action required <span class="tl-ts">11:00am · Auto</span></div>
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Dr. Al-Rashid alerted via WhatsApp — review in HMIS <span class="tl-ts">11:00am · Auto</span></div>
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> HAAD/DHA audit trail created — timestamped <span class="tl-ts">11:00am · Auto</span></div>
+                    </div>
+                    <div class="tl-resp-bar">No orchestrator action required · <strong>47 seconds from flag to notification</strong> · No ministry complaint possible</div>
+                    <button class="tl-see-msgs" onclick="toggleTlPanel('nora-crit-msgs')">▼ See messages sent</button>
+                    <div class="tl-wa-panel" id="nora-crit-msgs">
+                      <div class="tl-crit-pair">
+                        <div class="tl-crit-card">
+                          <div class="tl-crit-lbl p">→ Sent to patient</div>
+                          <div class="tl-crit-bub">
+                            Nora, your test result requires <strong>urgent attention</strong>.<br><br>
+                            Please contact American Hospital Dubai immediately:<br>
+                            📞 +971 4 XXX XXXX<br><br>
+                            Dr. Al-Rashid has been informed.
+                          </div>
+                          <div class="tl-crit-ts">Mar 28 · 11:00am · Auto · No human action</div>
+                        </div>
+                        <div class="tl-crit-card">
+                          <div class="tl-crit-lbl d">→ Sent to doctor</div>
+                          <div class="tl-crit-bub doc">
+                            <strong>URGENT — Critical result</strong><br><br>
+                            Nora Al-Ansari · MRN 44201<br>
+                            Critical flag received from Radiology.<br>
+                            Please review in HMIS immediately.<br>
+                            Patient has been notified.
+                            <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(59,130,246,.15);font-size:10px;color:#3b82f6;font-weight:600;">
+                              → Tap to review in CareLoop:<br>
+                              <span style="text-decoration:underline;color:#2563eb;">careloop.medinous.com/doctor/alert/nora-44201</span>
+                            </div>
+                          </div>
+                          <div class="tl-crit-ts">Mar 28 · 11:00am · Auto · No human action</div>
+                        </div>
+                      </div>
+                      <div class="tl-audit-strip">
+                        🔒 Result value stays in HMIS · CareLoop never read the clinical data
+                        <span class="tl-resp-badge">47 sec response</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="action-panel">
+
+          <!-- CRITICAL AUTO-ACTED BANNER -->
+          <div class="crit-auto-banner">
+            <div class="crit-auto-banner-title"><div class="crit-auto-dot"></div> Critical result — auto-acted</div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Patient notified <span class="crit-auto-ts">11:00am</span></div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Doctor alerted <span class="crit-auto-ts">11:00am</span></div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Audit trail logged <span class="crit-auto-ts">11:00am</span></div>
+            <div class="crit-auto-footer"><strong>47 seconds</strong> · No orchestrator action required</div>
+          </div>
+
+          <!-- RISK SCORE -->
+          <div class="action-card">
+            <div class="action-card-title">Care Gap Risk</div>
+            <div class="risk-score-ring" style="background:conic-gradient(var(--amber) 0% 62%, var(--bg) 62%);">
+              <div class="risk-score-inner">
+                <div class="risk-score-num" style="color:var(--amber);">62</div>
+                <div class="risk-score-label">/ 100</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:11px;font-weight:700;color:var(--amber);margin-bottom:12px;">Medium · Critical alert auto-acted</div>
+            <div class="risk-factors">
+              <div class="risk-reason-row">
+                <div class="risk-reason-dot red"></div>
+                <div class="risk-reason-label">Critical result received</div>
+                <span class="risk-reason-tag red">HMIS flag · Mar 28</span>
+              </div>
+              <div class="risk-reason-row">
+                <div class="risk-reason-dot amber"></div>
+                <div class="risk-reason-label">Follow-up in 7 days</div>
+                <span class="risk-reason-tag amber">Apr 4 · 10:00 AM</span>
+              </div>
+            </div>
+            <div style="margin-top:10px;padding:8px 10px;background:#f0f9ff;border-radius:6px;border:1px solid #bae6fd;font-size:10px;color:#0369a1;line-height:1.5;">◈ Engagement patterns + HMIS status flags. Not a clinical assessment.</div>
+          </div>
+
+          <!-- AI SUGGESTION -->
+          <div class="ai-suggestion-strip">
+            <div class="ai-suggestion-label">Suggested action</div>
+            <div class="ai-suggestion-body">Critical alert has been auto-sent to patient and doctor. Monitor for doctor response and patient acknowledgement. No immediate action required from orchestrator.</div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="action-card">
+            <div class="action-card-title">Take Action</div>
+            <button class="action-btn whatsapp" onclick="showModal('whatsapp')" style="margin-bottom:6px;">
+              <span class="action-btn-icon">💬</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Send WhatsApp</div>
+                <div class="action-btn-sub">Follow up on critical alert</div>
+              </div>
+            </button>
+            <button class="action-btn call" onclick="showModal('call')" style="margin-bottom:6px;">
+              <span class="action-btn-icon">📞</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Call Patient</div>
+                <div class="action-btn-sub">+971 55 XXX XXXX</div>
+              </div>
+            </button>
+            <button class="action-btn mark" onclick="showModal('mark')" style="margin-bottom:6px;">
+              <span class="action-btn-icon">✅</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Log Outcome</div>
+                <div class="action-btn-sub">Mark care item complete</div>
+              </div>
+            </button>
+            <button class="action-btn escalate" onclick="showScreen('escalation-form')">
+              <span class="action-btn-icon">🔺</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Escalate to Doctor</div>
+                <div class="action-btn-sub">Send to Dr. Al-Rashid — if no response</div>
+              </div>
+            </button>
+
+            <div style="height:1px;background:var(--border);margin:12px 0;"></div>
+
+            <button class="action-btn" style="background:var(--green-light);border:1px solid rgba(22,163,74,.2);color:var(--green);margin-bottom:6px;" onclick="showScreen('close-episode')">
+              <span class="action-btn-icon">✅</span>
+              <div class="action-btn-text">
+                <div class="action-btn-label">Close Episode</div>
+                <div class="action-btn-sub">All care items complete · Record outcome</div>
+              </div>
+            </button>
+
+            <button class="abandoned-btn" onclick="showModal('abandon')">
+              <span style="font-size:14px;">🚩</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;">Close Episode — Unresolved</div>
+                <div style="font-size:10px;margin-top:1px;">Patient unreachable · Log reason and close</div>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SCREEN: DOCTOR VIEW ══════ -->
+    <div class="screen" id="screen-doctor">
+
+      <!-- DOCTOR HEADER -->
+      <div style="background:linear-gradient(135deg,#0d1b2a 0%,#1a2f45 100%);border:none;border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:0 4px 20px rgba(13,27,42,.15);">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;font-family:'Syne',sans-serif;flex-shrink:0;">SW</div>
+          <div style="flex:1;">
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:white;">Dr. Sam Willis</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">Pulmonology · American Hospital Dubai</div>
+          </div>
+          <div style="position:relative;">
+            <button id="doc-status-btn" onclick="toggleDocStatus()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--green-light);border:1px solid rgba(22,163,74,.2);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+              <span id="doc-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>
+              <span id="doc-status-label">Available</span> ▾
+            </button>
+            <div id="doc-status-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--white);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:200px;z-index:100;box-shadow:var(--shadow-md);">
+              <div class="doc-status-option" data-color="var(--green)" data-bg="var(--green-light)" data-border="rgba(22,163,74,.2)" onclick="setDocStatus(this,'Available','Alerts come to you directly')">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:8px;"></span>Available
+                <span style="color:var(--muted);font-size:10px;margin-left:auto;">alerts come to me</span>
+              </div>
+              <div class="doc-status-option" data-color="var(--amber)" data-bg="var(--amber-light)" data-border="rgba(217,119,6,.2)" onclick="setDocStatus(this,'In Clinic','Urgent only — routine held')">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block;margin-right:8px;"></span>In Clinic
+                <span style="color:var(--muted);font-size:10px;margin-left:auto;">urgent only</span>
+              </div>
+              <div class="doc-status-option" data-color="var(--red)" data-bg="var(--red-light)" data-border="rgba(229,62,62,.2)" onclick="setDocStatus(this,'In Surgery','All alerts go to duty doctor')">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;margin-right:8px;"></span>In Surgery
+                <span style="color:var(--muted);font-size:10px;margin-left:auto;">duty Dr. covers</span>
+              </div>
+              <div class="doc-status-option" data-color="var(--muted)" data-bg="var(--bg)" data-border="var(--border)" onclick="setDocStatus(this,'Off Call','Dr. Omar Farouq covering')">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:8px;"></span>Off Call
+                <span style="color:var(--muted);font-size:10px;margin-left:auto;">Dr. Omar Farouq</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="showDoctorSetup()" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">⚙️</button>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:rgba(255,255,255,.3);display:flex;align-items:center;gap:6px;">
+          🔒 American Hospital Dubai · HAAD/DHA compliant · All alerts logged with timestamp
+        </div>
+      </div>
+
+      <!-- COVERAGE BANNER -->
+      <div id="coverage-banner" style="display:none;background:var(--amber-light);border:1px solid rgba(217,119,6,.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔄 Coverage transferred</div>
+            <div style="font-size:12px;color:var(--ink);font-weight:500;">Dr. Omar Farouq is handling your alerts.</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="coverage-time">Active since — · All actions logged under his name</div>
+          </div>
+          <button id="duty-view-btn" onclick="switchToDutyView()" style="padding:7px 14px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;color:var(--slate);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;margin-left:16px;">Switch to Duty Doctor View</button>
+        </div>
+      </div>
+
+      <!-- MESSAGE THREAD -->
+      <div class="msg-thread-card" style="border-left:3px solid var(--amber);">
+        <div class="msg-thread-header">
+          <div class="msg-thread-label">🔺 Escalation from Fatima Hassan</div>
+          <div class="msg-thread-time">Mar 9 · 8:44am · Unread</div>
+        </div>
+        <div class="msg-thread-body" style="padding:20px 24px;">
+          <div class="msg-bubble-orchestrator" style="background:#f5f4f2;border-left:3px solid #d1cec9;border-radius:0 12px 12px 12px;">
+            Dr. Sam Willis,<br><br>
+            Zayn Al-Rashidi (MRN 40821) reported <strong>nausea and dizziness after each dose of Azithromycin 500mg</strong> during his wellbeing check on March 2 (Day 3 of his 10-day course).<br><br>
+            Requesting your guidance:<br>
+            Should he continue the medication given the reported side effects?
+          </div>
+          <div class="msg-bubble-sender" style="display:flex;align-items:center;gap:6px;"><span style="width:18px;height:18px;border-radius:50%;background:var(--teal);color:white;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">FH</span> Fatima Hassan · Care Orchestrator · American Hospital Dubai · Mar 9 · 8:44am</div>
+          <div class="msg-reply-wrap" style="border-top:1px solid var(--border);padding-top:16px;">
+            <div class="msg-reply-label">Your reply to Fatima Hassan</div>
+            <textarea class="msg-reply-box" id="doc-reply-box" placeholder="Type your clinical guidance here..." style="min-height:96px;"></textarea>
+            <div class="msg-reply-actions">
+              <div class="msg-wa-note">💬 Or reply directly on WhatsApp · message already on your phone</div>
+              <button class="msg-reply-send" onclick="sendDocReply()" style="padding:10px 24px;font-size:13px;">Send guidance →</button>
+            </div>
+            <div class="msg-reply-sent" id="doc-reply-sent">✓ Reply sent to Fatima Hassan · Logged to HAAD audit trail · <span id="doc-reply-time"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EARLIER TODAY -->
+      <div class="doc-section-divider">Earlier today</div>
+      <div style="padding:12px 0;opacity:.55;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">🔴 Critical result — acknowledged</div>
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">Nora Al-Ansari</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">MRN 44201 · Critical flag from Radiology · Patient notified 11:00am</div>
+          </div>
+          <div style="color:var(--green);font-size:11px;font-weight:700;white-space:nowrap;margin-left:12px;">✓ Done · 11:08am</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ══════ SCREEN: CLOSE EPISODE ══════ -->
@@ -948,7 +1623,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             <div style="flex:1;">
               <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:4px;">Sara Al-Zaabi</div>
               <div class="patient-tags">
-                <span class="patient-tag dept">Pulmonology · Dr. Al-Hamdan</span>
+                <span class="patient-tag dept">Pulmonology · Dr. Sam Willis</span>
                 <span class="patient-tag lang">Arabic</span>
                 <span style="font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">MSH</span>
               </div>
@@ -988,7 +1663,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             <div class="close-check-row" id="sara-followup-check">
               <span class="close-check-icon" id="sara-followup-icon">⏳</span>
               <div style="flex:1;">
-                <strong>Follow-up appointment — Dr. Al-Hamdan</strong>
+                <strong>Follow-up appointment — Dr. Sam Willis</strong>
                 <div style="font-size:10px;margin-top:2px;" id="sara-followup-sub">Scheduled Mar 12 · 10:00 AM · Awaiting attendance</div>
               </div>
               <span class="lifecycle-badge" id="sara-followup-badge" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">Pending</span>
@@ -1065,7 +1740,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         <div class="inbox-row unread" onclick="showScreen('detail')">
           <div class="inbox-unread-dot"></div>
           <div>
-            <div class="inbox-patient">Ahmed Al-Rashidi
+            <div class="inbox-patient">Zayn Al-Rashidi
               <span style="background:var(--red-light);color:var(--red);font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;">⚡ NEEDS ACTION</span>
             </div>
             <div class="inbox-msg">"<strong>Chest still very tight. Not feeling better at all.</strong> Can someone call me?"</div>
@@ -1079,7 +1754,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <div class="inbox-unread-dot"></div>
           <div>
             <div class="inbox-patient">Sara Al-Zaabi</div>
-            <div class="inbox-msg">"<strong>Done! Just finished my follow-up with Dr. Al-Hamdan.</strong> All good, shukran 🙏"</div>
+            <div class="inbox-msg">"<strong>Done! Just finished my follow-up with Dr. Sam Willis.</strong> All good, shukran 🙏"</div>
             <div class="inbox-episode">Acute · Upper Respiratory · Day 10 · Via WhatsApp</div>
           </div>
           <div class="inbox-meta">08:18 AM<br><span style="color:var(--teal);font-weight:700;">Unread</span></div>
@@ -1141,16 +1816,16 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
       <div class="escalation-form">
         <div class="detail-card" style="margin-bottom:16px;">
-          <div class="detail-card-title">🔺 Escalation Note — Ahmed Al-Rashidi</div>
+          <div class="detail-card-title">🔺 Escalation Note — Zayn Al-Rashidi</div>
 
           <div class="esc-to-row">
             <div>
               <div class="esc-to-label">Escalating to</div>
-              <div class="esc-to-doctor">Dr. Khalid Al-Hamdan · Pulmonology</div>
+              <div class="esc-to-doctor">Dr. Sam Willis · Pulmonology</div>
             </div>
             <div style="margin-left:auto;text-align:right;">
               <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Department</div>
-              <div style="font-size:12px;font-weight:600;color:var(--ink);">Pulmonology · Al-Hilal Hospital</div>
+              <div style="font-size:12px;font-weight:600;color:var(--ink);">Pulmonology · American Hospital Dubai</div>
             </div>
           </div>
 
@@ -1159,7 +1834,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
               <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⚠ Reason for Escalation</div>
               <div style="font-size:12px;color:var(--ink);line-height:1.7;">Patient reported <strong>nausea and dizziness after each dose of Azithromycin</strong> — received via WhatsApp wellbeing check on Mar 2 · 8:07pm (Day 3 of medication course).<br>CBC blood test is <strong>5 days overdue</strong> with follow-up on March 14 · 10:30 AM in 5 days. 5 contact attempts made — no response.<br>Doctor input needed: (1) review medication reaction, (2) advise whether to proceed with appointment without lab result.</div>
             </div>
-            <div class="esc-summary-row"><label>Patient</label><span>Ahmed Al-Rashidi · MRN 40821</span></div>
+            <div class="esc-summary-row"><label>Patient</label><span>Zayn Al-Rashidi · MRN 40821</span></div>
             <div class="esc-summary-row"><label>Episode</label><span>Acute: Chest Infection · Day 9 of 14</span></div>
             <div class="esc-summary-row"><label>Care Gap</label><span>CBC (Al Noor Lab, Khalidiyah) — 5 days overdue</span></div>
             <div class="esc-summary-row"><label>Next Appointment</label><span>March 14, 2026 · 10:30 AM · Pulmonology OPD</span></div>
@@ -1175,16 +1850,21 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <div class="ai-note-label">AI-drafted message — review and edit before sending</div>
           <div class="ai-note-hint">This message was composed by CareLoop from episode data. It may be incomplete or inaccurate. Edit it to reflect your own judgement before sending.</div>
           <div style="margin-bottom:12px;">
-            <textarea class="esc-note-field" id="esc-note-field">Dr. Al-Hamdan,
+            <textarea class="esc-note-field" id="esc-note-field">Dr. Sam Willis,
 
-Ahmed Al-Rashidi (MRN 40821) reported nausea and dizziness after each dose of Azithromycin 500mg during his wellbeing check on March 2 (Day 3 of his 10-day course). His CBC blood test at Al Noor Lab is now 5 days overdue and his follow-up appointment is March 14 · 10:30 AM. We have attempted contact 5 times with no response.
+Zayn Al-Rashidi (MRN 40821) reported nausea and dizziness after each dose of Azithromycin 500mg during his wellbeing check on March 2 (Day 3 of his 10-day course).
 
-Requesting your guidance on:
+His CBC blood test at Al Noor Lab is now 5 days overdue. His follow-up appointment is March 14 · 10:30 AM · Pulmonology OPD. We have attempted contact 5 times — WhatsApp, SMS, and voice call — with no response.
+
+Please review and respond:
 (1) Whether to continue or pause Azithromycin given the reported side effects.
 (2) Whether to proceed with the March 14 appointment if CBC remains incomplete.
 
-Care Orchestrator: Fatima Hassan · Al-Hilal Hospital
-March 9, 2026 · 08:44 AM</textarea>
+→ Tap to review and acknowledge in CareLoop:
+  https://careloop.medinous.com/doctor/alert/zayn-40821
+
+Care Orchestrator: Fatima Hassan
+American Hospital Dubai · March 9, 2026 · 08:44 AM</textarea>
           </div>
 
           <label class="review-check-row" for="esc-review-check">
@@ -1193,7 +1873,7 @@ March 9, 2026 · 08:44 AM</textarea>
           </label>
 
           <div style="display:flex;gap:12px;">
-            <button id="esc-send-btn" onclick="confirmEscalation()" disabled style="flex:1;padding:12px;background:var(--red);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .15s;">🔺 Send to Dr. Al-Hamdan via WhatsApp</button>
+            <button id="esc-send-btn" onclick="confirmEscalation()" disabled style="flex:1;padding:12px;background:var(--red);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.4;transition:all .15s;">🔺 Send to Dr. Sam Willis via WhatsApp</button>
             <button onclick="showScreen('detail')" style="padding:12px 20px;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--slate);">Cancel</button>
           </div>
           <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center;">🔒 All actions logged · HAAD/DHA audit trail · Timestamp + user ID recorded · CareLoop non-indemnity policy applies — orchestrator takes responsibility for message content and clinical decisions.</div>
@@ -1263,7 +1943,7 @@ March 9, 2026 · 08:44 AM</textarea>
           </div>
           <div class="notif-preview-body">
             <div class="sms-bubble">
-              <div class="sms-text">[CareLoop - Al-Hilal Hospital]<br><br>Ahmed, your blood test (CBC) is due by 7 Mar. Your appointment with Dr. Al-Hamdan is Mar 14 — he will need your results.<br><br>Reply YES to confirm you've scheduled it, or HELP if you need assistance.</div>
+              <div class="sms-text">[CareLoop - American Hospital Dubai]<br><br>Zayn, your blood test (CBC) is due by 7 Mar. Your appointment with Dr. Sam Willis is Mar 14 — he will need your results.<br><br>Reply YES to confirm you've scheduled it, or HELP if you need assistance.</div>
               <div class="reply-row">
                 <button class="reply-btn" onclick="showToast('✅ Patient confirmed')">YES</button>
                 <button class="reply-btn" onclick="showToast('🔺 Escalated to orchestrator')">HELP</button>
@@ -1284,7 +1964,7 @@ March 9, 2026 · 08:44 AM</textarea>
           <div class="notif-preview-body">
             <div class="voice-script">
               <div class="voice-script-label">AI speaks — Arabic or English</div>
-              <div class="voice-script-text">"Hello Ahmed. This is the care assistant from Al-Hilal Hospital, calling on behalf of Dr. Al-Hamdan.<br><br>I'm calling because your blood test was scheduled for this week and we haven't been able to confirm it's been done.<br><br>Is there anything making it difficult to complete? We can help with scheduling, or answer any questions you have.<br><br>Please press 1 if you've already done the test, press 2 if you need help, or press 3 to speak with our care team."</div>
+              <div class="voice-script-text">"Hello Zayn. This is the care assistant from American Hospital Dubai, calling on behalf of Dr. Sam Willis.<br><br>I'm calling because your blood test was scheduled for this week and we haven't been able to confirm it's been done.<br><br>Is there anything making it difficult to complete? We can help with scheduling, or answer any questions you have.<br><br>Please press 1 if you've already done the test, press 2 if you need help, or press 3 to speak with our care team."</div>
             </div>
             <div style="margin-top:10px;font-size:11px;color:var(--muted);padding:8px;background:var(--bg);border-radius:6px;">
               If patient presses 3 → live transfer to orchestrator queue · Flagged immediately
@@ -1303,7 +1983,7 @@ March 9, 2026 · 08:44 AM</textarea>
           </div>
           <div class="notif-preview-body">
             <div class="wa-bubble">
-              <div class="wa-text"><strong style="color:var(--teal);">Ahmed, your lab result is ready 📋</strong><br><br>Your CBC blood test from Al Noor Lab has been reviewed.<br><br>📎 Your report is attached.<br><br>Dr. Al-Hamdan has reviewed your results and would like to see you for a follow-up.<br><br>📅 <strong>Follow-up appointment</strong><br>March 16 · 11:00 AM — Al-Hilal Hospital OPD</div>
+              <div class="wa-text"><strong style="color:var(--teal);">Zayn, your lab result is ready 📋</strong><br><br>Your CBC blood test from Al Noor Lab has been reviewed.<br><br>📎 Your report is attached.<br><br>Dr. Sam Willis has reviewed your results and would like to see you for a follow-up.<br><br>📅 <strong>Follow-up appointment</strong><br>March 16 · 11:00 AM — American Hospital Dubai OPD</div>
               <div class="reply-row">
                 <button class="reply-btn" onclick="showToast('✅ Patient confirmed follow-up')">I'll be there ✓</button>
                 <button class="reply-btn" onclick="showToast('🔺 Escalated to orchestrator')">I need help</button>
@@ -1328,7 +2008,7 @@ March 9, 2026 · 08:44 AM</textarea>
           </div>
           <div class="notif-preview-body">
             <div class="wa-bubble">
-              <div class="wa-text"><strong style="color:var(--teal);">Fatima, your X-ray result is ready 📋</strong><br><br>Your chest X-ray from Al Noor Diagnostic Centre has been completed and is now available.<br><br>📎 Your report is attached.<br><br>Dr. Nasser has been notified and will review your results before your appointment tomorrow.<br><br>📅 <strong>Your appointment</strong><br>March 10 · 10:00 AM · Radiology OPD · Al-Hilal Hospital<br><br>Reply CONFIRM to confirm you will attend, or HELP if you need to reschedule.</div>
+              <div class="wa-text"><strong style="color:var(--teal);">Fatima, your X-ray result is ready 📋</strong><br><br>Your chest X-ray from Al Noor Diagnostic Centre has been completed and is now available.<br><br>📎 Your report is attached.<br><br>Dr. Nasser has been notified and will review your results before your appointment tomorrow.<br><br>📅 <strong>Your appointment</strong><br>March 10 · 10:00 AM · Radiology OPD · American Hospital Dubai<br><br>Reply CONFIRM to confirm you will attend, or HELP if you need to reschedule.</div>
               <div class="reply-row">
                 <button class="reply-btn" onclick="showToast('✅ Fatima confirmed follow-up appointment')">CONFIRM ✓</button>
                 <button class="reply-btn" onclick="showToast('🔺 Escalated — patient needs to reschedule')">HELP</button>
@@ -1341,21 +2021,21 @@ March 9, 2026 · 08:44 AM</textarea>
           </div>
         </div>
 
-        <!-- WhatsApp: Episode Pending Summary — Ahmed -->
+        <!-- WhatsApp: Episode Pending Summary — Zayn -->
         <div class="notif-preview-card" style="border-top:2px solid var(--amber);">
           <div class="notif-type-header">
             <div class="notif-type-icon">📝</div>
             <div style="flex:1;">
               <div class="notif-type-label">WhatsApp · Episode Pending Summary</div>
-              <div style="font-size:11px;color:var(--muted);">Sent on Days 3, 6, 9 while any item pending · Ahmed Al-Rashidi</div>
+              <div style="font-size:11px;color:var(--muted);">Sent on Days 3, 6, 9 while any item pending · Zayn Al-Rashidi</div>
             </div>
             <span style="font-size:10px;background:var(--amber-light);color:var(--amber);padding:2px 8px;border-radius:4px;font-weight:700;">Day 9 of 14</span>
           </div>
           <div class="notif-preview-body">
             <div class="wa-bubble">
-              <div class="wa-text"><strong style="color:var(--teal);">Ahmed, here is what is still needed 📋</strong><br><br>Your recovery is in progress. Here is what remains from Dr. Al-Hamdan's plan:<br><br>✗ <strong>CBC Blood Test</strong> — overdue by 5 days<br>&nbsp;&nbsp;&nbsp;Al Noor Lab, Khalidiyah · Covered under Daman<br><br>✓ <strong>Azithromycin 500mg</strong> — completed Days 1–8<br><br>⏳ <strong>Follow-up with Dr. Al-Hamdan</strong><br>&nbsp;&nbsp;&nbsp;March 14 · 10:30 AM — pending your lab result<br><br>Reply DONE if you have already done the test, or HELP if you need assistance.</div>
+              <div class="wa-text"><strong style="color:var(--teal);">Zayn, here is what is still needed 📋</strong><br><br>Your recovery is in progress. Here is what remains from Dr. Sam Willis's plan:<br><br>✗ <strong>CBC Blood Test</strong> — overdue by 5 days<br>&nbsp;&nbsp;&nbsp;Al Noor Lab, Khalidiyah · Covered under Daman<br><br>✓ <strong>Azithromycin 500mg</strong> — completed Days 1–8<br><br>⏳ <strong>Follow-up with Dr. Sam Willis</strong><br>&nbsp;&nbsp;&nbsp;March 14 · 10:30 AM — pending your lab result<br><br>Reply DONE if you have already done the test, or HELP if you need assistance.</div>
               <div class="reply-row">
-                <button class="reply-btn" onclick="showToast('✅ Ahmed confirmed lab done — episode updated')">DONE ✓</button>
+                <button class="reply-btn" onclick="showToast('✅ Zayn confirmed lab done — episode updated')">DONE ✓</button>
                 <button class="reply-btn" onclick="showToast('🔺 Barrier flagged — orchestrator alerted')">HELP</button>
               </div>
               <div class="wa-time">Mar 9 · 9:00 AM ✓✓</div>
@@ -1379,7 +2059,7 @@ March 9, 2026 · 08:44 AM</textarea>
         <div class="queue-row" onclick="showScreen('escalation-form')" style="grid-template-columns:40px 1.8fr 1.2fr 1fr 160px 120px;">
           <div class="risk-dot red"></div>
           <div>
-            <div class="patient-name">Ahmed Al-Rashidi</div>
+            <div class="patient-name">Zayn Al-Rashidi</div>
             <div class="patient-meta">Lab result pending · Appt in 5 days</div>
           </div>
           <div><span class="episode-tag acute">OPD Acute</span></div>
@@ -1484,6 +2164,47 @@ March 9, 2026 · 08:44 AM</textarea>
     </div>
 
   </div><!-- /content -->
+
+  <!-- WHATSAPP PHONE MOCKUP -->
+  <div class="wa-phone-overlay" id="wa-phone-overlay" onclick="closeWaPhone(event)">
+    <div class="wa-phone-wrap">
+      <button class="wa-phone-close" onclick="closeWaPhone()">×</button>
+      <div class="wa-phone">
+        <div class="wa-phone-screen">
+          <div style="background:#1c1c1e;padding:8px 0 4px;">
+            <div class="wa-notification-banner">
+              <div class="wa-notif-icon">💬</div>
+              <div class="wa-notif-text">
+                <div class="wa-notif-app">WhatsApp · now</div>
+                <div class="wa-notif-title">CareLoop · American Hospital Dubai</div>
+                <div class="wa-notif-body">🔺 Clinical escalation — Zayn Al-Rashidi</div>
+              </div>
+            </div>
+          </div>
+          <div class="wa-phone-statusbar">
+            <span class="wa-phone-back">‹</span>
+            <div class="wa-phone-avatar">CL</div>
+            <div class="wa-phone-contact">
+              <div class="wa-phone-contact-name">CareLoop · American Hospital Dubai</div>
+              <div class="wa-phone-contact-sub">tap here for contact info</div>
+            </div>
+          </div>
+          <div class="wa-phone-messages">
+            <div class="wa-incoming">
+              Dr. Willis,<br><br>
+              Zayn Al-Rashidi (MRN 40821) reported <strong>nausea and dizziness</strong> after Azithromycin 500mg on Day 3.<br><br>
+              Should he continue the medication?<br><br>
+              — Fatima Hassan · Care Orchestrator
+              <div class="wa-link-btn">→ Review &amp; respond in CareLoop</div>
+              <div class="wa-time">Mar 9 · 8:44 AM ✓✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wa-demo-label">This is what Dr. Sam Willis receives on his phone · Tap the link to open CareLoop</div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <!-- ══ MODALS ══ -->
@@ -1512,25 +2233,25 @@ function getFormattedTime() {
 var currentPatient = null;
 const PATIENTS = {
   marcus: {
-    initials: 'AA', name: 'Ahmed Al-Rashidi', mrn: '40821', age: '52 years',
+    initials: 'AA', name: 'Zayn Al-Rashidi', mrn: '40821', age: '52 years',
     phone: '+971 50 XXX XXXX', insurance: 'Daman · Basic Network',
-    consultant: 'Dr. Khalid Al-Hamdan', nok: 'Omar Al-Rashidi (son)',
-    dept: 'Pulmonology · Dr. Al-Hamdan', lang: 'Arabic',
+    consultant: 'Dr. Sam Willis', nok: 'Omar Al-Rashidi (son)',
+    dept: 'Pulmonology · Dr. Sam Willis', lang: 'Arabic',
     channel: 'WhatsApp · SMS', insTag: 'Daman Network',
     insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
     riskScore: 78, riskColor: 'var(--red)',
     riskLabel: 'High · Review required', status: 'critical',
-    suggestion: 'Call Ahmed — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.',
-    escalateTo: 'Dr. Khalid Al-Hamdan',
-    escalateDept: 'Pulmonology · Al-Hilal Hospital',
+    suggestion: 'Call Zayn — confirm lab barrier. Guide to Al Noor Lab (Daman covered). Escalate if symptoms worsen.',
+    escalateTo: 'Dr. Sam Willis',
+    escalateDept: 'Pulmonology · American Hospital Dubai',
     episodes: [
-      { type: 'acute', label: 'OPD Acute · Day 9 of 14', name: 'Chest Infection', icd: 'ICD-10: J06.9 · Acute upper respiratory infection', meta: 'Dr. Al-Hamdan · Started Feb 28 · Follow-up Mar 14', actions: [
+      { type: 'acute', label: 'OPD Acute · Day 9 of 14', name: 'Chest Infection', icd: 'ICD-10: J06.9 · Acute upper respiratory infection', meta: 'Dr. Sam Willis · Started Feb 28 · Follow-up Mar 14', actions: [
         { icon: 'done', iconChar: '✓', text: 'Azithromycin 500mg — Days 1–8 confirmed', iconId: 'care-medication' },
         { type: 'adherence', pct: 80, confirmed: 8, total: 10, unack: 2 },
         { icon: 'overdue', iconChar: '!', text: 'CBC (Al Noor Lab, Khalidiyah) — 5 days overdue', overdue: true, iconId: 'care-lab', textId: 'care-lab-text' },
         { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 14 · 10:30 AM — pending lab results', iconId: 'care-followup' }
       ]},
-      { type: 'chronic', label: 'OPD Chronic · Month 6', name: 'Diabetes Management', icd: 'ICD-10: E11 · Type 2 diabetes mellitus', meta: 'Dr. Al-Hamdan · Since Oct 2025 · Ongoing', actions: [
+      { type: 'chronic', label: 'OPD Chronic · Month 6', name: 'Diabetes Management', icd: 'ICD-10: E11 · Type 2 diabetes mellitus', meta: 'Dr. Sam Willis · Since Oct 2025 · Ongoing', actions: [
         { icon: 'done', iconChar: '✓', text: 'Insulin — 87% adherence this month' },
         { icon: 'pending', iconChar: '⏳', text: 'HbA1c (NMC Healthcare) — due next week' }
       ]}
@@ -1546,22 +2267,39 @@ const PATIENTS = {
     barriers: [
       { icon: '💰', type: 'Possible Cost Barrier', desc: 'Patient engaged with all medication reminders but went silent specifically when lab test reminders began. Pattern suggests cost concern. Confirm on call.' }
     ],
-    barrierNote: 'No barrier explicitly confirmed by patient yet. Suggested opening on call: <em>"Ahmed, I noticed you haven\'t been able to schedule your test — is there anything making it difficult? We can help."</em>',
+    barrierNote: 'No barrier explicitly confirmed by patient yet. Suggested opening on call: <em>"Zayn, I noticed you haven\'t been able to schedule your test — is there anything making it difficult? We can help."</em>',
     timeline: [
-      { time: 'Feb 28 · 9:04am', dot: 'sent', connector: true, action: 'WhatsApp — Care plan delivered', detail: '"Hi Ahmed, Dr. Al-Hamdan has shared your recovery plan..."', statusClass: 'ok', statusText: 'Opened · Read 9:11am' },
-      { time: 'Mar 1 · 8:00am', dot: 'ack', connector: true, action: 'WhatsApp — Medication reminder', detail: '"Ahmed, time for your Azithromycin 500mg..."', statusClass: 'ok', statusText: 'Replied: "Taken ✓"' },
-      { time: 'Mar 2 · 8:00pm', dot: 'sent', connector: true, action: 'WhatsApp — Wellbeing & side effects check', detail: '"Ahmed, you have been on Azithromycin 500mg for 3 days now. How are you feeling?\n\nReply with a number:\n1 — Feeling better ✓\n2 — No change yet\n3 — Feeling worse or side effects"', subDetail: 'Sent automatically on Days 3, 6, 9 of every medication course · CareLoop monitors reply for clinical signals', statusClass: 'ok', statusText: 'Delivered · Read 8:04pm' },
-      { time: 'Mar 2 · 8:07pm', dot: 'ack', connector: true, action: 'Patient replied — wellbeing check', detail: 'Ahmed replied: "3 — Feeling worse. Having nausea and dizziness after each dose."', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'esc', statusText: '⚠ Side effect signal detected' },
-      { time: 'Mar 2 · 8:07pm', dot: 'esc', connector: true, action: '🔺 Clinical alert triggered — side effect reported', detail: 'Patient reported nausea and dizziness on Azithromycin 500mg Day 3. CareLoop flagged for orchestrator review. Dr. Al-Hamdan notified via WhatsApp automatically.', bodyStyle: 'background:#fff7ed;border-radius:6px;padding:6px 8px;border-left:2px solid var(--amber);', statusClass: 'esc', statusText: 'Flagged · Doctor notified' },
-      { time: 'Mar 3 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Lab test reminder', detail: '"Ahmed, your blood test is due by Mar 7..."', statusClass: 'fail', statusText: 'Delivered · Not read' },
-      { time: 'Mar 5 · 10:00am', dot: 'fail', connector: true, action: 'SMS — Lab reminder retry', detail: '"Ahmed, your CBC test is now overdue. Reply YES if you need help."', statusClass: 'fail', statusText: 'No response' },
-      { time: 'Mar 6 · 2:00pm', dot: 'call', connector: true, action: 'Voice call initiated', detail: 'Auto-call · +971 50 XXX XXXX · 45 seconds', statusClass: 'fail', statusText: 'No answer' },
-      { time: 'Mar 7 · 8:30am', dot: 'esc', connector: true, action: '🔺 Escalated to orchestrator queue', detail: '3 failed lab reminders + 1 unanswered call. Human action required.', statusClass: 'esc', statusText: 'Awaiting action' },
-      { time: 'Mar 9 · 2:15pm', dot: 'ack', connector: true, action: '📋 Lab result received — CBC complete', detail: 'Result available at Al Noor Lab · CareLoop notified Ahmed via WhatsApp · Dr. Al-Hamdan flagged for review before Mar 14 appointment', statusClass: 'ok', statusText: 'Patient notified · Loop closed' },
-      { time: 'Mar 13 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Appointment reminder + doctor recommendation check', detail: '"Ahmed, your follow-up with Dr. Al-Hamdan is tomorrow — March 14 · 10:30 AM · Al-Hilal Hospital OPD.\n\nPlease confirm you will attend.\n\nAlso, based on your experience so far — would you recommend Dr. Al-Hamdan to a friend or family member?\n\nReply:\nYES — I will attend + I recommend Dr. Al-Hamdan ⭐\nNO — I cannot attend (we will help reschedule)\nMAYBE — I will attend but not sure about recommendation"', subDetail: 'Sent automatically 24 hours before every follow-up appointment · Captures appointment confirmation + doctor CSAT in one message', statusClass: 'ok', statusText: 'Delivered · Read 9:03am' },
-      { time: 'Mar 13 · 9:15am', dot: 'ack', connector: true, action: 'Patient replied — appointment + recommendation', detail: 'Ahmed replied: "YES — I will be there. Dr. Al-Hamdan is very good, I recommend him ⭐"', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'csat', statusText: 'Confirmed attendance · CSAT captured ⭐' },
-      { time: 'Mar 16 · 10:00am', dot: 'sent', connector: true, action: 'WhatsApp — Health outcome check', detail: '"Ahmed, it has been 2 days since your follow-up with Dr. Al-Hamdan.\n\nHow are you feeling now?\n\nReply with a number:\n1 — Fully recovered ✓\n2 — Getting better, still some symptoms\n3 — No improvement\n4 — Feeling worse — I need help"', subDetail: 'Sent automatically 48 hours after follow-up appointment · Health outcome data collected for hospital reporting', statusClass: 'ok', statusText: 'Delivered · Read 10:06am' },
-      { time: 'Mar 16 · 10:22am', dot: 'ack', connector: false, action: 'Patient replied — health outcome', detail: 'Ahmed replied: "1 — Fully recovered. Feeling much better. Shukran Al-Hilal Hospital 🙏"', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'ok', statusText: '✅ Outcome: Recovered · Episode complete' }
+      { time: 'Feb 28 · 9:04am', dot: 'sent', connector: true, action: 'WhatsApp — Care plan delivered', detail: '', statusClass: 'ok', statusText: 'Opened · Read 9:11am',
+        expandId: 'ahmed-ev1', expandHtml: '<div class="tl-wa-panel" id="ahmed-ev1"><div class="tl-wa-screen"><div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div><div class="tl-wa-bub">Hi Zayn 👋 Dr. Sam Willis has shared your care plan.<br><br>💊 <strong>Azithromycin 500mg</strong> · once daily with food<br>🧪 <strong>CBC blood test</strong> · Al Noor Lab · due by Mar 7<br>📅 <strong>Follow-up</strong> · Mar 14 · 10:30 AM<br><br>I\'ll be with you every step 💚<div class="tl-wa-time">9:04 AM ✓✓</div></div><div class="tl-wa-btn" style="display:block;background:white;border:1px solid #d0e8d0;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:600;color:#128c7e;text-align:center;margin-top:6px;">See Consultation Summary →</div></div><div class="tl-wa-note">Sent 30 mins after consultation · Read 9:11am</div></div>' },
+      { time: 'Mar 1 · 8:00am', dot: 'ack', connector: true, action: 'WhatsApp — Medication reminder', detail: '', statusClass: 'ok', statusText: 'Replied: "Taken ✓"',
+        expandId: 'ahmed-ev2', expandHtml: '<div class="tl-wa-panel" id="ahmed-ev2"><div class="tl-wa-screen"><div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div><div class="tl-wa-bub">Zayn, time for your recovery boost 💊<br><strong>Azithromycin 500mg</strong> (1 tab) · Best taken with food 🍽<div class="tl-wa-time">8:00 AM ✓✓</div></div><div class="tl-wa-btns"><div class="tl-wa-btn" style="color:#16a34a;">Mark as taken ✓</div><div class="tl-wa-btn">Remind me 15 mins</div></div><div class="tl-wa-bub out" style="margin-top:8px;">Taken ✓<div class="tl-wa-time">8:09 AM ✓✓</div></div></div><div class="tl-wa-note">Daily reminder · Reply logged · Day 1 confirmed</div></div>' },
+      { time: 'Mar 2 · 8:00pm', dot: 'sent', connector: true, action: 'WhatsApp — Wellbeing & side effects check', detail: '', statusClass: 'ok', statusText: 'Delivered · Read 8:04pm',
+        expandId: 'ahmed-ev3', expandHtml: '<div class="tl-wa-panel" id="ahmed-ev3"><div class="tl-wa-screen"><div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div><div class="tl-wa-bub">Zayn, you have been on Azithromycin 500mg for 3 days now. How are you feeling?<br><br>Reply with a number:<br>1 — Feeling better ✓<br>2 — No change yet<br>3 — Feeling worse or side effects<div class="tl-wa-time">8:00 PM ✓✓</div></div><div class="tl-wa-bub out" style="margin-top:8px;">3 — Feeling worse. Having nausea and dizziness after each dose.<div class="tl-wa-time">8:07 PM ✓✓</div></div></div><div class="tl-wa-note">Sent automatically Day 3 of medication course · CareLoop monitors reply for clinical signals</div></div>' },
+      { time: 'Mar 2 · 8:07pm', dot: 'ack', connector: true, action: 'Patient replied — wellbeing check', detail: '', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'esc', statusText: '⚠ Side effect signal detected' },
+      { time: 'Mar 2 · 8:07pm', dot: 'esc', connector: true, action: '🔺 Clinical alert triggered — side effect reported', detail: '', bodyStyle: 'background:#fff7ed;border-radius:6px;padding:6px 8px;border-left:2px solid var(--amber);', statusClass: 'esc', statusText: 'Flagged · Doctor notified',
+        expandId: 'ahmed-alert', expandRedBtn: true, expandLabel: '▼ See alert sent to doctor', expandHtml: '<div class="tl-wa-panel" id="ahmed-alert"><div class="tl-crit-card" style="max-width:100%;"><div class="tl-crit-lbl d">→ Sent to Dr. Sam Willis</div><div class="tl-crit-bub doc">Zayn Al-Rashidi (MRN 40821) reported nausea and dizziness on Day 3 of Azithromycin 500mg. Patient-reported symptom. Please review before Mar 14 follow-up.<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(59,130,246,.15);font-size:10px;color:#3b82f6;font-weight:600;">→ Tap to review in CareLoop:<br><span style="text-decoration:underline;color:#2563eb;">careloop.medinous.com/doctor/alert/zayn-40821</span></div><div class="tl-crit-ts">Mar 2 · 8:07pm · Auto · CareLoop</div></div></div><div class="tl-wa-note">CareLoop detected side effect signal from patient reply · Doctor notified automatically · No PHI shared beyond patient-reported symptoms</div></div>' },
+      { time: 'Mar 3 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Lab test reminder', detail: '', statusClass: 'fail', statusText: 'Delivered · Not read',
+        expandId: 'ahmed-ev4', expandHtml: '<div class="tl-wa-panel" id="ahmed-ev4"><div class="tl-wa-screen"><div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div><div class="tl-wa-bub">Zayn, your CBC blood test is due by Mar 7 🧪<br><br>Nearest lab: Al Noor Lab, Khalidiyah<br>📍 Open 8am – 8pm · covered under Daman policy<br><br>Reply DONE when complete<div class="tl-wa-time">9:00 AM ✓✓</div></div></div><div class="tl-wa-note">Lab reminder triggered from prescription · No patient response received</div></div>' },
+      { time: 'Mar 5 · 10:00am', dot: 'fail', connector: true, action: 'SMS — Lab reminder retry', detail: '', statusClass: 'fail', statusText: 'No response' },
+      { time: 'Mar 6 · 2:00pm', dot: 'call', connector: true, action: 'Voice call initiated', detail: '', statusClass: 'fail', statusText: 'No answer' },
+      { time: 'Mar 7 · 8:30am', dot: 'esc', connector: true, action: '🔺 Escalated to orchestrator queue', detail: '', statusClass: 'esc', statusText: 'Awaiting action' },
+      { time: 'Mar 9 · 2:15pm', dot: 'ack', connector: true, action: '📋 Lab result received — CBC complete', detail: '', statusClass: 'ok', statusText: 'Patient notified · Loop closed' },
+      { time: 'Mar 13 · 9:00am', dot: 'sent', connector: true, action: 'WhatsApp — Appointment reminder + recommendation check', detail: '', statusClass: 'ok', statusText: 'Delivered · Read 9:03am' },
+      { time: 'Mar 13 · 9:15am', dot: 'ack', connector: true, action: 'Patient replied — appointment + recommendation', detail: '', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'csat', statusText: 'Confirmed attendance · CSAT captured ⭐' },
+      { time: 'Mar 16 · 10:00am', dot: 'sent', connector: true, action: 'WhatsApp — Health outcome check', detail: '', statusClass: 'ok', statusText: 'Delivered · Read 10:06am' },
+      { time: 'Mar 16 · 10:22am', dot: 'ack', connector: false, action: 'Patient replied — health outcome', detail: '', bodyStyle: 'background:#f0fdf4;border-radius:6px;padding:6px 8px;border-left:2px solid var(--green);', statusClass: 'ok', statusText: '✅ Outcome: Recovered · Episode complete' }
+    ],
+    acuteProgressStrip: [
+      { state: 'done', icon: '✓', label: 'Care plan<br>sent' },
+      { state: 'done', icon: '✓', label: 'Meds<br>confirmed' },
+      { state: 'warn', icon: '⚠', label: 'Side effect<br>flagged' },
+      { state: 'done', icon: '✓', label: 'Lab<br>completed' },
+      { state: 'pend', icon: '○', label: 'Follow-up<br>Mar 14' }
+    ],
+    chronicProgressStrip: [
+      { state: 'done', icon: '✓', label: 'On track<br>6 months' },
+      { state: 'done', icon: '✓', label: '87%<br>adherent' },
+      { state: 'pend', icon: '○', label: 'HbA1c<br>due next week' }
     ],
     timelineTrackLabel: '🟠 Acute · Chest Infection',
     timelineTrackSub: 'Day 9 of 14 · Feb 28 – Mar 14 · OPD',
@@ -1605,45 +2343,6 @@ const PATIENTS = {
       ]
     }
   },
-  fatima: {
-    initials: 'FA', name: 'Fatima Al-Zahrawi', mrn: '38204', age: '34 years',
-    phone: '+971 55 XXX XXXX', insurance: 'ADNIC · Enhanced Network',
-    consultant: 'Dr. Hassan Nasser', nok: 'Youssef Al-Zahrawi (husband)',
-    dept: 'Radiology · Dr. Nasser', lang: 'Arabic',
-    channel: 'WhatsApp · SMS', insTag: 'ADNIC',
-    insColor: '#1d4ed8', insBg: '#eff6ff', insBorder: '#bfdbfe',
-    riskScore: 71, riskColor: 'var(--red)',
-    riskLabel: 'High · Doctor not notified', status: 'critical',
-    suggestion: 'X-ray result is available and appointment is tomorrow at 10:00 AM. Notify Dr. Nasser immediately via WhatsApp with the result status so he can clinically prepare before the appointment.',
-    escalateTo: 'Dr. Hassan Nasser',
-    escalateDept: 'Radiology · Al-Hilal Hospital',
-    episodes: [
-      { type: 'acute', label: 'OPD Acute · Day 6 of 10', name: 'Chest X-ray Follow-up', meta: 'Dr. Nasser · Started Mar 4 · Follow-up Mar 10', actions: [
-        { icon: 'done', iconChar: '✓', text: 'X-ray completed at Al Noor Diagnostic Centre' },
-        { icon: 'overdue', iconChar: '!', text: 'Doctor not yet notified of result', overdue: true },
-        { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 10 · 10:00 AM — Radiology OPD' }
-      ]}
-    ],
-    episodeBadge: { text: '1 active episode', bg: 'var(--red-light)', color: 'var(--red)' },
-    complexityFlag: null,
-    riskFactors: [
-      { dot: 'red', label: 'Doctor not notified', tag: 'X-ray result pending', tagClass: 'red' },
-      { dot: 'red', label: 'Appt tomorrow', tag: 'Mar 10 · 10:00 AM', tagClass: 'red' },
-      { dot: 'amber', label: 'Result ready', tag: 'Awaiting doctor review', tagClass: 'amber' }
-    ],
-    barriers: [
-      { icon: '⏱️', type: 'Time-Sensitive Gap', desc: 'X-ray result is available but Dr. Nasser has not been notified. Appointment is tomorrow morning. Delay risks unprepared consultation.' }
-    ],
-    barrierNote: 'No patient-side barrier. This is a system notification gap — doctor needs to be alerted before the appointment.',
-    timeline: [
-      { time: 'Mar 4 · 11:00am', dot: 'sent', connector: true, action: 'WhatsApp — Appointment confirmation', detail: '"Fatima, your X-ray appointment is booked for Mar 8 at Al Noor Diagnostic..."', statusClass: 'ok', statusText: 'Confirmed · Read 11:20am' },
-      { time: 'Mar 8 · 9:30am', dot: 'ack', connector: true, action: 'X-ray completed', detail: 'Al Noor Diagnostic Centre · Result uploaded to system', statusClass: 'ok', statusText: 'Result available' },
-      { time: 'Mar 9 · 8:00am', dot: 'esc', connector: false, action: '🔺 Doctor notification pending', detail: 'Dr. Nasser not yet notified of result · Appointment in 18 hours', statusClass: 'esc', statusText: 'Awaiting orchestrator action' }
-    ],
-    timelineTrackLabel: '🟠 Acute · Chest X-ray Follow-up',
-    timelineTrackSub: 'Day 6 of 10 · Mar 4 – Mar 14 · OPD',
-    timelineTrackBadge: { text: 'Doctor not notified · Appt tomorrow', bg: 'var(--red-light)', color: 'var(--red)' }
-  },
   khalid: {
     initials: 'KM', name: 'Khalid Al-Mansoori', mrn: '41093', age: '44 years',
     phone: '+971 56 XXX XXXX', insurance: 'Thiqa · Gold',
@@ -1655,7 +2354,7 @@ const PATIENTS = {
     riskLabel: 'Moderate · Lab deadline approaching', status: 'watch',
     suggestion: 'Patient has gone silent for 3 days with lab due in 2 days. Call directly to confirm whether cost or distance is the barrier. Thiqa Gold covers lab fees in full at any approved centre.',
     escalateTo: 'Dr. Yousef Al-Balooshi',
-    escalateDept: 'Gastroenterology · Al-Hilal Hospital',
+    escalateDept: 'Gastroenterology · American Hospital Dubai',
     episodes: [
       { type: 'acute', label: 'OPD Acute · Day 7 of 14', name: 'Gastric Investigation', meta: 'Dr. Al-Balooshi · Started Mar 2 · Follow-up Mar 16', actions: [
         { icon: 'done', iconChar: '✓', text: 'Pantoprazole 40mg — Days 1–7 confirmed' },
@@ -1697,7 +2396,7 @@ const PATIENTS = {
     riskLabel: 'Watch · Medication pattern concern', status: 'watch',
     suggestion: 'Patient is responding to wellbeing check-ins but not acknowledging insulin reminders. A brief call to confirm adherence is recommended before the next HbA1c is due.',
     escalateTo: 'Dr. Reem Al-Kaabi',
-    escalateDept: 'Endocrinology · Al-Hilal Hospital',
+    escalateDept: 'Endocrinology · American Hospital Dubai',
     episodes: [
       { type: 'chronic', label: 'OPD Chronic · Month 14', name: 'Diabetes Type 2 Management', meta: 'Dr. Al-Kaabi · Since Jan 2025 · Ongoing', actions: [
         { icon: 'done', iconChar: '✓', text: 'Metformin 1000mg — taken daily' },
@@ -1730,38 +2429,16 @@ const PATIENTS = {
   },
   nora: {
     initials: 'NA', name: 'Nora Al-Ansari', mrn: '44201', age: '38 years',
-    phone: '+971 52 XXX XXXX', insurance: 'Daman · Enhanced Network',
-    consultant: 'Dr. Layla Al-Rashid', nok: 'Saeed Al-Ansari (husband)',
+    phone: '+971 55 XXX XXXX', insurance: 'Daman · Enhanced',
+    consultant: 'Dr. Layla Al-Rashid', nok: 'Khalid Al-Ansari (husband)',
     dept: 'Endocrinology · Dr. Al-Rashid', lang: 'Arabic',
-    channel: 'WhatsApp', insTag: 'Daman Enhanced',
+    channel: 'WhatsApp · SMS', insTag: 'Daman Enhanced',
     insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
-    riskScore: '12', riskColor: 'var(--green)',
-    riskLabel: 'New episode · Monitoring started', status: 'auto',
-    suggestion: 'Episode just onboarded. First WhatsApp summary sent automatically. Monitor for 24 hours before any action is needed.',
+    riskScore: '62', riskColor: 'var(--amber)',
+    riskLabel: 'Medium · Critical alert auto-acted', status: 'critical',
+    suggestion: 'Critical result flag received from HMIS at 11:00am. Patient and doctor have been notified automatically. Monitor for doctor response and patient acknowledgement. No immediate orchestrator action required.',
     escalateTo: 'Dr. Layla Al-Rashid',
-    escalateDept: 'Endocrinology · Al-Hilal Hospital',
-    episodes: [
-      { type: 'acute', label: 'OPD Acute · Day 1 of 14', name: 'Diabetes Onset — New Diagnosis', meta: 'Dr. Al-Rashid · Started today · Follow-up Mar 28', actions: [
-        { icon: 'pending', iconChar: '⏳', text: 'Metformin 500mg — twice daily · starts today' },
-        { icon: 'pending', iconChar: '⏳', text: 'HbA1c blood test — due within 7 days' },
-        { icon: 'pending', iconChar: '⏳', text: 'Follow-up Mar 28 · 10:00 AM' }
-      ]}
-    ],
-    episodeBadge: { text: '1 new episode', bg: 'var(--green-light)', color: 'var(--green)' },
-    complexityFlag: null,
-    riskFactors: [
-      { dot: 'grey', label: 'Patient condition', tag: 'None reported yet', tagClass: 'amber' },
-      { dot: 'grey', label: 'New episode', tag: 'Just onboarded', tagClass: 'amber' },
-      { dot: 'grey', label: 'First contact sent', tag: 'WhatsApp delivered', tagClass: 'amber' }
-    ],
-    barriers: [],
-    barrierNote: 'No barriers detected — episode just started. Monitor engagement over the next 48 hours.',
-    timeline: [
-      { time: 'Now · 10:04am', dot: 'ack', connector: false, action: 'WhatsApp sent — Episode care plan summary', detail: 'Hi Nora, Dr. Al-Rashid has shared your care plan. 💊 Metformin 500mg · twice daily · with food 🧪 HbA1c blood test · due within 7 days 📅 Follow-up · March 28 · 10:00 AM', statusClass: 'ok', statusText: 'Delivered · Read 10:06am' }
-    ],
-    timelineTrackLabel: '🟠 Acute · Diabetes Onset',
-    timelineTrackSub: 'Day 1 of 14 · Started today · OPD',
-    timelineTrackBadge: { text: 'New · Monitoring', bg: 'var(--green-light)', color: 'var(--green)' }
+    escalateDept: 'Endocrinology · American Hospital Dubai'
   }
 };
 
@@ -1773,14 +2450,16 @@ function showScreen(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
   const titles = {
-    queue: ['CareLoop', 'Al-Hilal Hospital · OPD Care'],
-    detail: ['Ahmed Al-Rashidi', 'Episode Detail · MRN 40821'],
-    'escalation-form': ['Escalate to Doctor', 'Dr. Khalid Al-Hamdan · Pulmonology'],
+    queue: ['CareLoop', 'American Hospital Dubai · OPD Care'],
+    detail: ['Zayn Al-Rashidi', 'Episode Detail · MRN 40821'],
+    'escalation-form': ['Escalate to Doctor', 'Dr. Sam Willis · Pulmonology'],
     notifications: ['Notification Templates', 'Settings · Configure outreach messages'],
     escalation: ['Active Escalations', '2 cases requiring immediate action'],
     exec: ['Revenue Dashboard', 'Executive View · March 2026 · USD'],
     'close-episode': ['Close Episode', 'Sara Al-Zaabi · Acute · Day 10 of 10'],
-    inbox: ['Audit Log', 'Patient message history · Read only']
+    inbox: ['Audit Log', 'Patient message history · Read only'],
+    'detail-nora': ['Nora Al-Ansari', 'Episode Detail · MRN 44201'],
+    doctor: ['Doctor View', 'Dr. Sam Willis · Pulmonology · American Hospital Dubai']
   };
   if (id === 'detail' && currentPatient) {
     document.getElementById('topbar-title').textContent = currentPatient.name;
@@ -1790,7 +2469,7 @@ function showScreen(id) {
     document.getElementById('topbar-sub').textContent = titles[id][1];
   }
 
-  const navMap = { queue: 0, detail: 0, 'close-episode': 0, exec: 1, notifications: 2, inbox: 3, escalation: 0, 'escalation-form': 0 };
+  const navMap = { queue: 0, detail: 0, 'detail-nora': 0, 'close-episode': 0, doctor: 1, exec: 2, notifications: 3, inbox: 4, escalation: 0, 'escalation-form': 0 };
   const navItems = document.querySelectorAll('.nav-item');
   if (navMap[id] !== undefined) navItems[navMap[id]]?.classList.add('active');
 }
@@ -1853,15 +2532,6 @@ function showDetail(data) {
   });
   epContainer.innerHTML = epHtml;
 
-  // Complexity flag
-  var flagEl = document.getElementById('d-complexity-flag');
-  if (p.complexityFlag) {
-    flagEl.style.display = '';
-    flagEl.innerHTML = '<div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">⚠ Care Complexity Flag</div><div style="font-size:12px;color:var(--slate);">' + p.complexityFlag.text + '</div>';
-  } else {
-    flagEl.style.display = 'none';
-  }
-
   // Timeline
   var tlContainer = document.getElementById('d-timeline-tracks');
   var tlEvents = p.timeline || [];
@@ -1873,16 +2543,35 @@ function showDetail(data) {
   tlHtml += '<span style="font-size:10px;background:' + (tb.bg || 'var(--amber-light)') + ';color:' + (tb.color || 'var(--amber)') + ';padding:2px 8px;border-radius:4px;font-weight:700;">' + (tb.text || '') + '</span>';
   tlHtml += '<div class="tl-track-toggle" id="toggle-track-acute">▲</div></div>';
   tlHtml += '<div class="tl-track-body open" id="track-acute" style="padding:14px 14px 6px;background:white;border-top:1px solid var(--border-light);">';
+
+  // Acute progress strip
+  if (p.acuteProgressStrip) {
+    tlHtml += '<div class="tl-progress-strip" style="margin-bottom:12px;">';
+    p.acuteProgressStrip.forEach(function(s, i) {
+      if (i > 0) tlHtml += '<div class="tl-pi-connector' + (p.acuteProgressStrip[i-1].state === 'done' || p.acuteProgressStrip[i-1].state === 'warn' ? ' done' : '') + '"></div>';
+      tlHtml += '<div class="tl-pi-step ' + s.state + '"><div class="tl-pi-dot">' + s.icon + '</div><div><div class="tl-pi-label">' + s.label + '</div></div></div>';
+    });
+    tlHtml += '</div>';
+  }
+
   tlHtml += '<div class="timeline">';
-  tlEvents.forEach(function(ev) {
+  tlEvents.forEach(function(ev, idx) {
     tlHtml += '<div class="timeline-item">';
     tlHtml += '<div class="tl-time">' + ev.time + '</div>';
     tlHtml += '<div class="tl-line"><div class="tl-dot ' + ev.dot + '"></div>' + (ev.connector ? '<div class="tl-connector"></div>' : '') + '</div>';
     tlHtml += '<div class="tl-body"' + (ev.bodyStyle ? ' style="' + ev.bodyStyle + '"' : '') + '>';
-    tlHtml += '<div class="tl-action">' + ev.action + '</div>';
-    tlHtml += '<div class="tl-detail">' + ev.detail + '</div>';
+    if (ev.expandId) {
+      tlHtml += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+      tlHtml += '<div class="tl-action" style="margin-bottom:0;">' + ev.action + '</div>';
+      tlHtml += '<button class="tl-xbtn' + (ev.expandRedBtn ? '' : '') + '"' + (ev.expandRedBtn ? ' style="color:var(--red);border-color:rgba(229,62,62,.2);"' : '') + ' onclick="toggleTlPanel(\'' + ev.expandId + '\')">' + (ev.expandLabel || '▼ Message') + '</button>';
+      tlHtml += '</div>';
+    } else {
+      tlHtml += '<div class="tl-action">' + ev.action + '</div>';
+    }
+    if (ev.detail) tlHtml += '<div class="tl-detail">' + ev.detail + '</div>';
     if (ev.subDetail) tlHtml += '<div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic;">' + ev.subDetail + '</div>';
     tlHtml += '<span class="tl-status ' + ev.statusClass + '">' + ev.statusText + '</span>';
+    if (ev.expandId && ev.expandHtml) tlHtml += ev.expandHtml;
     tlHtml += '</div></div>';
   });
   tlHtml += '</div></div></div>';
@@ -1913,6 +2602,17 @@ function showDetail(data) {
 
     // Chronic body — collapsed by default
     tlHtml += '<div class="tl-track-body" id="track-chronic">';
+
+    // Chronic progress strip
+    if (p.chronicProgressStrip) {
+      tlHtml += '<div style="padding:10px 14px 4px;background:white;">';
+      tlHtml += '<div class="tl-progress-strip">';
+      p.chronicProgressStrip.forEach(function(s, i) {
+        if (i > 0) tlHtml += '<div class="tl-pi-connector' + (p.chronicProgressStrip[i-1].state === 'done' ? ' done' : '') + '"></div>';
+        tlHtml += '<div class="tl-pi-step ' + s.state + '"><div class="tl-pi-dot">' + s.icon + '</div><div><div class="tl-pi-label">' + s.label + '</div></div></div>';
+      });
+      tlHtml += '</div></div>';
+    }
 
     // Rhythm grid
     if (ct.rhythm) {
@@ -1985,7 +2685,176 @@ function showDetail(data) {
   var bNoteEl = document.getElementById('d-barrier-note');
   if (bNoteEl) bNoteEl.innerHTML = p.barrierNote || '';
 
-  showScreen('detail');
+  if (typeof data === 'string' && data === 'nora') {
+    showScreen('detail-nora');
+  } else {
+    showScreen('detail');
+  }
+}
+
+function docAcknowledge(patientId) {
+  showToast('✓ Acknowledged · Logged to audit trail · ' + new Date().toLocaleTimeString());
+}
+
+function docAddNote(patientId) {
+  showToast('Clinical note saved · Sent to orchestrator');
+}
+
+function sendDocReply() {
+  var box = document.getElementById('doc-reply-box');
+  var sent = document.getElementById('doc-reply-sent');
+  var timeEl = document.getElementById('doc-reply-time');
+  if (!box || !box.value.trim()) { showToast('Please type your guidance before sending.'); return; }
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (timeEl) timeEl.textContent = timeStr;
+  if (sent) sent.style.display = 'block';
+  box.disabled = true;
+  box.style.opacity = '.5';
+  var sendBtn = document.querySelector('.msg-reply-send');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.style.opacity = '.4'; sendBtn.style.cursor = 'not-allowed'; }
+  showToast('✓ Guidance sent to Fatima Hassan · ' + timeStr + ' · Logged to audit trail');
+}
+
+function toggleDocStatus() {
+  var menu = document.getElementById('doc-status-menu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function setDocStatus(el, label, sub) {
+  var btn = document.getElementById('doc-status-btn');
+  var dot = document.getElementById('doc-status-dot');
+  var lbl = document.getElementById('doc-status-label');
+  var menu = document.getElementById('doc-status-menu');
+  var banner = document.getElementById('coverage-banner');
+  var covTime = document.getElementById('coverage-time');
+  if (!btn || !dot || !lbl) return;
+  var color = el.getAttribute('data-color');
+  var bg = el.getAttribute('data-bg');
+  var border = el.getAttribute('data-border');
+  btn.style.background = bg;
+  btn.style.borderColor = border;
+  btn.style.color = color;
+  dot.style.background = color;
+  lbl.textContent = label;
+  if (menu) menu.style.display = 'none';
+  var coverageStatuses = ['In Surgery', 'Off Call'];
+  var isCoverage = coverageStatuses.indexOf(label) !== -1;
+  if (banner) banner.style.display = isCoverage ? 'block' : 'none';
+  if (isCoverage && covTime) {
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    covTime.textContent = 'Active since ' + timeStr + ' · All actions logged under his name';
+  }
+  if (!isCoverage) resetToPrimaryDoctorView();
+  showToast('Status: ' + label + ' · ' + sub);
+}
+
+function switchToDutyView() {
+  var nameEl = document.querySelector('#screen-doctor [style*="font-family:\'Syne\'"][style*="font-size:16px"]');
+  var subEl = document.querySelector('#screen-doctor [style*="Pulmonology"], #screen-doctor [style*="Covering"]');
+  var initEl = document.querySelector('#screen-doctor [style*="gradient"]');
+  var ackBtn = document.getElementById('doc-ack-ahmed');
+  var dutyBtn = document.getElementById('duty-view-btn');
+  if (nameEl) nameEl.textContent = 'Dr. Omar Farouq';
+  if (subEl) subEl.textContent = 'Duty Doctor · Covering Dr. Sam Willis';
+  if (initEl) { initEl.textContent = 'SN'; initEl.style.background = 'linear-gradient(135deg,#0f6e56,#1d9e75)'; }
+  var statusBtn = document.getElementById('doc-status-btn');
+  var statusDot = document.getElementById('doc-status-dot');
+  var statusLbl = document.getElementById('doc-status-label');
+  if (statusBtn) { statusBtn.style.background = 'var(--blue-light)'; statusBtn.style.borderColor = 'rgba(37,99,235,.2)'; statusBtn.style.color = 'var(--blue)'; }
+  if (statusDot) statusDot.style.background = 'var(--blue)';
+  if (statusLbl) statusLbl.textContent = 'On Duty Cover';
+  if (ackBtn) ackBtn.innerHTML = '✓ Acknowledge as Dr. Omar Farouq<span style="display:block;font-size:10px;font-weight:400;opacity:.8;margin-top:2px;">Covering for Dr. Sam Willis</span>';
+  if (dutyBtn) dutyBtn.style.display = 'none';
+  var banner = document.getElementById('coverage-banner');
+  if (banner) {
+    banner.style.background = 'var(--blue-light)';
+    banner.style.borderColor = 'rgba(37,99,235,.2)';
+    var title = banner.querySelector('[style*="color:var(--amber)"]');
+    if (title) { title.style.color = 'var(--blue)'; title.textContent = '🔵 Duty doctor view active'; }
+  }
+  showToast('Switched to duty doctor view · Dr. Omar Farouq');
+}
+
+function resetToPrimaryDoctorView() {
+  var nameEl = document.querySelector('#screen-doctor [style*="font-family:\'Syne\'"][style*="font-size:16px"]');
+  var subEl = document.querySelector('#screen-doctor [style*="Covering"], #screen-doctor [style*="Pulmonology"]');
+  var initEl = document.querySelector('#screen-doctor [style*="gradient"]');
+  var ackBtn = document.getElementById('doc-ack-ahmed');
+  var dutyBtn = document.getElementById('duty-view-btn');
+  if (nameEl) nameEl.textContent = 'Dr. Sam Willis';
+  if (subEl) subEl.textContent = 'Pulmonology · American Hospital Dubai';
+  if (initEl) { initEl.textContent = 'SW'; initEl.style.background = 'linear-gradient(135deg,#1d4ed8,#3b82f6)'; }
+  if (ackBtn) ackBtn.innerHTML = '✓ Acknowledge';
+  if (dutyBtn) dutyBtn.style.display = 'block';
+  var banner = document.getElementById('coverage-banner');
+  if (banner) { banner.style.background = 'var(--amber-light)'; banner.style.borderColor = 'rgba(217,119,6,.2)'; }
+}
+
+function docAcknowledgeWithAttribution(patientId) {
+  var statusLbl = document.getElementById('doc-status-label');
+  var isDuty = statusLbl && statusLbl.textContent === 'On Duty Cover';
+  var logBox = document.querySelector('#screen-doctor [style*="line-height:1.8"]');
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  var entry = isDuty
+    ? 'Mar 9 · ' + timeStr + ' — Acknowledged by Dr. Omar Farouq · Duty cover · Dr. Sam Willis In Surgery'
+    : 'Mar 9 · ' + timeStr + ' — Acknowledged by Dr. Sam Willis';
+  if (logBox) logBox.innerHTML += '<br><strong style="color:var(--green);">' + entry + '</strong>';
+  var actor = isDuty ? 'Dr. Omar Farouq (covering Dr. Sam Willis)' : 'Dr. Sam Willis';
+  showToast('✓ Acknowledged by ' + actor + ' · Logged to HAAD audit trail');
+}
+
+function showDoctorSetup() {
+  var rows = [
+    ['Channel', 'WhatsApp'],
+    ['Working hours', 'Mon–Fri · 9:00 AM – 6:00 PM'],
+    ['Out of hours', 'Dr. Omar Farouq · +971 55 XXX XXXX'],
+    ['Alert type', 'Critical results only'],
+    ['Nudge window', 'Auto after 30 mins · Escalates to duty Dr. at 60 mins']
+  ];
+  var rowsHtml = '';
+  rows.forEach(function(r) {
+    rowsHtml += '<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);gap:12px;">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;width:120px;flex-shrink:0;">' + r[0] + '</div>'
+      + '<div style="font-size:13px;color:var(--ink);flex:1;">' + r[1] + '</div>'
+      + '<button style="font-size:11px;color:var(--teal);font-weight:600;background:none;border:1px solid rgba(0,184,156,.2);border-radius:5px;padding:2px 8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Edit</button>'
+      + '</div>';
+  });
+  var chain = [['var(--teal-light)','var(--teal-d)','CareLoop'],['var(--amber-light)','var(--amber)','Orchestrator'],['var(--blue-light)','var(--blue)','Duty Dr.'],['var(--green-light)','var(--green)','You']];
+  var chainHtml = '';
+  chain.forEach(function(c, i) {
+    chainHtml += '<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:' + c[0] + ';color:' + c[1] + ';">' + c[2] + '</span>';
+    if (i < chain.length - 1) chainHtml += '<span style="font-size:10px;color:var(--muted);">→</span>';
+  });
+  var content = '<div style="padding:4px 0 16px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:var(--ink);">Alert Setup</div><button onclick="var o=document.getElementById(\'modal-overlay\');o.style.display=\'none\';o.classList.remove(\'open\');" style="width:28px;height:28px;background:var(--bg);border:1.5px solid var(--border);border-radius:50%;font-size:14px;color:var(--slate);cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;">✕</button></div>'
+    + '<div style="font-size:11px;color:var(--muted);margin-bottom:16px;">Configured by your care orchestrator · Dr. Sam Willis</div>'
+    + rowsHtml
+    + '</div>';
+  var modal = document.getElementById('modal-content');
+  var overlay = document.getElementById('modal-overlay');
+  if (modal && overlay) {
+    modal.innerHTML = content;
+    overlay.style.display = 'flex';
+  }
+}
+
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('doc-status-menu');
+  var btn = document.getElementById('doc-status-btn');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function sendNudge() {
+  showToast('📳 Nudge sent to Dr. Sam Willis via WhatsApp · ' + new Date().toLocaleTimeString() + ' · Logged to audit trail');
+}
+
+function escalateDuty() {
+  showToast('🔺 Escalated to Dr. Omar Farouq (Duty Doctor) · ' + new Date().toLocaleTimeString() + ' · Dr. Sam Willis notified');
 }
 
 function filterQueue(type) {
@@ -2009,8 +2878,8 @@ const modals = {
   whatsapp: {
     title: '💬 Send WhatsApp Message',
     sub: 'Message pre-drafted from episode context. Edit before sending.',
-    content: `<textarea class="modal-input" style="min-height:120px;resize:vertical;">Ahmed, I'm reaching out from Al-Hilal Hospital care team. We noticed your CBC blood test hasn't been scheduled yet and your appointment with Dr. Al-Hamdan is on March 14.\n\nIs there anything we can help with? Reply HELP if you need assistance with scheduling or costs. We're here to support you. 🙏</textarea>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Sending as: CareLoop · Al-Hilal Hospital · Arabic version available</div>`,
+    content: `<textarea class="modal-input" style="min-height:120px;resize:vertical;">Zayn, I'm reaching out from American Hospital Dubai care team. We noticed your CBC blood test hasn't been scheduled yet and your appointment with Dr. Sam Willis is on March 14.\n\nIs there anything we can help with? Reply HELP if you need assistance with scheduling or costs. We're here to support you. 🙏</textarea>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Sending as: CareLoop · American Hospital Dubai · Arabic version available</div>`,
     confirm: 'confirm',
     confirmText: '💬 Send WhatsApp',
     confirmAction: () => {
@@ -2034,7 +2903,7 @@ const modals = {
   sms: {
     title: '📱 Send SMS',
     sub: 'Plain text message — reaches any phone.',
-    content: `<textarea class="modal-input" style="min-height:100px;resize:vertical;">[Al-Hilal Hospital] Ahmed, your blood test is now 5 days overdue. Your appointment is Mar 14. Call us on +971-4-XXX-XXXX or reply HELP for assistance.</textarea>`,
+    content: `<textarea class="modal-input" style="min-height:100px;resize:vertical;">[American Hospital Dubai] Zayn, your blood test is now 5 days overdue. Your appointment is Mar 14. Call us on +971-4-XXX-XXXX or reply HELP for assistance.</textarea>`,
     confirm: 'confirm',
     confirmText: '📱 Send SMS',
     confirmAction: () => showToast('📱 SMS sent to +971 50 XXX XXXX')
@@ -2043,7 +2912,7 @@ const modals = {
     title: '📞 Call Patient',
     sub: 'Choose how you want to contact the patient.',
     content: `<div style="padding:12px 14px;background:var(--bg);border-radius:8px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">Ahmed Al-Rashidi</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">Zayn Al-Rashidi</div>
       <div style="font-size:12px;color:var(--slate);">+971 50 XXX XXXX</div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">Acute Chest Infection · Day 9 · Lab overdue 5 days</div>
     </div>
@@ -2052,7 +2921,7 @@ const modals = {
       <input type="radio" name="call-type" value="manual" checked style="margin-top:2px;accent-color:var(--teal);flex-shrink:0;">
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;">📞 Call manually</div>
-        <div style="font-size:11px;color:var(--slate);line-height:1.5;">You make the call. Episode context stays visible on your screen throughout.<br><span style="color:var(--muted);">Suggested opening: <em>"Hi Ahmed, I'm calling from the care team at Al-Hilal Hospital about your blood test..."</em></span></div>
+        <div style="font-size:11px;color:var(--slate);line-height:1.5;">You make the call. Episode context stays visible on your screen throughout.<br><span style="color:var(--muted);">Suggested opening: <em>"Hi Zayn, I'm calling from the care team at American Hospital Dubai about your blood test..."</em></span></div>
       </div>
     </label>
     <label id="call-option-agent" onclick="selectCallOption('agent')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:9px;cursor:pointer;border:2px solid var(--border);background:white;margin-bottom:4px;transition:all .15s;">
@@ -2163,7 +3032,7 @@ const modals = {
       const next = document.querySelector('input[name="barrier-next"]:checked')?.value;
       if (next === 'whatsapp') showToast('🚧 Barrier logged · WhatsApp with nearest lab location sent to patient');
       else if (next === 'social') showToast('🚧 Barrier logged · Flagged for social worker review');
-      else showToast('🚧 Barrier logged · Escalation triggered to Dr. Al-Hamdan');
+      else showToast('🚧 Barrier logged · Escalation triggered to Dr. Sam Willis');
     }
   },
   abandon: {
@@ -2202,7 +3071,7 @@ const modals = {
       <option>Episode type: Acute OPD</option>
       <option>Episode type: Chronic OPD</option>
     </select>
-    <input class="modal-input" placeholder="Consulting doctor (e.g. Dr. Al-Hamdan)">`,
+    <input class="modal-input" placeholder="Consulting doctor (e.g. Dr. Sam Willis)">`,
     confirm: 'confirm',
     confirmText: '+ Onboard to CareLoop',
     confirmAction: () => showToast('✅ Patient onboarded — OPD care plan sending in 30 minutes')
@@ -2262,6 +3131,21 @@ function toggleUrgent(el) {
 }
 
 // ── TIMELINE TRACK TOGGLE ──
+function toggleTlPanel(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  el.classList.toggle('open');
+  var btns = document.querySelectorAll('[onclick="toggleTlPanel(\'' + id + '\')"]');
+  btns.forEach(function(b) {
+    if (id === 'nora-crit-msgs') {
+      b.textContent = isOpen ? '▼ See messages sent' : '▲ Hide messages';
+    } else {
+      b.textContent = isOpen ? '▼ Message' : '▲ Hide';
+    }
+  });
+}
+
 function toggleTrack(trackId, headerEl) {
   const body = document.getElementById(trackId);
   const toggleEl = document.getElementById('toggle-' + trackId);
@@ -2334,9 +3218,9 @@ function confirmEscalation() {
   pendingAction = () => sendEscalation();
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">Confirm escalation</div>
-    <div class="modal-sub">You are about to send a clinical signal to <strong>Dr. Khalid Al-Hamdan</strong> via WhatsApp. Once sent, this escalation will be logged against the episode with your name, timestamp, and user ID.</div>
+    <div class="modal-sub">You are about to send a clinical signal to <strong>Dr. Sam Willis</strong> via WhatsApp. Once sent, this escalation will be logged against the episode with your name, timestamp, and user ID.</div>
     <div style="padding:12px 14px;background:var(--bg);border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--slate);">
-      To: Dr. Khalid Al-Hamdan · Pulmonology · Al-Hilal Hospital<br>
+      To: Dr. Sam Willis · Pulmonology · American Hospital Dubai<br>
       Channel: WhatsApp · Sent by: Fatima Hassan · Care Orchestrator<br>
       <span style="color:#0369a1;font-size:10px;">🔒 HAAD/DHA-compliant · Logged with timestamp</span>
     </div>
@@ -2349,8 +3233,76 @@ function confirmEscalation() {
 }
 
 function sendEscalation() {
-  showToast('🔺 Escalation sent to Dr. Al-Hamdan via WhatsApp · HAAD audit trail created');
-  setTimeout(() => showScreen('queue'), 1500);
+  showToast('🔺 Escalation sent to Dr. Sam Willis via WhatsApp · HAAD audit trail created');
+  var nb = document.getElementById('nudge-doctor-btn');
+  if (nb) nb.style.display = '';
+  setTimeout(function() {
+    closeModal();
+    showWaPhone();
+  }, 800);
+}
+
+function switchRole(role) {
+  var banner = document.getElementById('doc-role-banner');
+  var userNameEl = document.querySelector('.user-name');
+  var userRoleEl = document.querySelector('.user-role');
+  var userAvEl = document.querySelector('.user-avatar');
+  var sidebarOrch = document.getElementById('sidebar-orchestrator');
+  var sidebarClin = document.getElementById('sidebar-clinical');
+  var sidebarExec = document.getElementById('sidebar-executive');
+  var sidebarSettings = document.getElementById('sidebar-settings');
+  var toggleBtn = document.getElementById('role-toggle-btn');
+  var toggleDot = document.getElementById('role-toggle-dot');
+  var toggleLabel = document.getElementById('role-toggle-label');
+  var hmisBtn = document.getElementById('hmis-status');
+  var demoBtn = document.getElementById('demo-btn');
+  var safeguard = document.getElementById('safeguard-bar');
+  if (role === 'doctor') {
+    if (toggleBtn) toggleBtn.dataset.role = 'doctor';
+    if (toggleDot) toggleDot.style.background = 'var(--blue)';
+    if (toggleLabel) toggleLabel.textContent = 'Doctor';
+    if (toggleBtn) { toggleBtn.style.background = 'var(--blue-light)'; toggleBtn.style.borderColor = 'rgba(37,99,235,.2)'; toggleBtn.style.color = 'var(--blue)'; }
+    if (banner) banner.classList.add('visible');
+    if (userNameEl) userNameEl.textContent = 'Dr. Sam Willis';
+    if (userRoleEl) userRoleEl.textContent = 'Pulmonologist';
+    if (userAvEl) { userAvEl.textContent = 'SW'; userAvEl.style.background = 'linear-gradient(135deg,#1d4ed8,#3b82f6)'; }
+    if (sidebarOrch) sidebarOrch.style.display = 'none';
+    if (sidebarClin) sidebarClin.style.display = '';
+    if (sidebarExec) sidebarExec.style.display = 'none';
+    if (sidebarSettings) sidebarSettings.style.display = 'none';
+    if (hmisBtn) hmisBtn.style.display = 'none';
+    if (demoBtn) demoBtn.style.display = 'none';
+    if (safeguard) safeguard.style.display = 'none';
+    showScreen('doctor');
+  } else {
+    if (toggleBtn) toggleBtn.dataset.role = 'orchestrator';
+    if (toggleDot) toggleDot.style.background = 'var(--teal)';
+    if (toggleLabel) toggleLabel.textContent = 'Orchestrator';
+    if (toggleBtn) { toggleBtn.style.background = 'var(--bg)'; toggleBtn.style.borderColor = 'var(--border)'; toggleBtn.style.color = 'var(--slate)'; }
+    if (banner) banner.classList.remove('visible');
+    if (userNameEl) userNameEl.textContent = 'Fatima Hassan';
+    if (userRoleEl) userRoleEl.textContent = 'Care Orchestrator';
+    if (userAvEl) { userAvEl.textContent = 'FH'; userAvEl.style.background = 'linear-gradient(135deg,var(--teal-d),var(--teal))'; }
+    if (sidebarOrch) sidebarOrch.style.display = '';
+    if (sidebarClin) sidebarClin.style.display = 'none';
+    if (sidebarExec) sidebarExec.style.display = '';
+    if (sidebarSettings) sidebarSettings.style.display = '';
+    if (hmisBtn) hmisBtn.style.display = '';
+    if (demoBtn) demoBtn.style.display = '';
+    if (safeguard) safeguard.style.display = '';
+    showScreen('queue');
+  }
+}
+
+function showWaPhone() {
+  var overlay = document.getElementById('wa-phone-overlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function closeWaPhone(e) {
+  if (e && e.target !== document.getElementById('wa-phone-overlay') && !e.target.classList.contains('wa-phone-close')) return;
+  var overlay = document.getElementById('wa-phone-overlay');
+  if (overlay) overlay.classList.remove('open');
 }
 
 function incrementClosed() {
@@ -2476,7 +3428,7 @@ function handleNewPrescription(prescriptionData) {
     status: 'auto',
     suggestion: 'Episode just onboarded from HMIS. First WhatsApp care plan sent automatically. Monitor for 24 hours before any action is needed.',
     escalateTo: prescriptionData.consultant,
-    escalateDept: prescriptionData.dept + ' · Al-Hilal Hospital',
+    escalateDept: prescriptionData.dept + ' · American Hospital Dubai',
     episodes: [{
       type: prescriptionData.episodeType === 'OPD Chronic' ? 'chronic' : 'acute',
       label: prescriptionData.episodeType + ' · Day 1',
