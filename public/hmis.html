@@ -137,11 +137,11 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
 <div class="hmis-header">
   <div class="hmis-logo">Medinous <span>HMIS</span></div>
   <div class="hmis-header-sep"></div>
-  <div class="hmis-header-info"><strong>Al-Hilal Hospital</strong> · Abu Dhabi</div>
+  <div class="hmis-header-info"><strong>American Hospital Dubai</strong> · Abu Dhabi</div>
   <div class="hmis-header-sep"></div>
   <div class="hmis-header-info">General Practice · OPD</div>
   <div class="hmis-header-right">
-    <div class="doctor-badge">Dr. Layla Al-Rashid · Endocrinology</div>
+    <div class="doctor-badge">Dr. Sam Willis · General Practice</div>
     <div class="date-badge">20 Mar 2026</div>
   </div>
 </div>
@@ -159,19 +159,19 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
       <div class="form-grid">
         <div class="form-group">
           <label>Patient Name *</label>
-          <input type="text" id="f-name" value="Nora Al-Ansari" required>
+          <input type="text" id="f-name" value="Zayn Al-Rashidi" required>
         </div>
         <div class="form-group">
           <label>MRN *</label>
-          <input type="text" id="f-mrn" value="44201" required>
+          <input type="text" id="f-mrn" value="40821" required>
         </div>
         <div class="form-group">
           <label>Age *</label>
-          <input type="text" id="f-age" value="38 years" required>
+          <input type="text" id="f-age" value="34 years" required>
         </div>
         <div class="form-group">
           <label>Mobile *</label>
-          <input type="text" id="f-phone" value="+971 52 XXX XXXX" required>
+          <input type="text" id="f-phone" value="+971 50 XXX XXXX" required>
         </div>
         <div class="form-group">
           <label>Language</label>
@@ -202,7 +202,7 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
       <div class="form-grid">
         <div class="form-group">
           <label>Consulting Doctor *</label>
-          <input type="text" id="f-doctor" value="Dr. Layla Al-Rashid" required>
+          <input type="text" id="f-doctor" value="Dr. Sam Willis" required>
         </div>
         <div class="form-group">
           <label>Department *</label>
@@ -212,12 +212,12 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
             <option>Cardiology</option>
             <option>Gastroenterology</option>
             <option>Radiology</option>
-            <option>General Practice</option>
+            <option selected>General Practice</option>
           </select>
         </div>
         <div class="form-group">
           <label>Diagnosis *</label>
-          <input type="text" id="f-diagnosis" value="Type 2 Diabetes — newly diagnosed" required>
+          <input type="text" id="f-diagnosis" value="Fever Investigation, Query URTI" required>
         </div>
         <div class="form-group">
           <label>Episode Type</label>
@@ -236,31 +236,45 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
     <div class="form-section-body">
       <div class="med-rows" id="med-rows">
         <div class="med-row">
-          <div class="form-group"><label>Medication</label><input type="text" value="Metformin 500mg"></div>
+          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Paracetamol 500mg"></div>
           <div class="form-group"><label>Dose</label><input type="text" value="500mg"></div>
           <div class="form-group"><label>Frequency</label>
             <select>
               <option>Once daily</option>
-              <option selected>Twice daily</option>
+              <option>Twice daily</option>
               <option>Three times daily</option>
-              <option>As needed</option>
+              <option selected>Stat + SOS</option>
             </select>
           </div>
-          <div class="form-group"><label>Duration</label><input type="text" value="Ongoing"></div>
+          <div class="form-group"><label>Duration</label><input type="text" value="As needed"></div>
           <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
         </div>
         <div class="med-row">
-          <div class="form-group"><label>Medication</label><input type="text" value="Vitamin D3"></div>
-          <div class="form-group"><label>Dose</label><input type="text" value="1000 IU"></div>
+          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Ondansetron 4mg"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="4mg"></div>
+          <div class="form-group"><label>Frequency</label>
+            <select>
+              <option>Once daily</option>
+              <option>Twice daily</option>
+              <option>Three times daily</option>
+              <option selected>Stat + SOS</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Duration</label><input type="text" value="As needed"></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+        <div class="med-row">
+          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Azithromycin 500mg"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="500mg"></div>
           <div class="form-group"><label>Frequency</label>
             <select>
               <option selected>Once daily</option>
               <option>Twice daily</option>
               <option>Three times daily</option>
-              <option>As needed</option>
+              <option>Stat + SOS</option>
             </select>
           </div>
-          <div class="form-group"><label>Duration</label><input type="text" value="3 months"></div>
+          <div class="form-group"><label>Duration</label><input type="text" value="5 days"></div>
           <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
         </div>
       </div>
@@ -268,26 +282,58 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
     </div>
   </div>
 
-  <!-- Lab Orders -->
+  <!-- Lab Investigations -->
   <div class="form-section">
-    <div class="form-section-header">Lab & Investigation Orders</div>
+    <div class="form-section-header">Lab Investigations</div>
     <div class="form-section-body">
       <div class="lab-rows" id="lab-rows">
-        <div class="lab-row">
-          <div class="form-group"><label>Test Name</label><input type="text" value="HbA1c Blood Test"></div>
-          <div class="form-group"><label>Lab / Centre</label><input type="text" value="Al Noor Lab · Khalidiyah"></div>
-          <div class="form-group"><label>Due Within</label>
+        <div class="lab-row" style="grid-template-columns:1.5fr .8fr 28px;">
+          <div class="form-group"><label>Investigation</label><input type="text" value="Blood CBC with Differential Count (TLC/DLC)"></div>
+          <div class="form-group"><label>Priority</label>
             <select>
-              <option>3 days</option>
-              <option selected>7 days</option>
-              <option>14 days</option>
-              <option>1 month</option>
+              <option selected>Routine</option>
+              <option>Urgent</option>
+              <option>STAT</option>
+            </select>
+          </div>
+          <button class="remove-btn" onclick="this.closest('.lab-row').remove()">&times;</button>
+        </div>
+        <div class="lab-row" style="grid-template-columns:1.5fr .8fr 28px;">
+          <div class="form-group"><label>Investigation</label><input type="text" value="Malarial Parasite (MP) Smear"></div>
+          <div class="form-group"><label>Priority</label>
+            <select>
+              <option selected>Routine</option>
+              <option>Urgent</option>
+              <option>STAT</option>
             </select>
           </div>
           <button class="remove-btn" onclick="this.closest('.lab-row').remove()">&times;</button>
         </div>
       </div>
-      <div class="add-link" onclick="addLabRow()">+ Add Lab Order</div>
+      <div class="add-link" onclick="addLabRow()">+ Add Investigation</div>
+    </div>
+  </div>
+
+  <!-- Patient Instructions -->
+  <div class="form-section">
+    <div class="form-section-header">Patient Instructions</div>
+    <div class="form-section-body">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;">CareLoop monitors these instructions during patient wellbeing checks.</div>
+      <div class="med-rows" id="instruction-rows">
+        <div class="med-row" style="grid-template-columns:1fr 28px;">
+          <div class="form-group"><label>Instruction</label><input type="text" value="Monitor temperature every 4-6 hours. Note reading and time each time."></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+        <div class="med-row" style="grid-template-columns:1fr 28px;">
+          <div class="form-group"><label>Instruction</label><input type="text" value="Watch out for shivering or recurring high fever — especially if it repeats every 6-7 hours. Come to hospital immediately if this happens."></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+        <div class="med-row" style="grid-template-columns:1fr 28px;">
+          <div class="form-group"><label>Instruction</label><input type="text" value="Take light bland meals only. Avoid spicy, oily or heavy food during the medication course."></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+      </div>
+      <div class="add-link" onclick="addInstructionRow()">+ Add Instruction</div>
     </div>
   </div>
 
@@ -312,12 +358,12 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
             <option>Cardiology</option>
             <option>Gastroenterology</option>
             <option>Radiology</option>
-            <option>General Practice</option>
+            <option selected>General Practice</option>
           </select>
         </div>
         <div class="form-group" style="grid-column:span 3;">
           <label>Notes</label>
-          <textarea id="f-followup-notes" placeholder="Any notes for the follow-up visit..."></textarea>
+          <textarea id="f-followup-notes">Review with CBC and malarial parasite reports. Return in 5-7 days · OPD · American Hospital Dubai</textarea>
         </div>
       </div>
     </div>
@@ -335,7 +381,7 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
 <div class="status-bar">
   <span class="status-dot"></span>
   Connected to CareLoop Workbench · localStorage bridge active
-  <span style="margin-left:auto;color:#94a3b8;">Medinous HMIS v4.2 · Al-Hilal Hospital</span>
+  <span style="margin-left:auto;color:#94a3b8;">Medinous HMIS v4.2 · American Hospital Dubai</span>
 </div>
 
 <script>
@@ -355,7 +401,7 @@ function addMedRow() {
   row.className = 'med-row';
   row.innerHTML = '<div class="form-group"><label>Medication</label><input type="text" placeholder="Medication name"></div>' +
     '<div class="form-group"><label>Dose</label><input type="text" placeholder="e.g. 500mg"></div>' +
-    '<div class="form-group"><label>Frequency</label><select><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>As needed</option></select></div>' +
+    '<div class="form-group"><label>Frequency</label><select><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>As needed</option><option>Stat + SOS</option></select></div>' +
     '<div class="form-group"><label>Duration</label><input type="text" placeholder="e.g. 10 days"></div>' +
     '<button class="remove-btn" onclick="this.closest(\'.med-row\').remove()">&times;</button>';
   container.appendChild(row);
@@ -365,10 +411,20 @@ function addLabRow() {
   var container = document.getElementById('lab-rows');
   var row = document.createElement('div');
   row.className = 'lab-row';
-  row.innerHTML = '<div class="form-group"><label>Test Name</label><input type="text" placeholder="Test name"></div>' +
-    '<div class="form-group"><label>Lab / Centre</label><input type="text" placeholder="Lab name"></div>' +
-    '<div class="form-group"><label>Due Within</label><select><option>3 days</option><option>7 days</option><option>14 days</option><option>1 month</option></select></div>' +
+  row.style.gridTemplateColumns = '1.5fr .8fr 28px';
+  row.innerHTML = '<div class="form-group"><label>Investigation</label><input type="text" placeholder="Investigation name"></div>' +
+    '<div class="form-group"><label>Priority</label><select><option>Routine</option><option>Urgent</option><option>STAT</option></select></div>' +
     '<button class="remove-btn" onclick="this.closest(\'.lab-row\').remove()">&times;</button>';
+  container.appendChild(row);
+}
+
+function addInstructionRow() {
+  var container = document.getElementById('instruction-rows');
+  var row = document.createElement('div');
+  row.className = 'med-row';
+  row.style.gridTemplateColumns = '1fr 28px';
+  row.innerHTML = '<div class="form-group"><label>Instruction</label><input type="text" placeholder="Enter instruction..."></div>' +
+    '<button class="remove-btn" onclick="this.closest(\'.med-row\').remove()">&times;</button>';
   container.appendChild(row);
 }
 
