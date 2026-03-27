@@ -130,10 +130,12 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
   text-transform:uppercase; letter-spacing:1.5px; text-align:left;
 }
 .queue-row {
-  display:grid; grid-template-columns:40px 1.8fr 1.2fr 1fr 120px 130px 120px;
+  display:grid; grid-template-columns:32px 1.4fr 1fr 1.8fr 100px 100px;
   align-items:center; padding:0 16px; border-bottom:1px solid #f1f5f9;
   cursor:pointer; transition:background .1s; min-height:60px;
 }
+.queue-row > :nth-child(5),
+.queue-row > :nth-child(6) { text-align:center; justify-self:center; }
 .queue-row:last-child { border-bottom:none; }
 .queue-row:hover { background:#f8fafc; }
 .queue-row.selected { background:var(--teal-light); }
@@ -856,7 +858,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
   <div class="sidebar-section" id="sidebar-orchestrator">
     <div class="sidebar-section-label">Care Orchestrator</div>
     <div class="nav-item active" onclick="showScreen('queue')">
-      <span class="nav-icon">⚡</span> Triaging Patients
+      <span class="nav-icon">⚡</span> Priority Queue
       <span class="nav-badge">4</span>
     </div>
   </div>
@@ -915,10 +917,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
     </div>
   </div>
 
-  <!-- SAFEGUARD BANNER -->
-  <div class="safeguard-bar" id="safeguard-bar">
-    CareLoop surfaces information to support your decisions. All suggestions must be reviewed before any action is taken. CareLoop does not make clinical decisions. All actions are logged with timestamp and user ID for HAAD/DHA audit purposes.
-  </div>
 
 
 
@@ -933,15 +931,15 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         <span class="section-count">18 patients</span>
         <div class="filter-row">
           <button class="filter-btn" onclick="setFilter(this,'all')">All</button>
-          <button class="filter-btn active" onclick="setFilter(this,'red')">🔴 Emergent</button>
-          <button class="filter-btn" onclick="setFilter(this,'amber')">🟡 Urgent</button>
-          <button class="filter-btn" onclick="setFilter(this,'green')">🟢 Normal</button>
+          <button class="filter-btn active" onclick="setFilter(this,'red')">🔴 Critical</button>
+          <button class="filter-btn" onclick="setFilter(this,'amber')">🟡 At Risk</button>
+          <button class="filter-btn" onclick="setFilter(this,'green')">🟢 On Track</button>
         </div>
       </div>
 
       <div class="queue-table">
         <div class="queue-thead">
-          <div class="queue-row" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;background:#f8fafc;min-height:36px;cursor:default;">
+          <div class="queue-row" style="background:#f8fafc;min-height:36px;cursor:default;">
             <div></div>
             <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">Patient · Insurance</div>
             <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">Episode</div>
@@ -952,7 +950,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         </div>
 
         <!-- Row 1 -->
-        <div class="queue-row" data-status="critical" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;" onclick="showDetail('marcus')">
+        <div class="queue-row" data-status="critical" onclick="showDetail('marcus')">
           <div class="risk-dot red"></div>
           <div>
             <div class="patient-name">Zayn Al-Rashidi</div>
@@ -967,7 +965,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         </div>
 
         <!-- Row 2 — Nora -->
-        <div class="queue-row" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;" data-status="critical" onclick="showDetail('nora')">
+        <div class="queue-row" data-status="critical" onclick="showDetail('nora')">
           <div class="risk-dot red"></div>
           <div>
             <div class="patient-name">Nora Al-Ansari</div>
@@ -977,12 +975,12 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <div class="action-pending">
             <strong>Critical symptom — stomach pain + vomiting</strong>
           </div>
-          <div class="days-badge" style="background:var(--red-light);color:var(--red);border:1px solid rgba(229,62,62,.2);">Auto-acted</div>
-          <span class="action-tag" style="background:var(--amber-light);color:var(--amber);border:1px solid rgba(217,119,6,.15);font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Auto-Acted</span>
+          <div class="days-badge overdue">Auto-acted</div>
+          <span class="action-tag escalate">Auto-Acted</span>
         </div>
 
         <!-- Row 4 -->
-        <div class="queue-row" data-status="watch" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;" onclick="showDetail('khalid')">
+        <div class="queue-row" data-status="watch" onclick="showDetail('khalid')">
           <div class="risk-dot amber"></div>
           <div>
             <div class="patient-name">Khalid Al-Mansoori</div>
@@ -997,7 +995,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         </div>
 
         <!-- Row 4 -->
-        <div class="queue-row" data-status="watch" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;" onclick="showDetail('mariam')">
+        <div class="queue-row" data-status="watch" onclick="showDetail('mariam')">
           <div class="risk-dot amber"></div>
           <div>
             <div class="patient-name">Mariam Al-Suwaidi</div>
@@ -1012,7 +1010,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
         </div>
 
         <!-- Row 5 — Ready to Close -->
-        <div class="queue-row" id="sara-row" data-status="auto" style="grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;background:#f0fdf4;" onclick="showScreen('close-episode')">
+        <div class="queue-row" id="sara-row" data-status="auto" style="background:#f0fdf4;" onclick="showScreen('close-episode')">
           <div class="risk-dot green"></div>
           <div>
             <div class="patient-name" style="display:flex;align-items:center;gap:8px;">
@@ -1533,14 +1531,6 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
             </button>
 
             <div style="height:1px;background:var(--border);margin:12px 0;"></div>
-
-            <button class="action-btn" style="background:var(--green-light);border:1px solid rgba(22,163,74,.2);color:var(--green);margin-bottom:6px;" onclick="showScreen('close-episode')">
-              <span class="action-btn-icon">✅</span>
-              <div class="action-btn-text">
-                <div class="action-btn-label">Close Episode</div>
-                <div class="action-btn-sub">All care items complete · Record outcome</div>
-              </div>
-            </button>
 
             <button class="abandoned-btn" onclick="showModal('abandon')">
               <span style="font-size:14px;">🚩</span>
@@ -3508,7 +3498,7 @@ function runPrescriptionDemo() {
     row.className = 'queue-row row-highlight';
     row.setAttribute('data-status', 'auto');
     row.setAttribute('onclick', "showDetail('nora')");
-    row.style.cssText = 'grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;border-left:3px solid var(--green);cursor:pointer;';
+    row.style.cssText = 'border-left:3px solid var(--green);cursor:pointer;';
     row.innerHTML = '<div class="risk-dot green"></div>' +
       '<div><div class="patient-name">Nora Al-Ansari</div><div class="patient-meta">MRN 44201 · Daman · 38y · Arabic</div></div>' +
       '<div><span class="episode-tag acute">OPD Acute</span></div>' +
@@ -3633,7 +3623,7 @@ function handleNewPrescription(prescriptionData) {
 
     var newRow = document.createElement('div');
     newRow.className = 'queue-row row-highlight';
-    newRow.style.cssText = 'grid-template-columns:32px 1.4fr 1fr 1.8fr 120px 120px;border-left:3px solid var(--green);cursor:pointer;';
+    newRow.style.cssText = 'border-left:3px solid var(--green);cursor:pointer;';
     newRow.setAttribute('data-status', 'auto');
     newRow.setAttribute('data-patient-key', patientKey);
     newRow.setAttribute('onclick', "showDetail('" + patientKey + "')");
