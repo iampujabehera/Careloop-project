@@ -118,6 +118,50 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
   text-align:center; font-size:11px; color:#94a3b8; margin-top:8px;
 }
 
+/* Patient bar */
+.patient-bar {
+  background:#1a1a2e; color:white; padding:10px 24px;
+  display:flex; align-items:center; gap:12px; font-size:13px;
+}
+.patient-bar-name { font-weight:700; font-size:14px; }
+.patient-bar-meta { font-size:12px; color:rgba(255,255,255,.6); }
+.patient-bar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.patient-bar-badge {
+  padding:3px 10px; border-radius:4px; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1px;
+}
+.badge-new { background:#00b89c; color:white; }
+.history-btn {
+  padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.25);
+  background:transparent; color:white; font-size:12px; font-weight:600;
+  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s;
+}
+.history-btn:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.4); }
+
+/* Prescription history dropdown */
+.history-dropdown {
+  position:absolute; top:100%; right:0; width:420px; background:white;
+  border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.15);
+  z-index:100; display:none; color:#1a1a2e; margin-top:6px;
+}
+.history-dropdown.show { display:block; }
+.history-dropdown-header {
+  padding:12px 16px; border-bottom:1px solid #e2e8f0;
+  font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px;
+}
+.history-card {
+  padding:14px 16px; border-bottom:1px solid #f1f5f9;
+}
+.history-card-title { font-size:13px; font-weight:700; color:#1a1a2e; margin-bottom:2px; }
+.history-card-diagnosis { font-size:12px; color:#64748b; margin-bottom:8px; }
+.history-card-item { font-size:12px; color:#475569; padding:2px 0; }
+.history-card-status {
+  margin-top:8px; font-size:11px; font-weight:600; color:#16a34a;
+}
+.history-footer {
+  padding:10px 16px; font-size:11px; color:#94a3b8; text-align:center;
+}
+
 /* Status bar */
 .status-bar {
   position:fixed; bottom:0; left:0; right:0;
@@ -146,6 +190,31 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
   </div>
 </div>
 
+<!-- Patient Bar -->
+<div class="patient-bar">
+  <span class="patient-bar-name">Nora Al-Ansari</span>
+  <span class="patient-bar-meta">MRN 44201 · 38 yrs · Daman Enhanced</span>
+  <div class="patient-bar-right" style="position:relative;">
+    <button class="history-btn" id="history-btn" onclick="toggleHistoryDropdown(event)">📋 Prescription History ▾</button>
+    <span class="patient-bar-badge badge-new">New Prescription</span>
+    <div class="history-dropdown" id="history-dropdown">
+      <div class="history-dropdown-header">Previous Prescriptions</div>
+      <div class="history-card">
+        <div class="history-card-title">Zayn Al-Rashidi · MRN 40821 · Mar 26</div>
+        <div class="history-card-diagnosis">Diagnosis: Fever Investigation, Query URTI</div>
+        <div class="history-card-item">💊 Tab. Paracetamol 500mg · Stat + SOS</div>
+        <div class="history-card-item">💊 Tab. Ondansetron 4mg · Stat + SOS</div>
+        <div class="history-card-item">💊 Tab. Azithromycin 500mg · Once daily · 5 days</div>
+        <div class="history-card-item">🧪 Blood CBC with Differential Count · Routine</div>
+        <div class="history-card-item">🧪 Malarial Parasite (MP) Smear · Routine</div>
+        <div class="history-card-item">📋 Monitor temp every 4-6 hrs · Watch for shivering and recurring fever</div>
+        <div class="history-card-status">✓ Active episode · CareLoop monitoring</div>
+      </div>
+      <div class="history-footer">No older prescriptions</div>
+    </div>
+  </div>
+</div>
+
 <!-- Main -->
 <div class="hmis-main">
 
@@ -159,19 +228,19 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
       <div class="form-grid">
         <div class="form-group">
           <label>Patient Name *</label>
-          <input type="text" id="f-name" value="Zayn Al-Rashidi" required>
+          <input type="text" id="f-name" value="Nora Al-Ansari" required>
         </div>
         <div class="form-group">
           <label>MRN *</label>
-          <input type="text" id="f-mrn" value="40821" required>
+          <input type="text" id="f-mrn" value="44201" required>
         </div>
         <div class="form-group">
           <label>Age *</label>
-          <input type="text" id="f-age" value="34 years" required>
+          <input type="text" id="f-age" value="38 years" required>
         </div>
         <div class="form-group">
           <label>Mobile *</label>
-          <input type="text" id="f-phone" value="+971 50 XXX XXXX" required>
+          <input type="text" id="f-phone" value="+971 55 XXX XXXX" required>
         </div>
         <div class="form-group">
           <label>Language</label>
@@ -217,7 +286,7 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
         </div>
         <div class="form-group">
           <label>Diagnosis *</label>
-          <input type="text" id="f-diagnosis" value="Fever Investigation, Query URTI" required>
+          <input type="text" id="f-diagnosis" value="Abdominal Pain, Query Appendicitis" required>
         </div>
         <div class="form-group">
           <label>Episode Type</label>
@@ -236,8 +305,22 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
     <div class="form-section-body">
       <div class="med-rows" id="med-rows">
         <div class="med-row">
-          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Paracetamol 500mg"></div>
-          <div class="form-group"><label>Dose</label><input type="text" value="500mg"></div>
+          <div class="form-group"><label>Medication</label><input type="text" value="Inj. Ranitidine 50mg"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="50mg"></div>
+          <div class="form-group"><label>Frequency</label>
+            <select>
+              <option>Once daily</option>
+              <option>Twice daily</option>
+              <option>Three times daily</option>
+              <option selected>Stat · IV</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Duration</label><input type="text" value="Given at clinic"></div>
+          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
+        </div>
+        <div class="med-row">
+          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Hyoscine Butylbromide 10mg"></div>
+          <div class="form-group"><label>Dose</label><input type="text" value="10mg"></div>
           <div class="form-group"><label>Frequency</label>
             <select>
               <option>Once daily</option>
@@ -247,34 +330,6 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
             </select>
           </div>
           <div class="form-group"><label>Duration</label><input type="text" value="As needed"></div>
-          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
-        </div>
-        <div class="med-row">
-          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Ondansetron 4mg"></div>
-          <div class="form-group"><label>Dose</label><input type="text" value="4mg"></div>
-          <div class="form-group"><label>Frequency</label>
-            <select>
-              <option>Once daily</option>
-              <option>Twice daily</option>
-              <option>Three times daily</option>
-              <option selected>Stat + SOS</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Duration</label><input type="text" value="As needed"></div>
-          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
-        </div>
-        <div class="med-row">
-          <div class="form-group"><label>Medication</label><input type="text" value="Tab. Azithromycin 500mg"></div>
-          <div class="form-group"><label>Dose</label><input type="text" value="500mg"></div>
-          <div class="form-group"><label>Frequency</label>
-            <select>
-              <option selected>Once daily</option>
-              <option>Twice daily</option>
-              <option>Three times daily</option>
-              <option>Stat + SOS</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Duration</label><input type="text" value="5 days"></div>
           <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
         </div>
       </div>
@@ -288,23 +343,12 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
     <div class="form-section-body">
       <div class="lab-rows" id="lab-rows">
         <div class="lab-row" style="grid-template-columns:1.5fr .8fr 28px;">
-          <div class="form-group"><label>Investigation</label><input type="text" value="Blood CBC with Differential Count (TLC/DLC)"></div>
+          <div class="form-group"><label>Investigation</label><input type="text" value="USG Abdomen — to rule out appendicitis"></div>
           <div class="form-group"><label>Priority</label>
             <select>
-              <option selected>Routine</option>
+              <option>Routine</option>
               <option>Urgent</option>
-              <option>STAT</option>
-            </select>
-          </div>
-          <button class="remove-btn" onclick="this.closest('.lab-row').remove()">&times;</button>
-        </div>
-        <div class="lab-row" style="grid-template-columns:1.5fr .8fr 28px;">
-          <div class="form-group"><label>Investigation</label><input type="text" value="Malarial Parasite (MP) Smear"></div>
-          <div class="form-group"><label>Priority</label>
-            <select>
-              <option selected>Routine</option>
-              <option>Urgent</option>
-              <option>STAT</option>
+              <option selected>Stat</option>
             </select>
           </div>
           <button class="remove-btn" onclick="this.closest('.lab-row').remove()">&times;</button>
@@ -321,15 +365,11 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
       <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;">CareLoop monitors these instructions during patient wellbeing checks.</div>
       <div class="med-rows" id="instruction-rows">
         <div class="med-row" style="grid-template-columns:1fr 28px;">
-          <div class="form-group"><label>Instruction</label><input type="text" value="Monitor temperature every 4-6 hours. Note reading and time each time."></div>
+          <div class="form-group"><label>Instruction</label><input type="text" value="Watch out for vomiting or severe stomach pain — especially right lower abdomen."></div>
           <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
         </div>
         <div class="med-row" style="grid-template-columns:1fr 28px;">
-          <div class="form-group"><label>Instruction</label><input type="text" value="Watch out for shivering or recurring high fever — especially if it repeats every 6-7 hours. Come to hospital immediately if this happens."></div>
-          <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
-        </div>
-        <div class="med-row" style="grid-template-columns:1fr 28px;">
-          <div class="form-group"><label>Instruction</label><input type="text" value="Take light bland meals only. Avoid spicy, oily or heavy food during the medication course."></div>
+          <div class="form-group"><label>Instruction</label><input type="text" value="Take bland diet only. Avoid spicy, oily or heavy food."></div>
           <button class="remove-btn" onclick="this.closest('.med-row').remove()">&times;</button>
         </div>
       </div>
@@ -361,9 +401,17 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
             <option selected>General Practice</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" value="American Hospital Dubai · General Practice" readonly>
+        </div>
+        <div class="form-group">
+          <label>Bring</label>
+          <input type="text" value="USG Abdomen report" readonly>
+        </div>
         <div class="form-group" style="grid-column:span 3;">
           <label>Notes</label>
-          <textarea id="f-followup-notes">Review with CBC and malarial parasite reports. Return in 5-7 days · OPD · American Hospital Dubai</textarea>
+          <textarea id="f-followup-notes">Review with USG report. Return tomorrow · OPD · American Hospital Dubai</textarea>
         </div>
       </div>
     </div>
@@ -385,10 +433,22 @@ body { font-family:'DM Sans',sans-serif; background:#f5f6f8; color:#1a1a2e; font
 </div>
 
 <script>
-// Set default follow-up date to 14 days from now
+// Prescription History dropdown
+function toggleHistoryDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('history-dropdown').classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('history-dropdown');
+  if (dd && !dd.contains(e.target) && e.target.id !== 'history-btn') {
+    dd.classList.remove('show');
+  }
+});
+
+// Set default follow-up date to tomorrow
 (function() {
   var d = new Date();
-  d.setDate(d.getDate() + 14);
+  d.setDate(d.getDate() + 1);
   var yyyy = d.getFullYear();
   var mm = String(d.getMonth() + 1).padStart(2, '0');
   var dd = String(d.getDate()).padStart(2, '0');
@@ -401,7 +461,7 @@ function addMedRow() {
   row.className = 'med-row';
   row.innerHTML = '<div class="form-group"><label>Medication</label><input type="text" placeholder="Medication name"></div>' +
     '<div class="form-group"><label>Dose</label><input type="text" placeholder="e.g. 500mg"></div>' +
-    '<div class="form-group"><label>Frequency</label><select><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>As needed</option><option>Stat + SOS</option></select></div>' +
+    '<div class="form-group"><label>Frequency</label><select><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>As needed</option><option>Stat + SOS</option><option>Stat · IV</option></select></div>' +
     '<div class="form-group"><label>Duration</label><input type="text" placeholder="e.g. 10 days"></div>' +
     '<button class="remove-btn" onclick="this.closest(\'.med-row\').remove()">&times;</button>';
   container.appendChild(row);
@@ -413,7 +473,7 @@ function addLabRow() {
   row.className = 'lab-row';
   row.style.gridTemplateColumns = '1.5fr .8fr 28px';
   row.innerHTML = '<div class="form-group"><label>Investigation</label><input type="text" placeholder="Investigation name"></div>' +
-    '<div class="form-group"><label>Priority</label><select><option>Routine</option><option>Urgent</option><option>STAT</option></select></div>' +
+    '<div class="form-group"><label>Priority</label><select><option>Routine</option><option>Urgent</option><option>Stat</option></select></div>' +
     '<button class="remove-btn" onclick="this.closest(\'.lab-row\').remove()">&times;</button>';
   container.appendChild(row);
 }

@@ -772,26 +772,26 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 .wa-phone-wrap { position:relative; animation:phoneSlideIn .4s cubic-bezier(.34,1.56,.64,1); }
 @keyframes phoneSlideIn { from{opacity:0;transform:translateY(40px) scale(.93)} to{opacity:1;transform:translateY(0) scale(1)} }
 .wa-phone-close { position:absolute; top:-14px; right:-14px; width:32px; height:32px; border-radius:50%; background:white; border:none; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.25); z-index:10; line-height:1; }
-.wa-phone { width:300px; background:#1c1c1e; border-radius:44px; padding:12px; box-shadow:0 40px 100px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08); }
-.wa-phone-screen { background:#ece5dd; border-radius:34px; overflow:hidden; }
-.wa-notif-bar { background:rgba(7,94,84,.97); margin:8px 8px 0; border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:10px; animation:notifDrop .3s ease .2s both; }
+.wa-phone { width:260px; background:#1c1c1e; border-radius:36px; padding:10px; box-shadow:0 40px 100px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08); }
+.wa-phone-screen { background:#ece5dd; border-radius:28px; overflow:hidden; }
+.wa-notif-bar { background:rgba(7,94,84,.97); margin:6px 6px 0; border-radius:10px; padding:5px 8px; display:flex; align-items:center; gap:6px; animation:notifDrop .3s ease .2s both; }
 @keyframes notifDrop { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-.wa-notif-icon { width:38px; height:38px; border-radius:10px; background:#25d366; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.wa-notif-icon { width:24px; height:24px; border-radius:6px; background:#25d366; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
 .wa-notif-content { flex:1; }
-.wa-notif-app { font-size:10px; color:rgba(255,255,255,.55); font-family:'DM Sans',sans-serif; margin-bottom:1px; }
-.wa-notif-title { font-size:12px; font-weight:600; color:white; font-family:'DM Sans',sans-serif; }
-.wa-notif-body { font-size:11px; color:rgba(255,255,255,.65); font-family:'DM Sans',sans-serif; }
-.wa-chat-header { background:#075e54; padding:10px 14px; display:flex; align-items:center; gap:10px; }
-.wa-chat-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#00b89c,#008f79); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; font-family:'Syne',sans-serif; flex-shrink:0; }
+.wa-notif-app { font-size:8px; color:rgba(255,255,255,.55); font-family:'DM Sans',sans-serif; margin-bottom:0; line-height:1.2; }
+.wa-notif-title { font-size:10px; font-weight:600; color:white; font-family:'DM Sans',sans-serif; line-height:1.2; }
+.wa-notif-body { font-size:9px; color:rgba(255,255,255,.65); font-family:'DM Sans',sans-serif; line-height:1.2; }
+.wa-chat-header { background:#075e54; padding:7px 10px; display:flex; align-items:center; gap:8px; }
+.wa-chat-avatar { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#00b89c,#008f79); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; font-family:'Syne',sans-serif; flex-shrink:0; }
 .wa-chat-info { flex:1; }
-.wa-chat-name { font-size:13px; font-weight:600; color:white; font-family:'DM Sans',sans-serif; }
-.wa-chat-sub { font-size:10px; color:rgba(255,255,255,.55); font-family:'DM Sans',sans-serif; }
-.wa-messages { padding:12px 10px 16px; min-height:240px; display:flex; flex-direction:column; gap:6px; background:#ece5dd; }
-.wa-bubble { background:white; border-radius:0 10px 10px 10px; padding:9px 11px 6px; max-width:90%; font-size:12px; line-height:1.6; color:#111; font-family:'DM Sans',sans-serif; box-shadow:0 1px 2px rgba(0,0,0,.1); position:relative; animation:bubbleIn .25s ease .5s both; }
+.wa-chat-name { font-size:11px; font-weight:600; color:white; font-family:'DM Sans',sans-serif; }
+.wa-chat-sub { font-size:9px; color:rgba(255,255,255,.55); font-family:'DM Sans',sans-serif; }
+.wa-messages { padding:8px 8px 10px; min-height:auto; display:flex; flex-direction:column; gap:4px; background:#ece5dd; }
+.wa-bubble { background:white; border-radius:0 10px 10px 10px; padding:7px 9px 5px; max-width:90%; font-size:11px; line-height:1.5; color:#111; font-family:'DM Sans',sans-serif; box-shadow:0 1px 2px rgba(0,0,0,.1); position:relative; animation:bubbleIn .25s ease .5s both; }
 @keyframes bubbleIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
 .wa-bubble::before { content:''; position:absolute; top:0; left:-7px; border-right:7px solid white; border-top:7px solid transparent; }
 .wa-bubble-time { font-size:10px; color:#999; text-align:right; margin-top:4px; }
-.wa-cta-btn { display:block; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:8px 12px; margin-top:8px; font-size:11px; font-weight:600; color:#15803d; text-align:center; font-family:'DM Sans',sans-serif; cursor:pointer; }
+.wa-cta-btn { display:block; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:6px 10px; margin-top:6px; font-size:10px; font-weight:600; color:#15803d; text-align:center; font-family:'DM Sans',sans-serif; cursor:pointer; }
 .wa-demo-caption { text-align:center; margin-top:14px; font-size:11px; color:rgba(255,255,255,.4); font-family:'DM Sans',sans-serif; line-height:1.5; }
 /* ── DOCTOR VIEW V3 ── */
 .dv-stat-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; background:var(--white); border:1px solid var(--border); border-radius:12px; margin-bottom:16px; box-shadow:var(--shadow); }
@@ -855,9 +855,16 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
     <div class="logo-sub">American Hospital Dubai · OPD Care</div>
   </div>
 
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">HMIS</div>
+    <div class="nav-item active" onclick="showScreen('prescription')">
+      <span class="nav-icon">📝</span> New Prescription
+    </div>
+  </div>
+
   <div class="sidebar-section" id="sidebar-orchestrator">
     <div class="sidebar-section-label">Care Orchestrator</div>
-    <div class="nav-item active" onclick="showScreen('queue')">
+    <div class="nav-item" onclick="showScreen('queue')">
       <span class="nav-icon">⚡</span> Priority Queue
       <span class="nav-badge">4</span>
     </div>
@@ -904,12 +911,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <span class="topbar-title" id="topbar-title">CareLoop</span>
-    <span class="topbar-sub" id="topbar-sub">American Hospital Dubai · OPD Care</span>
+    <span class="topbar-title" id="topbar-title">Medinous HMIS</span>
+    <span class="topbar-sub" id="topbar-sub">OPD Prescription · New Patient</span>
     <div class="topbar-right">
-      <div id="hmis-status" style="display:flex;align-items:center;gap:6px;padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;" onclick="window.open('/hmis.html','hmis-tab')"><span style="width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block;"></span> HMIS · Open Prescription</div>
-      <button id="demo-btn" onclick="runPrescriptionDemo()" style="padding:4px 12px;background:transparent;border:1px solid #d1d5db;border-radius:6px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)';" onmouseout="this.style.borderColor='#d1d5db';this.style.color='var(--muted)';">Demo: New Prescription</button>
-      <div style="width:1px;height:20px;background:var(--border);"></div>
+      <!-- Demo button removed — prescription flow lands patients into queue via API call from sidebar -->
+
       <button id="role-toggle-btn" onclick="switchRole(document.getElementById('role-toggle-btn').dataset.role === 'orchestrator' ? 'doctor' : 'orchestrator')" data-role="orchestrator" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--slate);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;">
         <span id="role-toggle-dot" style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;"></span>
         <span id="role-toggle-label">Orchestrator</span>
@@ -923,7 +929,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
   <div class="content">
 
     <!-- ══════ SCREEN: PRIORITY QUEUE ══════ -->
-    <div class="screen active" id="screen-queue">
+    <div class="screen" id="screen-queue">
 
       <!-- Queue -->
       <div class="section-header">
@@ -949,22 +955,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           </div>
         </div>
 
-        <!-- Row 1 -->
-        <div class="queue-row" data-status="critical" onclick="showDetail('marcus')">
-          <div class="risk-dot red"></div>
-          <div>
-            <div class="patient-name">Zayn Al-Rashidi</div>
-            <div class="patient-meta">MRN 40821 · Daman · 34y · Arabic</div>
-          </div>
-          <div><span class="episode-tag both">OPD · Acute + Chronic</span></div>
-          <div class="action-pending">
-            <strong>CBC + Malarial Parasite tests — 5 days overdue</strong>
-          </div>
-          <div class="days-badge overdue">5 days late</div>
-          <span class="action-tag escalate">Escalate</span>
-        </div>
-
-        <!-- Row 2 — Nora -->
+        <!-- Row 1 — Nora -->
         <div class="queue-row" data-status="critical" onclick="showDetail('nora')">
           <div class="risk-dot red"></div>
           <div>
@@ -977,6 +968,21 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           </div>
           <div class="days-badge overdue">Auto-acted</div>
           <span class="action-tag escalate">Auto-Acted</span>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="queue-row" data-status="critical" onclick="showDetail('marcus')">
+          <div class="risk-dot red"></div>
+          <div>
+            <div class="patient-name">Zayn Al-Rashidi</div>
+            <div class="patient-meta">MRN 40821 · Daman · 34y · Arabic</div>
+          </div>
+          <div><span class="episode-tag both">OPD · Acute + Chronic</span></div>
+          <div class="action-pending">
+            <strong>CBC + Malarial Parasite tests — 5 days overdue</strong>
+          </div>
+          <div class="days-badge overdue">5 days late</div>
+          <span class="action-tag escalate">Escalate</span>
         </div>
 
         <!-- Row 4 -->
@@ -1222,7 +1228,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                 <span style="font-size:11px;font-weight:700;color:var(--green);">100%</span>
               </div>
               <div style="margin-top:8px;padding:7px 10px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:6px;font-size:11px;">
-                <span style="color:var(--red);font-weight:700;">🔴 Critical symptom reported · Mar 28 · 11:00pm</span><br>
+                <span style="color:var(--red);font-weight:700;">🔴 Critical symptom reported · Mar 28 · 11:10am</span><br>
                 <span style="color:var(--slate);margin-top:2px;display:block;">Patient directed to emergency · Auto-acted · USG and follow-up on hold pending emergency outcome</span>
               </div>
             </div>
@@ -1271,7 +1277,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                 <div class="tl-track-label">🟠 Acute · Abdominal Pain, Query Appendicitis</div>
                 <div class="tl-track-sub">Day 3 · Mar 26 – Apr 9 · Dr. Sam Willis</div>
               </div>
-              <span style="font-size:10px;background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:4px;font-weight:700;">🔴 Critical symptom · Mar 28 · 11:00pm</span>
+              <span style="font-size:10px;background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:4px;font-weight:700;">🔴 Critical symptom · Mar 28 · 11:10am</span>
             </div>
 
             <!-- Timeline events -->
@@ -1301,7 +1307,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                         Watch for vomiting or severe stomach pain. Reply if you feel worse 💚
                         <div class="tl-wa-time">3:30 PM ✓✓</div>
                       </div>
-                      <div class="tl-wa-btn" style="display:block;background:white;border:1px solid #d0e8d0;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:600;color:#128c7e;text-align:center;margin-top:6px;">See Consultation Summary →</div>
+                      <div style="font-size:11px;color:#64748b;text-align:center;margin-top:8px;margin-bottom:4px;">Would you like a summary of your prescription?</div>
+                      <div class="tl-wa-btns">
+                        <div class="tl-wa-btn" style="color:#128c7e;">Yes, summarise the prescription</div>
+                        <div class="tl-wa-btn">No, I understand</div>
+                      </div>
                     </div>
                     <div class="tl-wa-note">Sent automatically 30 mins after consultation · Opened and read within 4 mins</div>
                   </div>
@@ -1380,22 +1390,56 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                 </div>
               </div>
 
-              <!-- EVENT 4: Patient reports severe symptom -->
+              <!-- EVENT 4: Lab results sent to patient -->
               <div style="display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--border-light);">
-                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--red);font-weight:700;line-height:1.4;">Mar 28<br>11:00pm</div>
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--muted);font-weight:600;line-height:1.4;">Mar 28<br>11:00am</div>
                 <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
-                  <div style="width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;"></div>
-                  <div style="width:1px;background:#fca5a5;flex:1;margin-top:3px;"></div>
+                  <div style="width:9px;height:9px;border-radius:50%;background:var(--teal);flex-shrink:0;"></div>
+                  <div style="width:1px;background:var(--border);flex:1;margin-top:3px;"></div>
                 </div>
                 <div style="flex:1;padding:11px 0 11px 8px;">
-                  <div style="font-size:12px;font-weight:600;color:var(--red);">Patient reported severe stomach pain and vomiting — right lower abdomen</div>
-                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--red-light);color:var(--red);">⚠ Critical symptom · CareLoop auto-acted</span>
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    WhatsApp — USG Abdomen results shared with patient
+                    <button class="tl-xbtn" onclick="toggleTlPanel('nora-ev-lab')">▼ Message</button>
+                  </div>
+                  <span style="display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;background:var(--green-light);color:var(--green);">Opened · Read 11:03am</span>
+                  <div class="tl-wa-panel" id="nora-ev-lab">
+                    <div class="tl-wa-screen">
+                      <div class="tl-wa-hdr"><div class="tl-wa-av">CL</div> CareLoop · American Hospital Dubai</div>
+                      <div class="tl-wa-bub">
+                        Hi Nora 👋 Your lab results are ready.<br><br>
+                        🧪 <strong>USG Abdomen</strong> — Report available<br>
+                        📋 Dr. Sam Willis has reviewed the results<br><br>
+                        Your report has been attached below. Please bring a copy to your OPD review appointment tomorrow.
+                        <div class="tl-wa-time">11:00 AM ✓✓</div>
+                      </div>
+                      <div style="margin-top:6px;padding:8px 10px;background:#f0fdf4;border:1px solid #d0e8d0;border-radius:6px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <span style="font-size:16px;">📄</span>
+                          <div>
+                            <div style="font-size:11px;font-weight:600;color:#1a1a2e;">USG_Abdomen_Nora_44201.pdf</div>
+                            <div style="font-size:10px;color:#64748b;">Lab report · 2 pages · 340 KB</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="font-size:11px;color:#64748b;text-align:center;margin-top:8px;margin-bottom:4px;">Do you have any questions about your results?</div>
+                      <div class="tl-wa-btns">
+                        <div class="tl-wa-btn" style="color:#128c7e;">Yes, I have questions</div>
+                        <div class="tl-wa-btn">No, all clear 👍</div>
+                      </div>
+                      <div class="tl-wa-bub out" style="margin-top:8px;">
+                        No, all clear 👍
+                        <div class="tl-wa-time">11:03 AM ✓✓</div>
+                      </div>
+                    </div>
+                    <div class="tl-wa-note">Lab results auto-shared when received from HMIS · Patient acknowledged within 3 mins</div>
+                  </div>
                 </div>
               </div>
 
               <!-- EVENT 5: CRITICAL — always open -->
               <div class="tl-crit-row" style="display:flex;gap:0;padding:0 14px;">
-                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--red);font-weight:700;line-height:1.4;">Mar 28<br>11:00am</div>
+                <div style="width:84px;flex-shrink:0;padding:12px 8px 12px 0;font-size:10px;color:var(--red);font-weight:700;line-height:1.4;">Mar 28<br>11:10am</div>
                 <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:16px;">
                   <div style="width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;animation:tl-pulse 1.5s infinite;"></div>
                 </div>
@@ -1403,9 +1447,9 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                   <div style="font-size:12px;font-weight:600;color:var(--red);">🔴 Critical symptom reported — CareLoop auto-acted</div>
                   <div class="tl-crit-detail">
                     <div class="tl-auto-rows">
-                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Patient directed to emergency via WhatsApp <span class="tl-ts">11:00pm · Auto</span></div>
-                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Dr. Sam Willis alerted via WhatsApp <span class="tl-ts">11:00pm · Auto</span></div>
-                      <div class="tl-auto-row"><span class="tl-ck">✓</span> HAAD/DHA audit trail created — timestamped <span class="tl-ts">11:00pm · Auto</span></div>
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Patient directed to emergency via WhatsApp <span class="tl-ts">11:10am · Auto</span></div>
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> Dr. Sam Willis alerted via WhatsApp <span class="tl-ts">11:10am · Auto</span></div>
+                      <div class="tl-auto-row"><span class="tl-ck">✓</span> HAAD/DHA audit trail created — timestamped <span class="tl-ts">11:10am · Auto</span></div>
                     </div>
                     <div class="tl-resp-bar">No orchestrator action required · <strong>47 seconds from flag to notification</strong> · No ministry complaint possible</div>
                     <button class="tl-see-msgs" onclick="toggleTlPanel('nora-crit-msgs')">▼ See messages sent</button>
@@ -1419,7 +1463,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                             📞 +971 4 XXX XXXX<br><br>
                             Dr. Sam Willis has been informed.
                           </div>
-                          <div class="tl-crit-ts">Mar 28 · 11:00pm · Auto · No human action</div>
+                          <div class="tl-crit-ts">Mar 28 · 11:10am · Auto · No human action</div>
                         </div>
                         <div class="tl-crit-card">
                           <div class="tl-crit-lbl d">→ Sent to doctor</div>
@@ -1434,7 +1478,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
                               <span style="text-decoration:underline;color:#2563eb;">careloop.medinous.com/doctor/alert/nora-44201</span>
                             </div>
                           </div>
-                          <div class="tl-crit-ts">Mar 28 · 11:00pm · Auto · No human action</div>
+                          <div class="tl-crit-ts">Mar 28 · 11:10am · Auto · No human action</div>
                         </div>
                       </div>
                       <div class="tl-audit-strip">
@@ -1544,9 +1588,9 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <!-- CRITICAL AUTO-ACTED BANNER -->
           <div class="crit-auto-banner">
             <div class="crit-auto-banner-title"><div class="crit-auto-dot"></div> Critical symptom reported — auto-acted</div>
-            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Patient notified <span class="crit-auto-ts">11:00am</span></div>
-            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Doctor alerted <span class="crit-auto-ts">11:00am</span></div>
-            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Audit trail logged <span class="crit-auto-ts">11:00am</span></div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Patient notified <span class="crit-auto-ts">11:10am</span></div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Doctor alerted <span class="crit-auto-ts">11:10am</span></div>
+            <div class="crit-auto-row"><span class="crit-auto-ck">✓</span> Audit trail logged <span class="crit-auto-ts">11:10am</span></div>
             <div class="crit-auto-footer"><strong>47 seconds</strong> · No orchestrator action required</div>
           </div>
 
@@ -1843,29 +1887,29 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
 
       <div class="escalation-form">
         <div class="detail-card" style="margin-bottom:16px;">
-          <div class="detail-card-title">🔺 Escalation Note — Zayn Al-Rashidi</div>
+          <div class="detail-card-title">🔺 Escalation Note — Nora Al-Ansari</div>
 
           <div class="esc-to-row">
             <div>
               <div class="esc-to-label">Escalating to</div>
-              <div class="esc-to-doctor">Dr. Sam Willis · Pulmonology</div>
+              <div class="esc-to-doctor">Dr. Sam Willis · General Practice</div>
             </div>
             <div style="margin-left:auto;text-align:right;">
               <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Department</div>
-              <div style="font-size:12px;font-weight:600;color:var(--ink);">Pulmonology · American Hospital Dubai</div>
+              <div style="font-size:12px;font-weight:600;color:var(--ink);">General Practice · American Hospital Dubai</div>
             </div>
           </div>
 
           <div class="esc-summary-card">
             <div style="padding:12px 14px;background:var(--red-light);border-left:3px solid var(--red);border-radius:6px;margin-bottom:16px;">
               <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⚠ Reason for Escalation</div>
-              <div style="font-size:12px;color:var(--ink);line-height:1.7;">Patient reported <strong>shivering and recurring high fever every 6-7 hours</strong> — received via WhatsApp wellbeing check on Mar 2 · 8:07pm (Day 3 of medication course). Classic malarial fever pattern.<br>CBC + Malarial Parasite smear is <strong>5 days overdue</strong> with follow-up on March 14 · 10:30 AM in 5 days. 5 contact attempts made — no response.<br>Doctor input needed: (1) review recurring fever pattern, (2) advise whether Chloroquine should be prescribed pending lab confirmation.</div>
+              <div style="font-size:12px;color:var(--ink);line-height:1.7;">Patient reported <strong>severe stomach pain and vomiting — right lower abdomen</strong> — received via WhatsApp on Mar 28 · 11:10am. Classic appendicitis indicator. CareLoop auto-acted: patient directed to emergency.<br>USG Abdomen results shared with patient on Mar 28 · 11:00am. <strong>Doctor acknowledgement pending</strong>.<br>Doctor input needed: (1) review USG Abdomen findings, (2) confirm emergency admission or advise next steps for suspected appendicitis.</div>
             </div>
-            <div class="esc-summary-row"><label>Patient</label><span>Zayn Al-Rashidi · MRN 40821</span></div>
-            <div class="esc-summary-row"><label>Episode</label><span>Acute: Fever Investigation, Query URTI · Day 9 of 14</span></div>
-            <div class="esc-summary-row"><label>Care Gap</label><span>CBC + Malarial Parasite smear — 5 days overdue</span></div>
-            <div class="esc-summary-row"><label>Next Appointment</label><span>March 14, 2026 · 10:30 AM · Pulmonology OPD</span></div>
-            <div class="esc-summary-row"><label>Attempts Made</label><span>3× WhatsApp, 1× SMS, 1× Voice call — no response</span></div>
+            <div class="esc-summary-row"><label>Patient</label><span>Nora Al-Ansari · MRN 44201</span></div>
+            <div class="esc-summary-row"><label>Episode</label><span>Acute: Abdominal Pain, Query Appendicitis · Day 3 of 14</span></div>
+            <div class="esc-summary-row"><label>Care Gap</label><span>Doctor acknowledgement pending on critical symptom auto-action</span></div>
+            <div class="esc-summary-row"><label>Next Appointment</label><span>April 9, 2026 · OPD Review · General Practice</span></div>
+            <div class="esc-summary-row"><label>Attempts Made</label><span>1× WhatsApp auto-alert sent to doctor — awaiting response</span></div>
           </div>
 
           <div class="esc-urgent-toggle" onclick="toggleUrgent(this)">
@@ -1879,11 +1923,11 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink);
           <div style="margin-bottom:12px;">
             <textarea class="esc-note-field" id="esc-note-field">Dr. Sam Willis,
 
-Zayn Al-Rashidi (MRN 40821) reported shivering and recurring high fever every 6-7 hours during his Day 3 wellbeing check. Classic malarial fever pattern. His CBC and Malarial Parasite smear at Al Noor Lab are now 5 days overdue. We have attempted contact 5 times across WhatsApp, SMS, and voice call with no response. Follow-up appointment is March 14 · 10:30 AM.
+Nora Al-Ansari (MRN 44201) reported severe stomach pain and vomiting in the right lower abdomen at 11:10am today (Day 3 of acute episode). Classic appendicitis indicator. CareLoop auto-acted — patient was directed to emergency via WhatsApp and you were alerted automatically. USG Abdomen results were shared with the patient at 11:00am.
 
-Requesting clinical guidance: Should Chloroquine be prescribed given the reported symptoms pending lab confirmation?
+Requesting clinical guidance: Please confirm emergency admission or advise next steps for suspected appendicitis. Your acknowledgement of the auto-alert is pending.
 
-Care Orchestrator: Fatima Hassan · American Hospital Dubai · March 9, 2026 · 08:44 AM</textarea>
+Care Orchestrator: Fatima Hassan · American Hospital Dubai · March 28, 2026 · 11:15 AM</textarea>
           </div>
 
           <label class="review-check-row" for="esc-review-check">
@@ -2182,6 +2226,11 @@ Care Orchestrator: Fatima Hassan · American Hospital Dubai · March 9, 2026 · 
       </div>
     </div>
 
+    <!-- ══════ SCREEN: HMIS PRESCRIPTION ══════ -->
+    <div class="screen active" id="screen-prescription">
+      <iframe id="hmis-iframe" src="hmis.html" style="width:100%;height:calc(100vh - 80px);border:none;border-radius:8px;"></iframe>
+    </div>
+
   </div><!-- /content -->
 
   <!-- WHATSAPP PHONE MOCKUP -->
@@ -2190,16 +2239,16 @@ Care Orchestrator: Fatima Hassan · American Hospital Dubai · March 9, 2026 · 
       <button class="wa-phone-close" onclick="closeWaPhone()">×</button>
       <div class="wa-phone">
         <div class="wa-phone-screen">
-          <div style="background:#1c1c1e;padding:8px 8px 0;border-radius:34px 34px 0 0;">
+          <div style="background:#1c1c1e;padding:4px 6px 0;border-radius:28px 28px 0 0;">
             <div class="wa-notif-bar">
-              <div class="wa-notif-icon">💬</div>
+              <div class="wa-notif-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
               <div class="wa-notif-content">
                 <div class="wa-notif-app">WhatsApp · now</div>
                 <div class="wa-notif-title">CareLoop · American Hospital Dubai</div>
-                <div class="wa-notif-body">🔺 Clinical alert — Zayn Al-Rashidi</div>
+                <div class="wa-notif-body">🔺 Clinical alert — Nora Al-Ansari</div>
               </div>
             </div>
-            <div style="height:8px;"></div>
+            <div style="height:4px;"></div>
           </div>
           <div class="wa-chat-header">
             <div class="wa-chat-avatar">CL</div>
@@ -2211,11 +2260,10 @@ Care Orchestrator: Fatima Hassan · American Hospital Dubai · March 9, 2026 · 
           <div class="wa-messages">
             <div class="wa-bubble">
               Dr. Sam Willis,<br><br>
-              Zayn Al-Rashidi (MRN 40821) reported <strong>shivering and recurring high fever every 6-7 hours</strong> during his Day 3 wellbeing check. Classic malarial fever pattern. CBC + Malarial Parasite smear 5 days overdue.<br><br>
-              Should Chloroquine be prescribed given the reported symptoms pending lab confirmation?<br><br>
+              Nora Al-Ansari (MRN 44201) — <strong>severe stomach pain, right lower abdomen</strong>. Appendicitis suspected. Please confirm next steps.<br><br>
               — Fatima Hassan · Care Orchestrator
               <div class="wa-cta-btn" onclick="closeWaPhoneAndSwitch()">→ Review &amp; respond in CareLoop</div>
-              <div class="wa-bubble-time">Mar 9 · 8:44 AM ✓✓</div>
+              <div class="wa-bubble-time">Mar 28 · 11:15 AM ✓✓</div>
             </div>
           </div>
         </div>
@@ -2452,7 +2500,7 @@ const PATIENTS = {
     insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
     riskScore: '62', riskColor: 'var(--amber)',
     riskLabel: 'Medium · Patient directed to emergency', status: 'critical',
-    suggestion: 'Patient reported severe stomach pain and vomiting — right lower abdomen at 11:00pm. Classic appendicitis indicator. CareLoop auto-acted. Patient directed to emergency. Dr. Sam Willis notified. Monitor for doctor acknowledgement. No immediate orchestrator action required.',
+    suggestion: 'Patient reported severe stomach pain and vomiting — right lower abdomen at 11:10am. Classic appendicitis indicator. CareLoop auto-acted. Patient directed to emergency. Dr. Sam Willis notified. Monitor for doctor acknowledgement. No immediate orchestrator action required.',
     escalateTo: 'Dr. Sam Willis',
     escalateDept: 'General Practice · American Hospital Dubai'
   }
@@ -2468,10 +2516,11 @@ function showScreen(id) {
   const titles = {
     queue: ['CareLoop', 'American Hospital Dubai · OPD Care'],
     detail: ['Zayn Al-Rashidi', 'Episode Detail · MRN 40821'],
-    'escalation-form': ['Escalate to Doctor', 'Dr. Sam Willis · Pulmonology'],
+    'escalation-form': ['Escalate to Doctor', 'Dr. Sam Willis · General Practice'],
     notifications: ['Notification Templates', 'Settings · Configure outreach messages'],
     escalation: ['Active Escalations', '2 cases requiring immediate action'],
     exec: ['Revenue Dashboard', 'Executive View · March 2026 · USD'],
+    prescription: ['Medinous HMIS', 'OPD Prescription · New Patient'],
     'close-episode': ['Close Episode', 'Sara Al-Zaabi · Acute · Day 10 of 10'],
     inbox: ['Audit Log', 'Patient message history · Read only'],
     'detail-nora': ['Nora Al-Ansari', 'Episode Detail · MRN 44201'],
@@ -2485,7 +2534,7 @@ function showScreen(id) {
     document.getElementById('topbar-sub').textContent = titles[id][1];
   }
 
-  const navMap = { queue: 0, detail: 0, 'detail-nora': 0, 'close-episode': 0, doctor: 1, exec: 2, notifications: 3, inbox: 4, escalation: 0, 'escalation-form': 0 };
+  const navMap = { prescription: 0, queue: 1, detail: 1, 'detail-nora': 1, 'close-episode': 1, doctor: 2, exec: 3, notifications: 4, inbox: 5, escalation: 1, 'escalation-form': 1 };
   const navItems = document.querySelectorAll('.nav-item');
   if (navMap[id] !== undefined) navItems[navMap[id]]?.classList.add('active');
 
@@ -2497,7 +2546,7 @@ function showScreen(id) {
 
   const safeguardBar = document.querySelector('.safeguard-bar');
   if (safeguardBar) {
-    safeguardBar.style.display = id === 'queue' ? 'none' : '';
+    safeguardBar.style.display = (id === 'queue' || id === 'prescription') ? 'none' : '';
   }
 
   // Reset escalation form when navigated to
@@ -3683,7 +3732,7 @@ window.addEventListener('storage', function(e) {
 })();
 
 // Init
-showScreen('queue');
+showScreen('prescription');
 filterQueue('critical');
 </script>
 </body>
