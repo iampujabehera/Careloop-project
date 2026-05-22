@@ -2,3 +2,8 @@ node_modules/
 .DS_Store
 *.log
 .env
+
+# SQLite scratch files (auto-generated when server runs — not real code changes)
+*.db-shm
+*.db-wal
+*.db-journal
