@@ -1,5 +1,3 @@
 {
-  "installCommand": "echo skip-install",
-  "buildCommand": "echo '=== BUILD STARTING ===' && pwd && echo '--- working dir contents ---' && ls -la && echo '--- public/ contents ---' && ls -la public/ && echo '--- copying ---' && mkdir -p dist && cp -r public/. dist/ && echo '=== DIST CONTENTS ===' && ls -la dist/ && echo '=== BUILD DONE ==='",
-  "outputDirectory": "dist"
+  "installCommand": "echo skip"
 }
