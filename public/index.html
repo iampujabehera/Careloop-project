@@ -4383,7 +4383,7 @@ Care Orchestrator: Fatima Hassan · Good Health Hospital · March 28, 2026 · 11
           <div style="font-size:32px;margin-bottom:8px;">📄</div>
           <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Drop prescription PDF here</div>
           <div style="font-size:11px;color:var(--muted);">or click to browse · accepts .pdf, .jpg, .png</div>
-          <input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){flashSettingsToast('📥 Parsing ' + this.files[0].name + '...');document.getElementById('upload-rx-modal').style.display='none';this.value='';}">
+          <input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){processUploadedPrescription(this.files[0]); this.value='';}">
         </div>
 
         <div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--slate);line-height:1.5;">
@@ -5922,6 +5922,85 @@ function handleNewPrescription(prescriptionData) {
   setTimeout(function() {
     showToast('✅ Episode live · CareLoop is now monitoring ' + prescriptionData.name);
   }, 4200);
+}
+
+// ── PRESCRIPTION UPLOAD (parse PDF → onboard episode) ──
+var SAMPLE_PRESCRIPTIONS = [
+  {
+    name: 'Aisha Al-Maktoum', mrn: '45102', age: '29 years',
+    phone: '+971 50 412 8867', lang: 'Arabic',
+    insurance: 'Thiqa · Comprehensive', consultant: 'Dr. Layla Hassan',
+    dept: 'Pulmonology', diagnosis: 'Acute Asthma Exacerbation',
+    episodeType: 'OPD Acute',
+    medications: [
+      { name: 'Salbutamol Inhaler', dose: '100mcg', frequency: '2 puffs · 4x daily', duration: '7 days' },
+      { name: 'Prednisolone', dose: '40mg', frequency: 'Once daily', duration: '5 days' }
+    ],
+    labs: [{ test: 'Peak Flow Recheck', lab: 'NMC Healthcare', dueWithin: '5 days' }],
+    followupDate: 'Apr 5', followupTime: '10:00 AM'
+  },
+  {
+    name: 'Hamza Al-Nuaimi', mrn: '45213', age: '54 years',
+    phone: '+971 50 778 1124', lang: 'Arabic',
+    insurance: 'Daman · Enhanced Network', consultant: 'Dr. Sam Willis',
+    dept: 'Cardiology', diagnosis: 'Essential Hypertension',
+    episodeType: 'OPD Chronic',
+    medications: [
+      { name: 'Amlodipine', dose: '5mg', frequency: 'Once daily', duration: '30 days' },
+      { name: 'Atorvastatin', dose: '20mg', frequency: 'Once daily', duration: '30 days' }
+    ],
+    labs: [{ test: 'Lipid Profile + HbA1c', lab: 'Al Noor Lab', dueWithin: '14 days' }],
+    followupDate: 'Apr 22', followupTime: '11:30 AM'
+  },
+  {
+    name: 'Latifa Al-Falasi', mrn: '45324', age: '34 years',
+    phone: '+971 52 391 5602', lang: 'Arabic',
+    insurance: 'AXA Gulf · Plus', consultant: 'Dr. Maya Sharif',
+    dept: 'Internal Medicine', diagnosis: 'Urinary Tract Infection',
+    episodeType: 'OPD Acute',
+    medications: [{ name: 'Nitrofurantoin', dose: '100mg', frequency: 'Twice daily', duration: '7 days' }],
+    labs: [{ test: 'Urine Culture', lab: 'NMC Healthcare', dueWithin: '3 days' }],
+    followupDate: 'Apr 8', followupTime: '3:00 PM'
+  }
+];
+var sampleRxIdx = 0;
+
+function resetUploadModalDropArea() {
+  var dropArea = document.querySelector('#upload-rx-modal div[style*="dashed"]');
+  if (!dropArea) return;
+  dropArea.innerHTML =
+    '<div style="font-size:32px;margin-bottom:8px;">📄</div>' +
+    '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Drop prescription PDF here</div>' +
+    '<div style="font-size:11px;color:var(--muted);">or click to browse · accepts .pdf, .jpg, .png</div>' +
+    '<input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){processUploadedPrescription(this.files[0]); this.value=\'\';}">';
+}
+
+function processUploadedPrescription(file) {
+  var modal = document.getElementById('upload-rx-modal');
+  var dropArea = modal.querySelector('div[style*="dashed"]');
+  if (dropArea) {
+    dropArea.innerHTML =
+      '<div style="font-size:32px;margin-bottom:8px;">⏳</div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Parsing ' + file.name + '...</div>' +
+      '<div style="font-size:11px;color:var(--muted);">Extracting patient + prescription details</div>';
+  }
+
+  setTimeout(function() {
+    var sample = SAMPLE_PRESCRIPTIONS[sampleRxIdx % SAMPLE_PRESCRIPTIONS.length];
+    var rx = JSON.parse(JSON.stringify(sample));
+    // After first cycle, give each repeat upload a unique MRN so it onboards as a fresh patient
+    if (sampleRxIdx >= SAMPLE_PRESCRIPTIONS.length) {
+      rx.mrn = String(45400 + (sampleRxIdx - SAMPLE_PRESCRIPTIONS.length) + 1);
+    }
+    sampleRxIdx++;
+    rx.timestamp = new Date().toISOString();
+
+    modal.style.display = 'none';
+    resetUploadModalDropArea();
+
+    if (typeof showScreen === 'function') showScreen('queue');
+    setTimeout(function() { handleNewPrescription(rx); }, 250);
+  }, 1500);
 }
 
 window.addEventListener('storage', function(e) {
