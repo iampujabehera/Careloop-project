@@ -4,10 +4,20 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const Database = require('better-sqlite3');
+const multer = require('multer');
+const OpenAI = require('openai');
+const pdfParse = require('pdf-parse');
+const careloopRiskEngine = require('./careloopRiskEngine');
+const { buildSystemPrompt } = require('./careloopMessagingPrompt');
+const reminders = require('./careloopReminders');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DB_PATH = path.join(__dirname, 'careloop.db');
+
+console.log('OpenAI key loaded:', process.env.OPENAI_API_KEY ? '✓ yes' : '✗ no — set OPENAI_API_KEY in .env');
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
 // ---------------------------------------------------------------------------
 // Database setup
@@ -52,6 +62,54 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_events_episode ON events(episodeId, createdAt);
+
+  CREATE TABLE IF NOT EXISTS messages (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    direction    TEXT    NOT NULL,
+    fromNumber   TEXT,
+    toNumber     TEXT,
+    body         TEXT,
+    twilioSid    TEXT,
+    patientMrn   TEXT,
+    patientName  TEXT,
+    episodeId    INTEGER,
+    createdAt    TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_messages_phone ON messages(fromNumber, toNumber, createdAt);
+  CREATE INDEX IF NOT EXISTS idx_messages_mrn ON messages(patientMrn, createdAt);
+
+  CREATE TABLE IF NOT EXISTS patient_state (
+    mrn                       TEXT    PRIMARY KEY,
+    patientName               TEXT,
+    phone                     TEXT,
+    careActivated             INTEGER NOT NULL DEFAULT 0,
+    careStartedAt             TEXT,
+    medicationConfirmedToday  INTEGER NOT NULL DEFAULT 0,
+    lastMedicationConfirmedAt TEXT,
+    treatmentAdvice           TEXT,
+    condition                 TEXT,
+    doctor                    TEXT,
+    hospital                  TEXT,
+    medicationsJson           TEXT NOT NULL DEFAULT '[]',
+    labsJson                  TEXT NOT NULL DEFAULT '[]',
+    followUp                  TEXT,
+    riskSegment               TEXT NOT NULL DEFAULT 'Low',
+    updatedAt                 TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS adherence_log (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    mrn           TEXT    NOT NULL,
+    label         TEXT    NOT NULL,
+    scheduledAt   TEXT    NOT NULL,
+    respondedAt   TEXT,
+    taken         INTEGER,
+    barrier       TEXT,
+    createdAt     TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_adherence_mrn ON adherence_log(mrn, createdAt);
 `);
 
 // ---------------------------------------------------------------------------
@@ -133,7 +191,32 @@ function computeRiskFromEvents(events) {
 }
 
 function computeRiskBreakdown(events) {
-  const features = extractFeatures(events);
+  return computeRiskBreakdownFromFeatures(extractFeatures(events));
+}
+
+// Clamp/normalise a loosely-typed signals object into the feature shape the
+// weighted engine expects. Same caps as extractFeatures() so an ad-hoc signal
+// payload scores identically to one derived from persisted events.
+function normalizeSignals(sig) {
+  sig = sig || {};
+  const n = (v, cap) => Math.min(cap, Math.max(0, parseInt(v, 10) || 0));
+  return {
+    cost_barrier:            sig.cost_barrier ? 1 : 0,
+    medication_nonadherence: sig.medication_nonadherence ? 1 : 0,
+    lab_overdue:             n(sig.lab_overdue, 5),
+    silence_days:            n(sig.silence_days, 14),
+    chronic_condition:       sig.chronic_condition ? 1 : 0,
+    missed_appointments:     n(sig.missed_appointments, 3),
+    anxiety_flag:            sig.anxiety_flag ? 1 : 0,
+    tier2_signal:            sig.tier2_signal ? 1 : 0,
+    tier1_signal:            sig.tier1_signal ? 1 : 0,
+  };
+}
+
+// Apply the CURRENT configurable weights to a feature set. This is the single
+// scoring brain — both persisted episodes and ad-hoc client patients run
+// through here, so the Risk Detection Settings sliders govern every score.
+function computeRiskBreakdownFromFeatures(features) {
   const w = RISK_WEIGHTS;
 
   const contributions = [
@@ -425,6 +508,17 @@ app.get('/api/episodes/:id/risk', (req, res) => {
   res.json({ episodeId: id, ...breakdown, triage: triageFromScore(breakdown.score) });
 });
 
+// Score an ad-hoc signals object with the CURRENT configurable weights.
+// Client-side patients (uploaded via prescription, demo patients) aren't
+// persisted as episodes, so they post their derived signals here and get
+// scored by the same slider-controlled engine as seeded episodes. Adjusting
+// any weight in Risk Detection Settings changes the result of this endpoint.
+app.post('/api/risk/score-signals', (req, res) => {
+  const features = normalizeSignals((req.body || {}).signals);
+  const breakdown = computeRiskBreakdownFromFeatures(features);
+  res.json({ ok: true, ...breakdown, triage: triageFromScore(breakdown.score) });
+});
+
 // Settings → Risk Weights (configurable per client).
 app.get('/api/settings/risk-weights', (req, res) => {
   res.json({ weights: { ...RISK_WEIGHTS }, defaults: { ...DEFAULT_RISK_WEIGHTS } });
@@ -509,6 +603,712 @@ app.get('/api/whatsapp/status', (req, res) => {
     configured,
     from: configured ? process.env.TWILIO_WHATSAPP_FROM : null,
   });
+});
+
+// Demo defaults — the review screen auto-fills the phone field with this so
+// the upload-to-WhatsApp demo flow doesn't require typing on every test.
+app.get('/api/config/demo-defaults', (req, res) => {
+  let demoPhone = process.env.PATIENT_PHONE_NUMBER || '';
+  // Strip whatsapp: prefix if user added it in .env — the UI field expects bare phone
+  if (demoPhone.startsWith('whatsapp:')) demoPhone = demoPhone.slice('whatsapp:'.length);
+  res.json({ demoPhone });
+});
+
+// ---------------------------------------------------------------------------
+// WhatsApp — LLM-driven messaging + state tracking + inbound auto-reply
+// ---------------------------------------------------------------------------
+
+// Static fallback when OpenAI is unavailable. Same shape as before so we
+// degrade gracefully instead of failing the demo.
+function buildStaticCareplanMessage(rx) {
+  const firstName = String(rx.name || 'there').trim().split(/\s+/)[0];
+  const doctor = rx.consultant || 'Your doctor';
+  let msg = `Hi ${firstName} 👋 ${doctor} has shared your care plan via CareLoop.\n\n`;
+  if (Array.isArray(rx.medications) && rx.medications.length) {
+    msg += '💊 *Medications*\n';
+    for (const m of rx.medications) {
+      if (!m || !m.name) continue;
+      let line = '• ' + m.name;
+      if (m.dose) line += ' ' + m.dose;
+      if (m.frequency) line += ' · ' + m.frequency;
+      if (m.duration) line += ' · ' + m.duration;
+      msg += line + '\n';
+    }
+    msg += '\n';
+  }
+  if (rx.followupDate) msg += '📅 Follow-up: ' + rx.followupDate + '\n\n';
+  msg += '— CareLoop · Good Health Hospital';
+  return msg;
+}
+
+function formatMedicationsForPrompt(rx) {
+  return (rx.medications || [])
+    .filter(m => m && m.name)
+    .map(m => {
+      const parts = [m.name];
+      if (m.dose) parts.push(m.dose);
+      if (m.frequency) parts.push(m.frequency);
+      if (m.duration) parts.push(m.duration);
+      return parts.join(' — ');
+    });
+}
+
+function formatLabsForPrompt(rx) {
+  return (rx.labs || [])
+    .filter(l => l && l.test)
+    .map(l => {
+      const parts = [l.test];
+      if (l.lab) parts.push('at ' + l.lab);
+      if (l.dueWithin) parts.push('due within ' + l.dueWithin);
+      return parts.join(' · ');
+    });
+}
+
+function getPatientState(mrn) {
+  if (!mrn) return null;
+  const row = db.prepare('SELECT * FROM patient_state WHERE mrn = ?').get(String(mrn));
+  if (!row) return null;
+  return {
+    mrn: row.mrn,
+    patientName: row.patientName,
+    name: (row.patientName || '').split(/\s+/)[0],
+    phone: row.phone,
+    careActivated: !!row.careActivated,
+    careStartedAt: row.careStartedAt,
+    medicationConfirmedToday: !!row.medicationConfirmedToday,
+    lastMedicationConfirmedAt: row.lastMedicationConfirmedAt,
+    treatmentAdvice: row.treatmentAdvice || '',
+    condition: row.condition || '',
+    doctor: row.doctor || '',
+    hospital: row.hospital || 'Good Health Hospital',
+    medications: JSON.parse(row.medicationsJson || '[]'),
+    labs: JSON.parse(row.labsJson || '[]'),
+    followUp: row.followUp || '',
+    riskSegment: row.riskSegment || 'Low',
+    dayInJourney: computeDayInJourney(row.careStartedAt),
+  };
+}
+
+function computeDayInJourney(careStartedAt) {
+  if (!careStartedAt) return 1;
+  const start = new Date(careStartedAt + (careStartedAt.includes('T') ? '' : 'Z'));
+  if (isNaN(start.getTime())) return 1;
+  const days = Math.floor((Date.now() - start.getTime()) / 86400000) + 1;
+  return Math.max(1, days);
+}
+
+function upsertPatientState(rx, riskSegment) {
+  const meds = formatMedicationsForPrompt(rx);
+  const labs = formatLabsForPrompt(rx);
+  const followUp = rx.followupDate
+    ? (rx.followupTime ? `${rx.followupDate} at ${rx.followupTime}` : rx.followupDate)
+    : '';
+  db.prepare(
+    `INSERT INTO patient_state (mrn, patientName, phone, careActivated, careStartedAt, treatmentAdvice, condition, doctor, hospital, medicationsJson, labsJson, followUp, riskSegment, updatedAt)
+     VALUES (?, ?, ?, 1, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(mrn) DO UPDATE SET
+       patientName=excluded.patientName,
+       phone=excluded.phone,
+       careActivated=1,
+       careStartedAt=COALESCE(patient_state.careStartedAt, excluded.careStartedAt),
+       treatmentAdvice=excluded.treatmentAdvice,
+       condition=excluded.condition,
+       doctor=excluded.doctor,
+       hospital=excluded.hospital,
+       medicationsJson=excluded.medicationsJson,
+       labsJson=excluded.labsJson,
+       followUp=excluded.followUp,
+       riskSegment=excluded.riskSegment,
+       updatedAt=datetime('now')`
+  ).run(
+    String(rx.mrn || ''),
+    rx.name || '',
+    rx.phone || '',
+    rx.instructionsEn || '',
+    rx.diagnosis || '',
+    rx.consultant || '',
+    'Good Health Hospital',
+    JSON.stringify(meds),
+    JSON.stringify(labs),
+    followUp,
+    riskSegment || 'Low'
+  );
+}
+
+function markMedicationConfirmed(mrn) {
+  db.prepare(
+    "UPDATE patient_state SET medicationConfirmedToday=1, lastMedicationConfirmedAt=datetime('now'), updatedAt=datetime('now') WHERE mrn=?"
+  ).run(String(mrn));
+}
+
+function setRiskSegment(mrn, segment) {
+  db.prepare(
+    "UPDATE patient_state SET riskSegment=?, updatedAt=datetime('now') WHERE mrn=?"
+  ).run(segment, String(mrn));
+}
+
+async function generateLLMMessage(state, incomingPatientText) {
+  if (!openai) {
+    return null; // fall back to static template
+  }
+  const systemPrompt = buildSystemPrompt(state);
+  const userContent = incomingPatientText
+    ? incomingPatientText
+    : 'Begin the first contact message now. Deliver the care plan as instructed.';
+  const resp = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    temperature: 0.7,
+    max_tokens: 400,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userContent },
+    ],
+  });
+  return resp.choices[0].message.content.trim();
+}
+
+async function buildCareplanMessage(rx, riskSegment = 'Low') {
+  try {
+    const meds = formatMedicationsForPrompt(rx);
+    const labs = formatLabsForPrompt(rx);
+    const state = {
+      name: (rx.name || '').split(/\s+/)[0] || 'there',
+      condition: rx.diagnosis || '',
+      doctor: rx.consultant || '',
+      hospital: 'Good Health Hospital',
+      medications: meds,
+      labs,
+      followUp: rx.followupDate
+        ? (rx.followupTime ? `${rx.followupDate} at ${rx.followupTime}` : rx.followupDate)
+        : '',
+      treatmentAdvice: rx.instructionsEn || '',
+      dayInJourney: 1,
+      careActivated: false,
+      medicationConfirmedToday: false,
+      riskSegment: riskSegment || 'Low',
+    };
+    const llmMsg = await generateLLMMessage(state, null);
+    if (llmMsg && llmMsg.length > 20) return llmMsg;
+  } catch (err) {
+    console.warn('[careplan] LLM generation failed, using static template:', err.message);
+  }
+  return buildStaticCareplanMessage(rx);
+}
+
+async function sendWhatsAppRaw(toPhone, body, mrn, patientName) {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_WHATSAPP_FROM;
+  if (!sid || !token || !from) throw new Error('Twilio not configured');
+
+  const cleanPhone = String(toPhone).replace(/\s+/g, '');
+  const toFormatted = cleanPhone.startsWith('whatsapp:') ? cleanPhone : `whatsapp:${cleanPhone}`;
+  const twilioClient = require('twilio')(sid, token);
+  const result = await twilioClient.messages.create({ from, to: toFormatted, body });
+
+  db.prepare(
+    'INSERT INTO messages (direction, fromNumber, toNumber, body, twilioSid, patientMrn, patientName) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run('outbound', from, toFormatted, body, result.sid || '', String(mrn || ''), patientName || '');
+
+  return result;
+}
+
+app.post('/api/whatsapp/send-careplan', async (req, res) => {
+  const rx = req.body || {};
+  if (!rx.phone) {
+    return res.status(400).json({ error: 'phone is required' });
+  }
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_WHATSAPP_FROM) {
+    return res.status(503).json({ error: 'Twilio not configured' });
+  }
+
+  try {
+    // Score the patient first so the message tone matches the risk segment
+    let riskSegment = 'Low';
+    let riskScore = null;
+    try {
+      const scored = await careloopRiskEngine.scorePatient({
+        patient: {
+          name: rx.name, mrn: rx.mrn, age: rx.age,
+          insurance_type: rx.insurance, chronic_diseases: rx.diagnosis,
+          prescriptions: (rx.medications || []).map(m => m.name),
+          past_non_availability_rate: 0,
+        },
+        whatsappMessages: [],
+        openai,
+      });
+      riskSegment = scored.risk_segment;
+      riskScore = scored.risk_score;
+    } catch (riskErr) {
+      console.warn('[careplan] Risk scoring failed, defaulting to Low:', riskErr.message);
+    }
+
+    // Persist patient state so the inbound webhook can use it for replies
+    try { upsertPatientState(rx, riskSegment); } catch (e) { console.warn('[careplan] state persist failed:', e.message); }
+
+    // Generate the care-plan message via LLM (with static fallback inside)
+    const message = await buildCareplanMessage(rx, riskSegment);
+
+    const result = await sendWhatsAppRaw(rx.phone, message, rx.mrn, rx.name);
+
+    // Schedule the first medication reminder. For demo visibility we default to
+    // 2 minutes after onboarding (configurable via REMINDER_FIRST_DELAY_MS in .env).
+    let reminderLogId = null;
+    try {
+      const firstMed = (rx.medications || [])[0];
+      const medName = firstMed ? firstMed.name : 'your medication';
+      const delayMs = Number(process.env.REMINDER_FIRST_DELAY_MS) || reminders.DEFAULT_FIRST_REMINDER_MS;
+      reminderLogId = reminders.scheduleMedicationReminder(
+        { db, sendFn: sendWhatsAppRaw, patient: { mrn: rx.mrn, patientName: rx.name, phone: rx.phone, medicationName: medName } },
+        { delayMs, label: medName + ' — first dose' }
+      );
+    } catch (remErr) {
+      console.warn('[careplan] reminder scheduling failed:', remErr.message);
+    }
+
+    res.json({
+      ok: true,
+      sid: result.sid,
+      status: result.status,
+      to: result.to,
+      bodyPreview: message.slice(0, 140),
+      bodyLength: message.length,
+      risk: { score: riskScore, segment: riskSegment },
+      reminderLogId,
+    });
+  } catch (err) {
+    console.error('send-careplan failed:', err.message, 'code:', err.code);
+    res.status(500).json({ error: err.message, code: err.code });
+  }
+});
+
+// Twilio sends form-encoded payloads, NOT JSON — use a specific middleware for this route.
+const twilioFormParser = express.urlencoded({ extended: false });
+
+app.post('/api/whatsapp/incoming', twilioFormParser, (req, res) => {
+  const { From, To, Body, MessageSid, NumMedia, ProfileName } = req.body || {};
+  console.log(`📩 Inbound WhatsApp from ${From} (${ProfileName || 'unknown'}): "${Body}"`);
+
+  // Look up the patient by phone (strip whatsapp: prefix)
+  const cleanFrom = String(From || '').replace(/^whatsapp:/, '').replace(/\s+/g, '');
+  let patientName = '';
+  let patientMrn = '';
+
+  try {
+    const recentOutbound = db.prepare(
+      "SELECT patientName, patientMrn FROM messages WHERE direction='outbound' AND toNumber LIKE ? ORDER BY id DESC LIMIT 1"
+    ).get('%' + cleanFrom + '%');
+    if (recentOutbound) {
+      patientName = recentOutbound.patientName || '';
+      patientMrn = recentOutbound.patientMrn || '';
+    }
+  } catch (lookupErr) {
+    console.warn('Patient lookup failed:', lookupErr.message);
+  }
+
+  try {
+    db.prepare(
+      'INSERT INTO messages (direction, fromNumber, toNumber, body, twilioSid, patientMrn, patientName) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run('inbound', From || '', To || '', Body || '', MessageSid || '', patientMrn, patientName);
+  } catch (dbErr) {
+    console.error('Failed to store inbound message:', dbErr.message);
+  }
+
+  // Empty TwiML response immediately — we'll send the LLM reply via the Messages API instead,
+  // so Twilio doesn't time out and the orchestrator's terminal sees the full reasoning.
+  res.set('Content-Type', 'text/xml');
+  res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+
+  // Background pipeline: rescore risk, then generate + send the LLM reply.
+  if (patientMrn) {
+    (async () => {
+      try {
+        const conversation = buildMessagesForMrn(patientMrn);
+
+        // 1) Re-score risk with the new message included
+        const scored = await careloopRiskEngine.scorePatient({
+          patient: { mrn: patientMrn, name: patientName },
+          whatsappMessages: conversation,
+          openai,
+        });
+        setRiskSegment(patientMrn, scored.risk_segment);
+        db.prepare(
+          'INSERT INTO events (episodeId, eventType, metadata) VALUES (?, ?, ?)'
+        ).run(0, 'risk_rescored_after_inbound', JSON.stringify({
+          mrn: patientMrn,
+          score: scored.risk_score,
+          segment: scored.risk_segment,
+          flags: scored.flags,
+          next_action: scored.next_action,
+        }));
+        console.log(`📊 Re-scored ${patientName || patientMrn}: ${scored.risk_score} (${scored.risk_segment}) — ${scored.next_action}`);
+
+        // 2) Generate the reply. Three fast-path commands handled before the LLM:
+        //    a) Pending check-in yes/no → mark adherence + brief confirmation
+        //    b) "summary" / "status" → adherence summary
+        //    c) "remind me in 10m" → parse delay + schedule reminder
+        //    Otherwise → LLM reply with full prompt context
+        const state = getPatientState(patientMrn);
+        if (!state) {
+          console.warn('No patient_state for MRN', patientMrn, '— skipping auto-reply.');
+          return;
+        }
+        state.riskSegment = scored.risk_segment;
+        state.careActivated = true;
+
+        const phone = state.phone || cleanFrom;
+        let replyBody = null;
+        let fastPath = null;
+
+        // (a) Adherence check-in response
+        const adherenceResult = reminders.handleAdherenceResponse(db, patientMrn, Body || '');
+        if (adherenceResult) {
+          fastPath = adherenceResult.taken === 1 ? 'adherence_yes' : 'adherence_no';
+          const firstName = state.name;
+          replyBody = adherenceResult.taken === 1
+            ? `Great job ${firstName}! ✅ Marked your ${adherenceResult.label} as taken. Keep it up 💚`
+            : `Thanks for letting me know ${firstName}. ❌ Logged as missed. Your care team will check in shortly 💚`;
+          if (adherenceResult.taken === 1) markMedicationConfirmed(patientMrn);
+        }
+
+        // (b) Summary request
+        if (!replyBody && reminders.isSummaryRequest(Body || '')) {
+          fastPath = 'summary';
+          replyBody = reminders.buildAdherenceSummary(db, patientMrn);
+        }
+
+        // (c) Schedule reminder request — "remind me in 10 minutes"
+        if (!replyBody && reminders.isScheduleRequest(Body || '')) {
+          const delayMs = reminders.parseReminderDelay(Body || '');
+          if (delayMs) {
+            const firstMed = (state.medications || [])[0];
+            const medName = firstMed ? String(firstMed).split('—')[0].trim() : 'your medication';
+            reminders.scheduleMedicationReminder(
+              { db, sendFn: sendWhatsAppRaw, patient: { mrn: patientMrn, patientName: state.patientName, phone, medicationName: medName } },
+              { delayMs, label: medName + ' — patient-requested' }
+            );
+            const minutes = Math.round(delayMs / 60000);
+            fastPath = 'reminder_scheduled';
+            replyBody = `✅ Got it — I'll remind you in ${minutes >= 1 ? minutes + ' minute' + (minutes !== 1 ? 's' : '') : Math.round(delayMs/1000) + ' seconds'}. 💚`;
+          } else {
+            fastPath = 'reminder_invalid';
+            replyBody = `I can set a reminder up to 24 hours away. Try "remind me in 30 minutes" or "remind me in 2 hours" 💚`;
+          }
+        }
+
+        // (d) LLM fallback — full prompt context
+        if (!replyBody) {
+          replyBody = await generateLLMMessage(state, Body || '');
+        }
+        if (!replyBody) {
+          console.warn('LLM produced no reply for', patientMrn);
+          return;
+        }
+
+        // 3) Detect markers BEFORE stripping them (state updates), then strip from outgoing text
+        const hasConfirmed = /✅\s*CONFIRMED/.test(replyBody);
+        const hasMissed = /❌\s*MISSED/.test(replyBody);
+        const hasEscalate = /🚨\s*ESCALATE/.test(replyBody);
+
+        if (hasConfirmed) markMedicationConfirmed(patientMrn);
+        if (hasMissed || hasEscalate) {
+          db.prepare(
+            'INSERT INTO events (episodeId, eventType, metadata) VALUES (?, ?, ?)'
+          ).run(0, hasEscalate ? 'patient_escalation' : 'medication_missed', JSON.stringify({
+            mrn: patientMrn,
+            patientName,
+            patientMessage: Body,
+            llmReply: replyBody,
+            riskSegment: scored.risk_segment,
+            timestamp: new Date().toISOString(),
+          }));
+        }
+
+        // 4) Send the reply back to the patient
+        if (phone) {
+          await sendWhatsAppRaw(phone, replyBody, patientMrn, patientName);
+          const tags = [];
+          if (fastPath) tags.push(fastPath);
+          if (hasConfirmed) tags.push('✅ CONFIRMED');
+          if (hasMissed) tags.push('❌ MISSED');
+          if (hasEscalate) tags.push('🚨 ESCALATE');
+          console.log(`💬 Reply sent to ${phone}${tags.length ? ' [' + tags.join(', ') + ']' : ''}`);
+        }
+      } catch (err) {
+        console.warn('Auto-reply pipeline failed:', err.message);
+      }
+    })();
+  }
+});
+
+app.get('/api/messages', (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 50, 200);
+  const sinceId = Number(req.query.sinceId) || 0;
+  const rows = db.prepare(
+    'SELECT id, direction, fromNumber, toNumber, body, twilioSid, patientMrn, patientName, createdAt FROM messages WHERE id > ? ORDER BY id DESC LIMIT ?'
+  ).all(sinceId, limit);
+  res.json({ ok: true, messages: rows });
+});
+
+// ---------------------------------------------------------------------------
+// Risk Scoring — LLM flag extraction + logistic regression
+// ---------------------------------------------------------------------------
+
+function buildMessagesForMrn(mrn, limit = 20) {
+  if (!mrn) return [];
+  const rows = db.prepare(
+    "SELECT direction, body, createdAt FROM messages WHERE patientMrn = ? AND body != '' ORDER BY id DESC LIMIT ?"
+  ).all(String(mrn), limit);
+  return rows
+    .reverse() // chronological order, oldest first
+    .map(r => ({
+      sender: r.direction === 'inbound' ? 'patient' : 'orchestrator',
+      text: r.body || '',
+    }));
+}
+
+app.get('/api/adherence/:mrn', (req, res) => {
+  const mrn = String(req.params.mrn || '');
+  const rows = db.prepare(
+    'SELECT id, label, scheduledAt, respondedAt, taken, barrier, createdAt FROM adherence_log WHERE mrn = ? ORDER BY id DESC LIMIT 100'
+  ).all(mrn);
+  const summary = reminders.buildAdherenceSummary(db, mrn);
+  res.json({ ok: true, mrn, rows, summaryText: summary });
+});
+
+app.post('/api/risk/score', async (req, res) => {
+  const { patient = {}, adherence = null, whatsapp_messages = null, use_llm = true } = req.body || {};
+
+  try {
+    // If caller didn't supply messages, build them from the DB by MRN
+    const messages = Array.isArray(whatsapp_messages)
+      ? whatsapp_messages
+      : buildMessagesForMrn(patient.mrn);
+
+    const result = await careloopRiskEngine.scorePatient({
+      patient,
+      adherence,
+      whatsappMessages: messages,
+      openai: use_llm ? openai : null,
+    });
+
+    // Audit
+    try {
+      db.prepare(
+        'INSERT INTO events (episodeId, eventType, metadata) VALUES (?, ?, ?)'
+      ).run(0, 'risk_scored', JSON.stringify({
+        mrn: patient.mrn || '',
+        score: result.risk_score,
+        segment: result.risk_segment,
+        message_count: messages.length,
+      }));
+    } catch (_) { /* non-fatal */ }
+
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error('Risk scoring failed:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Prescription PDF/image parsing via OpenAI GPT-4o
+// ---------------------------------------------------------------------------
+
+const RX_EXTRACTION_SCHEMA_PROMPT = `You are a medical prescription parser for CareLoop, a patient-engagement platform at hospitals in the UAE.
+Extract structured data from the prescription provided and return STRICT JSON matching this schema:
+
+{
+  "name": "Full patient name as printed",
+  "mrn": "Medical record number (digits only, no MRN: prefix)",
+  "age": "Age as a human-readable string e.g. '26 years' or '54 years'",
+  "phone": "Patient's mobile if present, else empty string",
+  "lang": "Most likely patient language ('Arabic', 'English', 'Hindi', 'Marathi', etc.). Infer from script used or location.",
+  "insurance": "Insurance plan if present, else empty string",
+  "consultant": "Prescribing doctor's full name with title (e.g. 'Dr. Nitin G. Barde')",
+  "dept": "Department or speciality inferred from doctor's qualification (e.g. 'Dermatology', 'Cardiology', 'Pulmonology')",
+  "diagnosis": "Primary diagnosis or reason for visit, in English. If only medications are listed, infer the condition from them.",
+  "episodeType": "EXACTLY one of: 'OPD Acute' (single short course <= 30 days), 'OPD Chronic' (long-term/maintenance/lifestyle conditions like hypertension, diabetes, hair-loss maintenance), or 'OPD · Acute + Chronic' (both)",
+  "medications": [
+    {
+      "name": "Brand name as written",
+      "dose": "Strength + unit e.g. '500mg', '5%', '1 capsule'",
+      "frequency": "Dosing schedule TRANSLATED TO ENGLISH e.g. 'Once daily', 'Twice daily (morning & night)', '3 times per week'",
+      "duration": "Length of course e.g. '7 days', '30 days', 'ongoing'"
+    }
+  ],
+  "labs": [
+    {
+      "test": "Lab test name",
+      "lab": "Lab provider if specified, else empty string",
+      "dueWithin": "Time window e.g. '5 days', '2 weeks'"
+    }
+  ],
+  "followupDate": "Follow-up date in 'MMM D' format e.g. 'Jul 2', else empty string",
+  "followupTime": "Follow-up time e.g. '10:30 AM', else empty string",
+  "instructionsEn": "Any general instructions (diet, lifestyle) TRANSLATED TO ENGLISH, else empty string"
+}
+
+RULES:
+- Return ONLY the JSON object. No prose, no markdown fences.
+- Translate any non-English text (Arabic, Marathi, Hindi) to clear English in 'frequency', 'instructionsEn', 'diagnosis'.
+- If a field is genuinely absent, use empty string "" (or empty array for medications/labs). Never invent values.
+- Ignore clinic phone numbers, QR codes, addresses, branding — only extract PATIENT and PRESCRIPTION data.
+- For Indian prescriptions where 'OD' = once daily, 'BD/BID' = twice daily, 'TDS' = three times daily, 'HS' = at bedtime.
+- For Arabic prescriptions: same logic with Arabic dosing conventions.`;
+
+async function callOpenAIVision(imageBuffer, mimeType) {
+  const base64 = imageBuffer.toString('base64');
+  const dataUrl = `data:${mimeType};base64,${base64}`;
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: RX_EXTRACTION_SCHEMA_PROMPT },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Parse this prescription. Return ONLY the JSON object specified in the system prompt.' },
+          { type: 'image_url', image_url: { url: dataUrl, detail: 'high' } },
+        ],
+      },
+    ],
+    max_tokens: 2000,
+    temperature: 0,
+  });
+
+  return response.choices[0].message.content;
+}
+
+async function callOpenAIText(text) {
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: RX_EXTRACTION_SCHEMA_PROMPT },
+      { role: 'user', content: 'Parse the prescription text below. Return ONLY the JSON object specified in the system prompt.\n\n---\n' + text },
+    ],
+    max_tokens: 2000,
+    temperature: 0,
+  });
+
+  return response.choices[0].message.content;
+}
+
+// OCR path for scanned/image-only PDFs: upload to OpenAI Files API and ask
+// GPT-4o to read the document directly. Handles both text-PDFs and scanned-PDFs.
+// File is deleted after extraction to avoid storage cost accumulation.
+async function callOpenAIFilePDF(buffer, filename) {
+  const file = await openai.files.create({
+    file: new File([buffer], filename || 'prescription.pdf', { type: 'application/pdf' }),
+    purpose: 'user_data',
+  });
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: RX_EXTRACTION_SCHEMA_PROMPT },
+        { role: 'user', content: [
+          { type: 'text', text: 'Parse the attached prescription PDF. Return ONLY the JSON object specified in the system prompt.' },
+          { type: 'file', file: { file_id: file.id } },
+        ]},
+      ],
+      max_tokens: 2000,
+      temperature: 0,
+    });
+    return response.choices[0].message.content;
+  } finally {
+    openai.files.delete(file.id).catch(() => {});
+  }
+}
+
+app.post('/api/parse-prescription', upload.single('prescription'), async (req, res) => {
+  if (!openai) {
+    return res.status(503).json({ error: 'OpenAI not configured. Set OPENAI_API_KEY in .env and restart the server.' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded. Send a multipart form with a "prescription" field.' });
+  }
+
+  const { buffer, mimetype, originalname, size } = req.file;
+  const t0 = Date.now();
+
+  try {
+    let rawJson;
+    let parseMethod;
+
+    if (mimetype === 'application/pdf' || originalname.toLowerCase().endsWith('.pdf')) {
+      // Cheap path first: EMR-exported PDFs have a real text layer.
+      let pdfText = '';
+      try {
+        const pdfData = await pdfParse(buffer);
+        pdfText = (pdfData.text || '').trim();
+      } catch (_) { pdfText = ''; }
+
+      if (pdfText && pdfText.length >= 30) {
+        rawJson = await callOpenAIText(pdfText);
+        parseMethod = 'pdf-text';
+      } else {
+        // OCR layer: scanned/photo-PDF — upload to OpenAI Files API and let
+        // GPT-4o read the document directly (handles both image-only PDFs and
+        // mixed PDFs without us having to render anything locally).
+        rawJson = await callOpenAIFilePDF(buffer, originalname);
+        parseMethod = 'pdf-ocr-via-files-api';
+      }
+    } else if (mimetype && mimetype.startsWith('image/')) {
+      rawJson = await callOpenAIVision(buffer, mimetype);
+      parseMethod = 'image-vision';
+    } else {
+      return res.status(415).json({ error: `Unsupported file type: ${mimetype}. Use PDF, JPG, or PNG.` });
+    }
+
+    let extracted;
+    try {
+      extracted = JSON.parse(rawJson);
+    } catch (parseErr) {
+      return res.status(502).json({
+        error: 'OpenAI returned malformed JSON. Try uploading again.',
+        rawResponse: rawJson,
+      });
+    }
+
+    const elapsedMs = Date.now() - t0;
+
+    // Audit trail: log the parse event (without storing PHI in clear text)
+    try {
+      db.prepare(
+        'INSERT INTO events (episodeId, eventType, metadata) VALUES (?, ?, ?)'
+      ).run(0, 'prescription_parsed', JSON.stringify({
+        filename: originalname,
+        sizeBytes: size,
+        method: parseMethod,
+        elapsedMs,
+        extractedFields: Object.keys(extracted),
+      }));
+    } catch (auditErr) {
+      console.warn('Audit log failed (non-fatal):', auditErr.message);
+    }
+
+    res.json({
+      ok: true,
+      extracted,
+      meta: {
+        filename: originalname,
+        sizeBytes: size,
+        method: parseMethod,
+        elapsedMs,
+        model: 'gpt-4o',
+      },
+    });
+  } catch (err) {
+    console.error('Prescription parse failed:', err);
+    res.status(500).json({
+      error: err.message || 'Parsing failed. Check server logs.',
+      code: err.code,
+    });
+  }
 });
 
 app.delete('/api/episodes/reset', (req, res) => {

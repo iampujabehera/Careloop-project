@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareLoop Workbench</title>
+<title>CareLoop Workbench Wi</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -4948,10 +4948,27 @@ function showDetail(data) {
   var bNoteEl = document.getElementById('d-barrier-note');
   if (bNoteEl) bNoteEl.innerHTML = p.barrierNote || '';
 
+  // Decide which engine drives the risk-score header for THIS patient.
+  // Zayn (marcus) maps to a real seeded DB episode with an event-based breakdown;
+  // everyone else is scored by the logistic-regression engine (risk.js logic):
+  // uploaded patients reuse their stored result, demo patients are scored live.
+  // NOTE: showScreen is a hoisted function declaration; the risk-refresh hooks
+  // live on the window.showScreen wrapper, which a bare showScreen() call skips.
+  // So we invoke applyDetailRisk()/loadRiskBreakdown() EXPLICITLY here to
+  // guarantee the header refreshes for the patient we just rendered.
   if (typeof data === 'string' && data === 'nora') {
+    window.__detailRiskSource = { kind: 'episode', id: 1 };   // Nora — episode 1
     showScreen('detail-nora');
+    loadRiskBreakdown(1);
   } else {
+    if (typeof data === 'string' && data === 'marcus') {
+      window.__detailRiskSource = { kind: 'episode', id: 2 };  // Zayn — seeded episode 2
+    } else {
+      // Everyone else is scored live by the slider-controlled weighted engine.
+      window.__detailRiskSource = { kind: 'signals', patient: p };
+    }
     showScreen('detail');
+    applyDetailRisk();
   }
 }
 
@@ -5802,7 +5819,16 @@ function runPrescriptionDemo() {
 }
 
 // ── HMIS PRESCRIPTION LISTENER ──
-function handleNewPrescription(prescriptionData) {
+// riskData (optional) is the response from /api/risk/score. Every UI field below is
+// derived from it so the row never shows hardcoded placeholders.
+function handleNewPrescription(prescriptionData, riskData) {
+  var ui = (typeof riskUiTokens === 'function')
+    ? riskUiTokens(riskData)
+    : { dotClass: 'green', tagClass: 'auto', tagText: 'Auto-Monitored', color: 'var(--green)', dataStatus: 'auto' };
+  var riskScoreDisplay = (riskData && riskData.risk_score != null) ? String(riskData.risk_score) : '—';
+  var riskSegmentDisplay = (riskData && riskData.risk_segment) || 'Low';
+  var nextActionDisplay = (riskData && riskData.next_action) || 'Continue automated monitoring';
+
   // Generate a unique key from MRN
   var patientKey = 'hmis_' + prescriptionData.mrn;
 
@@ -5850,10 +5876,11 @@ function handleNewPrescription(prescriptionData) {
     channel: 'WhatsApp',
     insTag: insTag,
     insColor: '#15803d', insBg: '#f0fdf4', insBorder: '#bbf7d0',
-    riskScore: '12',
-    riskColor: 'var(--green)',
-    riskLabel: 'New episode · Monitoring started',
-    status: 'auto',
+    riskScore: riskScoreDisplay,
+    riskColor: ui.color,
+    riskLabel: riskSegmentDisplay + ' · ' + nextActionDisplay,
+    riskData: riskData,   // full logistic-regression result — drives the detail risk header
+    status: ui.dataStatus,
     suggestion: 'Episode just onboarded from HMIS. First WhatsApp care plan sent automatically. Monitor for 24 hours before any action is needed.',
     escalateTo: prescriptionData.consultant,
     escalateDept: prescriptionData.dept + ' · Good Health Hospital',
@@ -5892,20 +5919,24 @@ function handleNewPrescription(prescriptionData) {
 
     var newRow = document.createElement('div');
     newRow.className = 'queue-row row-highlight';
-    newRow.style.cssText = 'border-left:3px solid var(--green);cursor:pointer;';
-    newRow.setAttribute('data-status', 'auto');
+    newRow.style.cssText = 'border-left:3px solid ' + ui.color + ';cursor:pointer;';
+    newRow.setAttribute('data-status', ui.dataStatus);
     newRow.setAttribute('data-patient-key', patientKey);
     newRow.setAttribute('onclick', "showDetail('" + patientKey + "')");
-    newRow.innerHTML = '<div class="risk-dot green"></div>' +
+    var deadlineClass = (ui.dotClass === 'red') ? 'overdue' : (ui.dotClass === 'amber' ? 'soon' : 'ok');
+    var newBadgeBg = (ui.dotClass === 'red') ? '#fee2e2' : (ui.dotClass === 'amber' ? '#fef3c7' : '#dcfce7');
+    var newBadgeFg = (ui.dotClass === 'red') ? '#b91c1c' : (ui.dotClass === 'amber' ? '#92400e' : '#15803d');
+    newRow.innerHTML = '<div class="risk-dot ' + ui.dotClass + '"></div>' +
       '<div><div class="patient-name">' + prescriptionData.name +
-      ' <span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:700;">NEW</span></div>' +
+      ' <span style="font-size:9px;background:' + newBadgeBg + ';color:' + newBadgeFg + ';padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:700;">NEW</span></div>' +
       '<div class="patient-meta">MRN ' + prescriptionData.mrn +
       ' · ' + insTag +
       ' · ' + prescriptionData.age + ' · ' + prescriptionData.lang + '</div></div>' +
       '<div><span class="episode-tag ' + (prescriptionData.episodeType === 'OPD Chronic' ? 'chronic' : 'acute') + '">' + prescriptionData.episodeType + '</span></div>' +
-      '<div class="action-pending"><strong>Episode just started</strong>' + prescriptionData.diagnosis + '</div>' +
-      '<div class="days-badge ok">Just now</div>' +
-      '<span class="action-tag auto">Auto-Monitored</span>';
+      '<div class="action-pending"><strong>Risk ' + riskScoreDisplay + '/100 · ' + riskSegmentDisplay + '</strong>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">' + nextActionDisplay + '</div></div>' +
+      '<div class="days-badge ' + deadlineClass + '">Just now</div>' +
+      '<span class="action-tag ' + ui.tagClass + '">' + ui.tagText + '</span>';
 
     var queueTable = document.querySelector('#screen-queue .queue-table');
     var lastChild = queueTable.lastElementChild;
@@ -5975,32 +6006,312 @@ function resetUploadModalDropArea() {
     '<input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){processUploadedPrescription(this.files[0]); this.value=\'\';}">';
 }
 
-function processUploadedPrescription(file) {
+async function processUploadedPrescription(file) {
   var modal = document.getElementById('upload-rx-modal');
   var dropArea = modal.querySelector('div[style*="dashed"]');
   if (dropArea) {
     dropArea.innerHTML =
       '<div style="font-size:32px;margin-bottom:8px;">⏳</div>' +
       '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Parsing ' + file.name + '...</div>' +
-      '<div style="font-size:11px;color:var(--muted);">Extracting patient + prescription details</div>';
+      '<div style="font-size:11px;color:var(--muted);">Reading prescription with GPT-4o · 3-8 seconds</div>';
   }
 
-  setTimeout(function() {
-    var sample = SAMPLE_PRESCRIPTIONS[sampleRxIdx % SAMPLE_PRESCRIPTIONS.length];
-    var rx = JSON.parse(JSON.stringify(sample));
-    // After first cycle, give each repeat upload a unique MRN so it onboards as a fresh patient
-    if (sampleRxIdx >= SAMPLE_PRESCRIPTIONS.length) {
-      rx.mrn = String(45400 + (sampleRxIdx - SAMPLE_PRESCRIPTIONS.length) + 1);
+  try {
+    var formData = new FormData();
+    formData.append('prescription', file);
+    var response = await fetch('/api/parse-prescription', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || ('Parse failed (HTTP ' + response.status + ')'));
     }
-    sampleRxIdx++;
-    rx.timestamp = new Date().toISOString();
 
-    modal.style.display = 'none';
-    resetUploadModalDropArea();
+    showRxReviewScreen(data.extracted, data.meta);
+  } catch (err) {
+    if (dropArea) {
+      dropArea.innerHTML =
+        '<div style="font-size:32px;margin-bottom:8px;">⚠️</div>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px;">Could not parse this prescription</div>' +
+        '<div style="font-size:11px;color:var(--muted);line-height:1.4;">' + (err.message || 'Unknown error') + '</div>' +
+        '<input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){processUploadedPrescription(this.files[0]); this.value=\'\';}">' +
+        '<button onclick="document.getElementById(\'rx-file-input\').click()" style="margin-top:12px;padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;">Try again</button>';
+    }
+  }
+}
 
-    if (typeof showScreen === 'function') showScreen('queue');
-    setTimeout(function() { handleNewPrescription(rx); }, 250);
-  }, 1500);
+function escAttr(v) { return String(v == null ? '' : v).replace(/"/g, '&quot;'); }
+
+function showRxReviewScreen(rx, meta) {
+  // Auto-fill phone from server-side demo default if the parsed prescription didn't have one
+  if (!rx.phone && window.__demoPhone) {
+    rx = Object.assign({}, rx, { phone: window.__demoPhone });
+  }
+  window.__rxReviewState = JSON.parse(JSON.stringify(rx));
+
+  var modal = document.getElementById('upload-rx-modal');
+  // Loose match on "border-radius" (browser sometimes normalises to "border-radius: 14px" with a space)
+  // plus firstElementChild fallback so the lookup never returns null after a fresh modal.
+  var modalBox = (modal && modal.querySelector('div[style*="border-radius"]')) || (modal && modal.firstElementChild);
+  if (!modalBox) {
+    console.error('[CareLoop] Upload modal box not found — aborting review render.');
+    if (typeof flashSettingsToast === 'function') flashSettingsToast('⚠ Upload modal failed to initialise — refresh and try again.');
+    return;
+  }
+  modalBox.style.width = '720px';
+
+  var medsHtml = (rx.medications || []).map(function(m, i) {
+    return '<div style="display:grid;grid-template-columns:1.4fr 0.7fr 1.4fr 0.7fr;gap:6px;margin-bottom:6px;">' +
+      '<input data-rx-med="' + i + '" data-field="name" value="' + escAttr(m.name) + '" placeholder="Medication" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '<input data-rx-med="' + i + '" data-field="dose" value="' + escAttr(m.dose) + '" placeholder="Dose" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '<input data-rx-med="' + i + '" data-field="frequency" value="' + escAttr(m.frequency) + '" placeholder="Frequency" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '<input data-rx-med="' + i + '" data-field="duration" value="' + escAttr(m.duration) + '" placeholder="Days" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '</div>';
+  }).join('');
+
+  var labsHtml = (rx.labs || []).map(function(l, i) {
+    return '<div style="display:grid;grid-template-columns:1.4fr 1.2fr 0.7fr;gap:6px;margin-bottom:6px;">' +
+      '<input data-rx-lab="' + i + '" data-field="test" value="' + escAttr(l.test) + '" placeholder="Test" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '<input data-rx-lab="' + i + '" data-field="lab" value="' + escAttr(l.lab) + '" placeholder="Lab provider" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '<input data-rx-lab="' + i + '" data-field="dueWithin" value="' + escAttr(l.dueWithin) + '" placeholder="Due within" style="padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;">' +
+      '</div>';
+  }).join('');
+  if (!labsHtml) labsHtml = '<div style="font-size:11px;color:var(--muted);padding:6px 0;">No lab tests detected in the prescription.</div>';
+
+  var elapsedSec = ((meta.elapsedMs || 0) / 1000).toFixed(1);
+
+  modalBox.innerHTML =
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">' +
+      '<div>' +
+        '<div style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:700;color:var(--ink);">Review parsed prescription</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Extracted from <strong>' + escAttr(meta.filename) + '</strong> · GPT-4o · ' + elapsedSec + 's</div>' +
+      '</div>' +
+      '<button onclick="cancelRxReview()" style="background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer;line-height:1;padding:0;">×</button>' +
+    '</div>' +
+    '<div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:8px 12px;margin:10px 0 14px;font-size:11px;color:#854d0e;line-height:1.5;">' +
+      '<strong>⚠ Review every field before confirming.</strong> AI extraction is ~85% accurate — verify medications, dosage, and patient identifiers. The patient is NOT onboarded until you click Confirm.' +
+    '</div>' +
+    '<div style="max-height:55vh;overflow-y:auto;padding-right:6px;">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Patient</div>' +
+      '<div style="display:grid;grid-template-columns:1.5fr 0.8fr 0.6fr 1.1fr 0.9fr;gap:6px;margin-bottom:14px;">' +
+        '<input data-rx-field="name" value="' + escAttr(rx.name) + '" placeholder="Patient name" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<input data-rx-field="mrn" value="' + escAttr(rx.mrn) + '" placeholder="MRN" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<input data-rx-field="age" value="' + escAttr(rx.age) + '" placeholder="Age" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<input data-rx-field="phone" value="' + escAttr(rx.phone) + '" placeholder="Phone (required)" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;background:' + (!rx.phone ? '#fef9c3' : 'white') + ';">' +
+        '<input data-rx-field="lang" value="' + escAttr(rx.lang) + '" placeholder="Language" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:14px;">' +
+        '<input data-rx-field="insurance" value="' + escAttr(rx.insurance) + '" placeholder="Insurance plan (e.g. Daman · Basic)" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;background:' + (!rx.insurance ? '#fef9c3' : 'white') + ';">' +
+      '</div>' +
+
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Consultation</div>' +
+      '<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:6px;margin-bottom:8px;">' +
+        '<input data-rx-field="consultant" value="' + escAttr(rx.consultant) + '" placeholder="Doctor" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<input data-rx-field="dept" value="' + escAttr(rx.dept) + '" placeholder="Department" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<select data-rx-field="episodeType" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+          '<option value="OPD Acute"' + (rx.episodeType === 'OPD Acute' ? ' selected' : '') + '>OPD Acute</option>' +
+          '<option value="OPD Chronic"' + (rx.episodeType === 'OPD Chronic' ? ' selected' : '') + '>OPD Chronic</option>' +
+          '<option value="OPD · Acute + Chronic"' + (rx.episodeType === 'OPD · Acute + Chronic' ? ' selected' : '') + '>OPD · Acute + Chronic</option>' +
+        '</select>' +
+      '</div>' +
+      '<div style="margin-bottom:14px;">' +
+        '<input data-rx-field="diagnosis" value="' + escAttr(rx.diagnosis) + '" placeholder="Diagnosis" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+      '</div>' +
+
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Medications</div>' +
+      '<div style="display:grid;grid-template-columns:1.4fr 0.7fr 1.4fr 0.7fr;gap:6px;margin-bottom:4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">' +
+        '<div>Name</div><div>Dose</div><div>Frequency</div><div>Duration</div>' +
+      '</div>' +
+      medsHtml +
+      '<div style="margin-bottom:14px;"><button onclick="addRxMedRow()" style="background:none;border:1px dashed var(--border);color:var(--slate);padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;">+ Add medication</button></div>' +
+
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Lab tests</div>' +
+      labsHtml +
+      '<div style="margin-bottom:14px;"><button onclick="addRxLabRow()" style="background:none;border:1px dashed var(--border);color:var(--slate);padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;">+ Add lab test</button></div>' +
+
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Follow-up</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">' +
+        '<input data-rx-field="followupDate" value="' + escAttr(rx.followupDate) + '" placeholder="Follow-up date (e.g. Jul 2)" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+        '<input data-rx-field="followupTime" value="' + escAttr(rx.followupTime) + '" placeholder="Follow-up time" style="padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;">' +
+      '</div>' +
+
+      '<div style="font-size:11px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">General instructions</div>' +
+      '<textarea data-rx-field="instructionsEn" placeholder="Diet / lifestyle notes" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:5px;min-height:50px;resize:vertical;font-family:inherit;">' + escAttr(rx.instructionsEn || '') + '</textarea>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;">' +
+      '<button onclick="cancelRxReview()" class="settings-btn outline">Cancel</button>' +
+      '<button onclick="confirmRxReview()" style="background:var(--teal);color:white;border:none;padding:9px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">✓ Confirm &amp; Onboard to Queue</button>' +
+    '</div>';
+}
+
+function addRxMedRow() {
+  var current = readRxReviewForm();
+  current.medications = current.medications || [];
+  current.medications.push({ name: '', dose: '', frequency: '', duration: '' });
+  window.__rxReviewState = current;
+  showRxReviewScreen(current, { filename: 'edited', elapsedMs: 0 });
+}
+
+function addRxLabRow() {
+  var current = readRxReviewForm();
+  current.labs = current.labs || [];
+  current.labs.push({ test: '', lab: '', dueWithin: '' });
+  window.__rxReviewState = current;
+  showRxReviewScreen(current, { filename: 'edited', elapsedMs: 0 });
+}
+
+function readRxReviewForm() {
+  var modal = document.getElementById('upload-rx-modal');
+  var out = JSON.parse(JSON.stringify(window.__rxReviewState || {}));
+  modal.querySelectorAll('[data-rx-field]').forEach(function(el) {
+    out[el.getAttribute('data-rx-field')] = el.value;
+  });
+  out.medications = [];
+  modal.querySelectorAll('[data-rx-med]').forEach(function(el) {
+    var idx = parseInt(el.getAttribute('data-rx-med'));
+    var field = el.getAttribute('data-field');
+    if (!out.medications[idx]) out.medications[idx] = { name: '', dose: '', frequency: '', duration: '' };
+    out.medications[idx][field] = el.value;
+  });
+  out.labs = [];
+  modal.querySelectorAll('[data-rx-lab]').forEach(function(el) {
+    var idx = parseInt(el.getAttribute('data-rx-lab'));
+    var field = el.getAttribute('data-field');
+    if (!out.labs[idx]) out.labs[idx] = { test: '', lab: '', dueWithin: '' };
+    out.labs[idx][field] = el.value;
+  });
+  return out;
+}
+
+function cancelRxReview() {
+  document.getElementById('upload-rx-modal').style.display = 'none';
+  rebuildUploadModal();
+  window.__rxReviewState = null;
+}
+
+async function confirmRxReview() {
+  var rx = readRxReviewForm();
+  if (!rx.name || !rx.mrn) {
+    flashSettingsToast('⚠ Patient name and MRN are required.');
+    return;
+  }
+  rx.timestamp = new Date().toISOString();
+
+  document.getElementById('upload-rx-modal').style.display = 'none';
+  rebuildUploadModal();
+  window.__rxReviewState = null;
+
+  if (typeof showScreen === 'function') showScreen('queue');
+
+  // 1) Score risk FIRST so the row is built with real data, not hardcoded.
+  showToast('🧠 Scoring risk...');
+  var riskData = await fetchRiskScore(rx);
+  if (riskData && riskData.risk_score != null) {
+    showToast('🎯 Risk: ' + riskData.risk_score + '/100 · ' + riskData.risk_segment + ' — ' + riskData.next_action);
+  }
+
+  // 2) Onboard with the real risk — colour, badge, riskScore all driven by the engine
+  setTimeout(function() {
+    handleNewPrescription(rx, riskData);
+    sendRealCareplanMessage(rx);
+  }, 250);
+}
+
+async function fetchRiskScore(rx) {
+  // Score a freshly-onboarded patient through the SAME slider-controlled
+  // weighted engine the detail header uses, so the queue row and the detail
+  // panel always agree. A new episode has few signals → it starts low and
+  // climbs only as real signals (overdue labs, missed doses, serious replies)
+  // accumulate at their configured weights.
+  try {
+    var data = await scoreViaSignals(deriveSignalsFromRx(rx));
+    var seg = data.triage === 'emergent' ? 'High' : (data.triage === 'urgent' ? 'Medium' : 'Low');
+    var nextAction = data.triage === 'emergent'
+      ? 'Escalate to consultant — clinical review needed'
+      : (data.triage === 'urgent'
+          ? 'Schedule check-in within 48 hours'
+          : 'Continue automated monitoring');
+    var result = { risk_score: data.score, risk_segment: seg, next_action: nextAction, triage: data.triage, flags: {} };
+    window.__lastRiskScore = result;
+    console.log('[CareLoop] Risk score (weighted engine):', data.score, '(' + seg + ')');
+    return result;
+  } catch (err) {
+    console.error('[CareLoop] Risk request error:', err);
+  }
+  // Honest unknown state — let the row reflect "score unavailable", not a fake green 12.
+  return { risk_score: null, risk_segment: 'Unknown', next_action: 'Risk score unavailable — recompute manually', flags: {} };
+}
+
+// Helper for the queue-row builder: maps risk_segment → UI tokens.
+function riskUiTokens(riskData) {
+  var seg = (riskData && riskData.risk_segment) || 'Low';
+  if (seg === 'High') {
+    return { dotClass: 'red', tagClass: 'escalate', tagText: 'Escalate', color: 'var(--red)', dataStatus: 'critical' };
+  }
+  if (seg === 'Medium') {
+    return { dotClass: 'amber', tagClass: 'escalate', tagText: 'Watch', color: 'var(--amber)', dataStatus: 'watch' };
+  }
+  if (seg === 'Unknown') {
+    return { dotClass: 'grey', tagClass: 'auto', tagText: '— Score N/A', color: 'var(--muted)', dataStatus: 'auto' };
+  }
+  return { dotClass: 'green', tagClass: 'auto', tagText: 'Auto-Monitored', color: 'var(--green)', dataStatus: 'auto' };
+}
+
+async function sendRealCareplanMessage(rx) {
+  if (!rx.phone) {
+    console.warn('[CareLoop] No phone number — skipping real WhatsApp send.');
+    return;
+  }
+  try {
+    var response = await fetch('/api/whatsapp/send-careplan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rx),
+    });
+    var data = await response.json();
+    if (response.ok && data.ok) {
+      console.log('[CareLoop] WhatsApp delivered. Twilio SID:', data.sid);
+      setTimeout(function() {
+        showToast('📱 WhatsApp delivered to ' + rx.phone + ' · SID ' + String(data.sid || '').slice(0, 14) + '...');
+      }, 5000);
+    } else {
+      console.error('[CareLoop] WhatsApp send failed:', data.error);
+      setTimeout(function() {
+        showToast('⚠ WhatsApp not sent: ' + (data.error || 'unknown error'));
+      }, 5000);
+    }
+  } catch (err) {
+    console.error('[CareLoop] WhatsApp request failed:', err);
+    setTimeout(function() {
+      showToast('⚠ WhatsApp request failed (server unreachable)');
+    }, 5000);
+  }
+}
+
+function rebuildUploadModal() {
+  var modal = document.getElementById('upload-rx-modal');
+  if (!modal) return;
+  var modalBox = modal.querySelector('div[style*="border-radius"]') || modal.firstElementChild;
+  if (!modalBox) return;
+  modalBox.style.width = '520px';
+  modalBox.innerHTML =
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">' +
+      '<div style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:700;color:var(--ink);">Upload Prescription</div>' +
+      '<button onclick="document.getElementById(\'upload-rx-modal\').style.display=\'none\'" style="background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer;line-height:1;padding:0;">×</button>' +
+    '</div>' +
+    '<div style="font-size:12px;color:var(--slate);margin-bottom:18px;">No EMR integration needed. CareLoop parses the PDF, extracts patient + prescription details, and creates the episode automatically.</div>' +
+    '<div style="border:2px dashed var(--teal);border-radius:10px;padding:32px 20px;text-align:center;background:#f0fdfa;cursor:pointer;transition:all .15s;" onclick="document.getElementById(\'rx-file-input\').click()">' +
+      '<div style="font-size:32px;margin-bottom:8px;">📄</div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Drop prescription PDF here</div>' +
+      '<div style="font-size:11px;color:var(--muted);">or click to browse · accepts .pdf, .jpg, .png</div>' +
+      '<input type="file" id="rx-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="if(this.files[0]){processUploadedPrescription(this.files[0]); this.value=\'\';}">' +
+    '</div>' +
+    '<div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--slate);line-height:1.5;">' +
+      '<strong style="color:var(--teal-d);">Pilot-friendly:</strong> Use this path for small clinics, trial deployments, or hospitals without HMIS integration. The orchestrator reviews and confirms the parsed episode in the Priority Queue.' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">' +
+      '<button onclick="document.getElementById(\'upload-rx-modal\').style.display=\'none\'" class="settings-btn outline">Cancel</button>' +
+    '</div>';
 }
 
 window.addEventListener('storage', function(e) {
@@ -6013,6 +6324,14 @@ window.addEventListener('storage', function(e) {
     }
   }
 });
+
+// Fetch demo defaults (e.g. demo phone number from server .env) once on page load
+(function() {
+  fetch('/api/config/demo-defaults')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d && d.demoPhone) { window.__demoPhone = d.demoPhone; console.log('[CareLoop] Demo phone loaded:', d.demoPhone); } })
+    .catch(function() { /* no demo phone — that's fine */ });
+})();
 
 // Check for any pending prescription on load (in case HMIS saved before this tab was listening)
 (function() {
@@ -6193,6 +6512,16 @@ function loadRiskBreakdown(episodeId) {
     .then(r => r.json())
     .then(data => {
       if (data.error) return;
+      renderEventBreakdown(data);
+    })
+    .catch(err => console.error('risk breakdown fetch failed', err));
+}
+
+// Render the weighted-engine breakdown. The data shape is identical whether it
+// came from /api/episodes/:id/risk (persisted episode) or /api/risk/score-signals
+// (ad-hoc client patient): { score, triage, contributions[] }. Both honour the
+// configurable Risk Detection Settings weights.
+function renderEventBreakdown(data) {
       const scoreEl    = document.getElementById('rb-score');
       const triageEl   = document.getElementById('rb-triage');
       const activeList = document.getElementById('rb-active-list');
@@ -6259,16 +6588,92 @@ function loadRiskBreakdown(episodeId) {
         inactiveSection.style.display = '';
         inactiveList.innerHTML = inactive.map(name => `<span class="rb-inactive-pill">${name}</span>`).join('');
       }
-    })
-    .catch(err => console.error('risk breakdown fetch failed', err));
+}
+
+// Translate a patient's known state into the weighted-engine signal inputs.
+// Only structured / current-status fields drive signals — instructions that
+// merely say "watch out for fever" must NOT raise a symptom flag, so we scan
+// care-item status text, barriers and the risk label, never free-text advice.
+function deriveSignalsFromPatient(p) {
+  const actionText = (p.episodes || [])
+    .reduce((acc, e) => acc.concat((e.actions || []).map(a => (a && a.text) || '')), [])
+    .join(' ').toLowerCase();
+  const barrierText = JSON.stringify(p.barriers || []).toLowerCase();
+  const labelText   = String(p.riskLabel || '').toLowerCase();
+  const ins         = String(p.insurance || '').toLowerCase();
+
+  const hasChronic  = (p.episodes || []).some(e => e.type === 'chronic');
+  const selfPay     = !ins || /self|cash|uninsured|no insurance|out of pocket/.test(ins);
+  const overdue     = actionText.match(/(\d+)\s*days?\s*overdue/);
+
+  return {
+    chronic_condition:       hasChronic ? 1 : 0,
+    cost_barrier:            (selfPay || /cost|afford|insurance/.test(barrierText) || /cost/.test(labelText)) ? 1 : 0,
+    lab_overdue:             overdue ? parseInt(overdue[1], 10) : (/overdue/.test(actionText) ? 1 : 0),
+    medication_nonadherence: /(unacknowledg|missed dose|skipped|not taken|non-?adher)/.test(actionText + ' ' + labelText) ? 1 : 0,
+    anxiety_flag:            /(anxious|anxiety|scared|fear|worried|nervous)/.test(barrierText + ' ' + labelText) ? 1 : 0,
+    silence_days:            0,
+    missed_appointments:     0,
+    tier1_signal:            0,
+    tier2_signal:            0,
+  };
+}
+
+// Same derivation from a freshly-parsed prescription (onboarding has rx, not a
+// PATIENTS entry). A new episode has no overdue labs / missed doses yet, so a
+// fresh upload scores low — it rises only as real signals accumulate.
+function deriveSignalsFromRx(rx) {
+  const type = /chronic/i.test(rx.episodeType || '') ? 'chronic' : 'acute';
+  const actions = (rx.medications || []).map(m => ({ text: (m.name || '') }))
+    .concat((rx.labs || []).map(l => ({ text: (l.test || '') + ' Due within ' + (l.dueWithin || '') })));
+  return deriveSignalsFromPatient({ episodes: [{ type, actions }], insurance: rx.insurance, barriers: [], riskLabel: '' });
+}
+
+// Score a signals object through the slider-controlled weighted engine.
+async function scoreViaSignals(signals) {
+  const resp = await fetch('/api/risk/score-signals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ signals }),
+  });
+  const data = await resp.json();
+  if (!resp.ok || !data.ok) throw new Error(data.error || 'signal scoring failed');
+  return data;
+}
+
+// Detail header for client-side patients (uploaded / demo): derive their
+// signals, score with the LIVE weights, render. Because it re-scores on every
+// open, changing a slider in Risk Detection Settings is reflected immediately.
+async function computeAndRenderEventSignals(p) {
+  const scoreEl  = document.getElementById('rb-score');
+  const triageEl = document.getElementById('rb-triage');
+  if (scoreEl)  scoreEl.textContent = '…';
+  if (triageEl) { triageEl.textContent = 'scoring…'; triageEl.style.color = 'rgba(255,255,255,.7)'; }
+  try {
+    const data = await scoreViaSignals(deriveSignalsFromPatient(p));
+    renderEventBreakdown(data);
+  } catch (err) {
+    console.error('[CareLoop] signal scoring failed', err);
+    if (scoreEl)  scoreEl.textContent = '—';
+    if (triageEl) { triageEl.textContent = 'SCORE N/A'; triageEl.style.color = '#9ca3af'; }
+  }
+}
+
+// Route the detail risk header for the current patient. Source is set by
+// showDetail(); defaults to the seeded Zayn episode so reaching the detail
+// screen directly (e.g. from the inbox) still works.
+function applyDetailRisk() {
+  const src = window.__detailRiskSource || { kind: 'episode', id: 2 };
+  if (src.kind === 'episode') return loadRiskBreakdown(src.id);
+  if (src.kind === 'signals') return computeAndRenderEventSignals(src.patient);
 }
 
 // Hook into showScreen so detail screens auto-refresh the panel.
 const _origShowScreen = window.showScreen;
 window.showScreen = function(id) {
   _origShowScreen(id);
-  if (id === 'detail') loadRiskBreakdown(2);          // Zayn — episode id 2
-  if (id === 'detail-nora') loadRiskBreakdown(1);     // Nora — episode id 1
+  if (id === 'detail') applyDetailRisk();              // per-patient (set by showDetail)
+  if (id === 'detail-nora') loadRiskBreakdown(1);      // Nora — episode id 1
   if (id === 'exec') renderRevenueTrendChart();
 };
 
