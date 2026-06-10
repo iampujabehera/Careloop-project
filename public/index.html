@@ -6509,12 +6509,17 @@ function magnitudeFor(contribution, isCriticalLocked) {
 // Load and render the risk-breakdown panel for the given episode id.
 function loadRiskBreakdown(episodeId) {
   fetch('/api/episodes/' + episodeId + '/risk')
-    .then(r => r.json())
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
     .then(data => {
-      if (data.error) return;
+      if (data.error) throw new Error(data.error);
       renderEventBreakdown(data);
     })
-    .catch(err => console.error('risk breakdown fetch failed', err));
+    .catch(err => {
+      // No persisted episode endpoint (e.g. on the static Vercel deploy) — fall
+      // back to scoring the current patient's signals through the same engine.
+      console.warn('episode risk unavailable, falling back to signal scoring:', err.message);
+      if (window.currentPatient) computeAndRenderEventSignals(window.currentPatient);
+    });
 }
 
 // Render the weighted-engine breakdown. The data shape is identical whether it
@@ -6630,11 +6635,13 @@ function deriveSignalsFromRx(rx) {
 }
 
 // Score a signals object through the slider-controlled weighted engine.
+// Pass the current slider weights so the deployed (stateless) serverless
+// function reflects tuning — locally the server falls back to its own copy.
 async function scoreViaSignals(signals) {
   const resp = await fetch('/api/risk/score-signals', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ signals }),
+    body: JSON.stringify({ signals, weights: CURRENT_RISK_WEIGHTS || undefined }),
   });
   const data = await resp.json();
   if (!resp.ok || !data.ok) throw new Error(data.error || 'signal scoring failed');

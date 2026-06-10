@@ -8,6 +8,7 @@ const multer = require('multer');
 const OpenAI = require('openai');
 const pdfParse = require('pdf-parse');
 const careloopRiskEngine = require('./careloopRiskEngine');
+const careloopWeightedEngine = require('./careloopWeightedEngine');
 const { buildSystemPrompt } = require('./careloopMessagingPrompt');
 const reminders = require('./careloopReminders');
 
@@ -136,20 +137,14 @@ db.exec(`
 //   score 60..80          → urgent   (amber)
 //   score <  60           → normal   (green)
 
-const DEFAULT_RISK_WEIGHTS = {
-  // ── Power BI–derived (Africa fit) ──
-  intercept:                -3.18,  // β0   evaluated log-odds of baseline non-avail rate (Power BI)
-  cost_barrier:              0.9,   // β1   maps to Coeff_High_Cost (lift ratio in log-odds form)
-  missed_appointments:       0.7,   // β2   maps to Coeff_Past_Non_Avail (per occurrence, capped at 3)
-  silence_days:              0.35,  // β3   maps to Coeff_Infrequent_Visitor (per day, capped at 14)
-  // ── CareLoop OPD extensions ──
-  medication_nonadherence:   1.2,   // β4   2+ consecutive missed doses
-  lab_overdue:               0.5,   // β5   per overdue lab (capped at 5)
-  chronic_condition:         0.4,   // β6   chronic episode flag
-  anxiety_flag:              0.6,   // β7   anxiety/fear inferred from LLM sentiment
-  tier2_signal:              4.0,   // β8   red-flag clinical symptom (forces emergent)
-  tier1_signal:              1.0,   // β9   yellow-flag clinical symptom
-};
+// Weights, scoring math and triage live in the shared module so the local
+// server and the Vercel serverless functions score identically.
+const {
+  DEFAULT_RISK_WEIGHTS,
+  normalizeSignals,
+  computeRiskBreakdownFromFeatures,
+  triageFromScore,
+} = careloopWeightedEngine;
 
 // Mutable copy — updated from Settings UI via PATCH /api/settings/risk-weights.
 let RISK_WEIGHTS = { ...DEFAULT_RISK_WEIGHTS };
@@ -191,65 +186,8 @@ function computeRiskFromEvents(events) {
 }
 
 function computeRiskBreakdown(events) {
-  return computeRiskBreakdownFromFeatures(extractFeatures(events));
-}
-
-// Clamp/normalise a loosely-typed signals object into the feature shape the
-// weighted engine expects. Same caps as extractFeatures() so an ad-hoc signal
-// payload scores identically to one derived from persisted events.
-function normalizeSignals(sig) {
-  sig = sig || {};
-  const n = (v, cap) => Math.min(cap, Math.max(0, parseInt(v, 10) || 0));
-  return {
-    cost_barrier:            sig.cost_barrier ? 1 : 0,
-    medication_nonadherence: sig.medication_nonadherence ? 1 : 0,
-    lab_overdue:             n(sig.lab_overdue, 5),
-    silence_days:            n(sig.silence_days, 14),
-    chronic_condition:       sig.chronic_condition ? 1 : 0,
-    missed_appointments:     n(sig.missed_appointments, 3),
-    anxiety_flag:            sig.anxiety_flag ? 1 : 0,
-    tier2_signal:            sig.tier2_signal ? 1 : 0,
-    tier1_signal:            sig.tier1_signal ? 1 : 0,
-  };
-}
-
-// Apply the CURRENT configurable weights to a feature set. This is the single
-// scoring brain — both persisted episodes and ad-hoc client patients run
-// through here, so the Risk Detection Settings sliders govern every score.
-function computeRiskBreakdownFromFeatures(features) {
-  const w = RISK_WEIGHTS;
-
-  const contributions = [
-    { name: 'Baseline (intercept)',         weight: w.intercept,              value: 1,                          contribution: w.intercept },
-    { name: 'Cost barrier flagged',         weight: w.cost_barrier,           value: features.cost_barrier,      contribution: w.cost_barrier * features.cost_barrier },
-    { name: 'Medication non-adherence',     weight: w.medication_nonadherence,value: features.medication_nonadherence, contribution: w.medication_nonadherence * features.medication_nonadherence },
-    { name: 'Lab orders overdue',           weight: w.lab_overdue,            value: features.lab_overdue,       contribution: w.lab_overdue * features.lab_overdue },
-    { name: 'Days silent',                  weight: w.silence_days,           value: features.silence_days,      contribution: w.silence_days * features.silence_days },
-    { name: 'Chronic condition',            weight: w.chronic_condition,      value: features.chronic_condition, contribution: w.chronic_condition * features.chronic_condition },
-    { name: 'Missed appointments',          weight: w.missed_appointments,    value: features.missed_appointments, contribution: w.missed_appointments * features.missed_appointments },
-    { name: 'Anxiety / fear inferred',      weight: w.anxiety_flag,           value: features.anxiety_flag,      contribution: w.anxiety_flag * features.anxiety_flag },
-    { name: 'Red-flag clinical signal',     weight: w.tier2_signal,           value: features.tier2_signal,      contribution: w.tier2_signal * features.tier2_signal },
-    { name: 'Yellow-flag clinical signal',  weight: w.tier1_signal,           value: features.tier1_signal,      contribution: w.tier1_signal * features.tier1_signal },
-  ];
-
-  const Z = contributions.reduce((sum, c) => sum + c.contribution, 0);
-  const P = 1 / (1 + Math.exp(-Z));
-  const score = Math.round(P * 100);
-
-  return {
-    features,
-    weights: { ...w },
-    contributions,
-    Z,
-    probability: P,
-    score,
-  };
-}
-
-function triageFromScore(score) {
-  if (score > 80) return 'emergent';
-  if (score >= 60) return 'urgent';
-  return 'normal';
+  // Use the live (slider-tuned) RISK_WEIGHTS for persisted episodes.
+  return computeRiskBreakdownFromFeatures(extractFeatures(events), RISK_WEIGHTS);
 }
 
 // ---------------------------------------------------------------------------
@@ -514,8 +452,11 @@ app.get('/api/episodes/:id/risk', (req, res) => {
 // scored by the same slider-controlled engine as seeded episodes. Adjusting
 // any weight in Risk Detection Settings changes the result of this endpoint.
 app.post('/api/risk/score-signals', (req, res) => {
-  const features = normalizeSignals((req.body || {}).signals);
-  const breakdown = computeRiskBreakdownFromFeatures(features);
+  const body = req.body || {};
+  const features = normalizeSignals(body.signals);
+  // Honour an explicit weights override (e.g. unsaved slider values); fall back
+  // to the server's live RISK_WEIGHTS.
+  const breakdown = computeRiskBreakdownFromFeatures(features, body.weights || RISK_WEIGHTS);
   res.json({ ok: true, ...breakdown, triage: triageFromScore(breakdown.score) });
 });
 
