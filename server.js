@@ -384,6 +384,59 @@ function seedIfEmpty() {
 
 seedIfEmpty();
 
+// Idempotent: ensure the Rehan autism chronic-care demo patient exists,
+// even on DBs that were seeded before he was added. Runs every boot but only
+// inserts if MRN 50231 is missing, so it never duplicates.
+function ensureRehan() {
+  const existing = db.prepare('SELECT id FROM episodes WHERE mrn = ?').get('50231');
+  if (existing) return;
+
+  const ashok = createEpisode({
+    patientName: 'Rehan',
+    mrn: '50231',
+    age: 4,
+    mobile: '+971509876543',
+    language: 'English',
+    insurance: 'Daman Enhanced',
+    doctorName: 'Dr. Layla Haddad',
+    department: 'Developmental Pediatrics',
+    diagnosis: 'Autism Spectrum Disorder',
+    icdCode: 'F84.0',
+    episodeType: 'chronic',
+    careGap: '3 caregiver forms pending · caregiver silent',
+    medications: [],
+    labs: [
+      { name: 'Developmental pediatrician review', priority: 'Due' },
+      { name: 'Hearing & Vision Evaluation', priority: 'Annual' },
+    ],
+    instructions: [
+      'Keep caregiver engaged through automated reminders and forms',
+      'Monitor for sleep disturbance, GI/feeding concerns, and seizure-like episodes',
+    ],
+    followUp: { date: 'Developmental review due', location: 'Good Health Hospital OPD', notes: 'Caregiver re-engagement required' },
+  });
+
+  // Drive the engine to a HIGH-risk score: chronic flag, missed appointments,
+  // caregiver silence, anxiety signal and a yellow-flag clinical signal.
+  appendEvent(ashok.id, 'CHRONIC_FLAG', { condition: 'Autism Spectrum Disorder' });
+  appendEvent(ashok.id, 'MISSED_APPOINTMENT', { what: 'speech therapy follow-up' });
+  appendEvent(ashok.id, 'MISSED_APPOINTMENT', { what: 'developmental review' });
+  for (let i = 1; i <= 6; i++) {
+    appendEvent(ashok.id, 'CONTACT_ATTEMPT_FAILED', { attempt: i });
+  }
+  appendEvent(ashok.id, 'ANXIETY_FLAG', { source: 'caregiver reported sleep disturbance and restlessness' });
+  appendEvent(ashok.id, 'TIER1_SIGNAL', { symptom: 'sleep disturbance reported by caregiver' });
+
+  // Pin the displayed risk score to 88 (matches the detail screen) so the
+  // queue and detail header stay in sync regardless of weight tuning.
+  db.prepare('UPDATE episodes SET riskScore = ?, triageSegment = ? WHERE id = ?')
+    .run(88, 'emergent', ashok.id);
+
+  console.log(`  Ensured Rehan autism chronic-care patient (id=${ashok.id})`);
+}
+
+ensureRehan();
+
 // ---------------------------------------------------------------------------
 // Express app
 // ---------------------------------------------------------------------------
